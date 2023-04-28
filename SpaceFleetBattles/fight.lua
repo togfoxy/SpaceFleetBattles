@@ -38,10 +38,9 @@ local function createFighter(forf, squadcallsign, squadid)
 
     thisobject.shape = love.physics.newPolygonShape( -5, -5, 5, 0, -5, 5, -7, 0)
 	thisobject.fixture = love.physics.newFixture(thisobject.body, thisobject.shape, 1)		-- the 1 is the density
-    thisobject.fixture:setDensity( 1 )
 	thisobject.fixture:setRestitution(0.25)
-	thisobject.fixture:setSensor(true)
-    thisobject.fixture:setGroupIndex( 1 )
+	thisobject.fixture:setSensor(false)
+    thisobject.fixture:setGroupIndex( -1 )
     local guid = cf.getGUID()
 	thisobject.fixture:setUserData(guid)
 
@@ -52,6 +51,8 @@ local function createFighter(forf, squadcallsign, squadid)
     thisobject.maxForwardThrust = 100
     thisobject.currentForwardThrust = 0
     thisobject.maxAcceleration = 25
+    thisobject.maxDeacceleration = 25       -- set to 0 for bullets
+    thisobject.weaponcooldown = 0           --! might be more than one weapon in the future
     table.insert(OBJECTS, thisobject)
 end
 
@@ -96,7 +97,7 @@ local function createSquadron(forf)
     end
 
     local squadid = love.math.random(100, 999)                 --! make this less random and more unique
-    for i = 1, 6 do
+    for i = 1, 1 do
         createFighter(forf, squadcallsign, squadid)
     end
 end
@@ -107,6 +108,19 @@ local function initialiseSquadList()
         for j = 1, 9 do
             local str = string.char(i) .. tostring(j)
             squadlist[str] = nil            -- setting to nil makes it available for selection
+        end
+    end
+end
+
+local function destroyObjects(dt)
+
+    for i = #OBJECTS, 1, -1 do
+        if OBJECTS[i].lifetime ~= nil then
+            OBJECTS[i].lifetime = OBJECTS[i].lifetime - dt
+            if OBJECTS[i].lifetime <= 0 then
+                OBJECTS[i].body:destroy()
+                table.remove(OBJECTS, i)
+            end
         end
     end
 end
@@ -150,54 +164,71 @@ function fight.draw()
 
             -- draw callsign first
             local objguid = Obj.fixture:getUserData()
-            local str = Obj.squadCallsign .. "-" .. string.sub(objguid, -2)
-            local objx = Obj.body:getX()
-            local objy = Obj.body:getY()
-            local drawx = objx * BOX2D_SCALE
-            local drawy = objy * BOX2D_SCALE
-            love.graphics.setColor(1,1,1,1)
-            love.graphics.print(str, drawx, drawy, 0, 1, 1, -15, 30)
+            if Obj.squadCallsign ~= nil then
+                local str = Obj.squadCallsign .. "-" .. string.sub(objguid, -2)
+                local objx = Obj.body:getX()
+                local objy = Obj.body:getY()
+                local drawx = objx * BOX2D_SCALE
+                local drawy = objy * BOX2D_SCALE
+                love.graphics.setColor(1,1,1,1)
+                love.graphics.print(str, drawx, drawy, 0, 1, 1, -15, 30)
 
-            -- draw a cool line next
-            local x2, y2 = drawx + 30, drawy - 14
-            love.graphics.setColor(1,1,1,1)
-            love.graphics.line(drawx, drawy, x2, y2)
 
-            -- draw velocity
-            local vx, vy = Obj.body:getLinearVelocity()
-            local vel = cf.getDistance(0, 0, vx, vy)    -- get distance of velocity vector
-            vel = "v: " .. cf.round(vel, 0)
-            love.graphics.print(vel, drawx, drawy, 0, 1, 1, 30, 30)
+                -- draw a cool line next
+                local x2, y2 = drawx + 30, drawy - 14
+                love.graphics.setColor(1,1,1,1)
+                love.graphics.line(drawx, drawy, x2, y2)
 
+                -- draw velocity
+                local vx, vy = Obj.body:getLinearVelocity()
+                local vel = cf.getDistance(0, 0, vx, vy)    -- get distance of velocity vector
+                vel = "v: " .. cf.round(vel, 0)
+                love.graphics.print(vel, drawx, drawy, 0, 1, 1, 30, 30)
+
+            end
 
             -- draw the physics object
             local shape = fixture:getShape()
-			local points = {thisbody:getWorldPoints(shape:getPoints())}
-            for i = 1, #points do
-	            points[i] = points[i] * BOX2D_SCALE
+            if shape:typeOf("PolygonShape") then
+    			local points = {thisbody:getWorldPoints(shape:getPoints())}
+                for i = 1, #points do
+    	            points[i] = points[i] * BOX2D_SCALE
+                end
+                if Obj.forf == enum.forfFriend then
+                    love.graphics.setColor(0,1,0,1)
+                elseif Obj.forf == enum.forfEnemy then
+                    love.graphics.setColor(0,0,1,1)
+                elseif Obj.forf == enum.forfNeutral then
+                    love.graphics.setColor(0.5,0.5,0.5,1)
+                end
+    			love.graphics.polygon("fill", points)
+            elseif shape:typeOf("CircleShape") then
+				local drawx, drawy = thisbody:getWorldPoints(shape:getPoint())
+				drawx = drawx * BOX2D_SCALE
+				drawy = drawy * BOX2D_SCALE
+				local radius = shape:getRadius()
+				radius = radius * BOX2D_SCALE
+				love.graphics.setColor(1, 0, 0, 1)
+				love.graphics.circle("line", drawx, drawy, radius)
+				love.graphics.setColor(1, 1, 1, 1)
+				love.graphics.print("r:" .. cf.round(radius,2), drawx + 7, drawy - 3)
+			else
+                error()
             end
-            if Obj.forf == enum.forfFriend then
-                love.graphics.setColor(0,1,0,1)
-            elseif Obj.forf == enum.forfEnemy then
-                love.graphics.setColor(0,0,1,1)
-            elseif Obj.forf == enum.forfNeutral then
-                love.graphics.setColor(0.5,0.5,0.5,1)
-            end
-			love.graphics.polygon("fill", points)
 
-            -- -- draw the velocity indicator
-            -- local linx, liny = Obj.body:getLinearVelocity( )        --! a lot of duplicate code here. Can be cleand up
-            -- linx = linx * 2
-            -- liny = liny * 2
-            --
-            -- local objx, objy = Obj.body:getPosition( )
-            -- local objxscaled = objx * BOX2D_SCALE
-            -- local objyscaled = objy * BOX2D_SCALE
-            -- local pointxscaled = (objx + linx) * BOX2D_SCALE
-            -- local pointyscaled = (objy + liny) * BOX2D_SCALE
-            --
-            -- love.graphics.setColor(1,0,1,1)
-            -- love.graphics.line(objxscaled, objyscaled, pointxscaled, pointyscaled)
+            -- draw the velocity indicator
+            local linx, liny = Obj.body:getLinearVelocity( )        --! a lot of duplicate code here. Can be cleand up
+            linx = linx * 2
+            liny = liny * 2
+
+            local objx, objy = Obj.body:getPosition( )
+            local objxscaled = objx * BOX2D_SCALE
+            local objyscaled = objy * BOX2D_SCALE
+            local pointxscaled = (objx + linx) * BOX2D_SCALE
+            local pointyscaled = (objy + liny) * BOX2D_SCALE
+
+            love.graphics.setColor(1,0,1,1)
+            love.graphics.line(objxscaled, objyscaled, pointxscaled, pointyscaled)
 		end
     end
 
@@ -227,6 +258,8 @@ function fight.update(dt)
         commanderai.update(commanderAI, dt)
         squadai.update(commanderAI, squadAI, squadlist, dt)
         unitai.update(squadAI, dt)
+
+        destroyObjects(dt)
 
         PHYSICSWORLD:update(dt) --this puts the world into motion
     end
