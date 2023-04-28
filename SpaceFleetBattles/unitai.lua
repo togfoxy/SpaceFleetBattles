@@ -66,35 +66,37 @@ local function adjustAngle(Obj, dt)
         -- nothing
     else
         local x1, y1 = Obj.body:getPosition()       -- BOX2D_SCALE
-        local x2, y2 = OBJECTS[Obj.targetid].body:getPosition()
+        if OBJECTS[Obj.targetid] ~= nil then
+            local x2, y2 = OBJECTS[Obj.targetid].body:getPosition()
 
-        local force = 1
-        local currentangle = Obj.body:getAngle()            -- rads
+            local force = 1
+            local currentangle = Obj.body:getAngle()            -- rads
 
-        assert(currentangle <= math.pi * 2)
-        assert(currentangle >= math.pi * -2)
+            assert(currentangle <= math.pi * 2)
+            assert(currentangle >= math.pi * -2)
 
-        local bearing = cf.getBearingRad(x1, y1, x2, y2)        -- this is absolute bearing in radians, starting from north
+            local bearing = cf.getBearingRad(x1, y1, x2, y2)        -- this is absolute bearing in radians, starting from north
 
-        local bearingdelta = bearing - currentangle
+            local bearingdelta = bearing - currentangle
 
-        -- print(currentangle, bearing, bearingdelta)
+            -- print(currentangle, bearing, bearingdelta)
 
-        if bearingdelta < -0.1 or bearingdelta > 0.1 then         -- rads
-            if bearingdelta > 0 then
-                -- turn right
-                force = 1
-                -- print(str .. " right", angledelta)
+            if bearingdelta < -0.1 or bearingdelta > 0.1 then         -- rads
+                if bearingdelta > 0 then
+                    -- turn right
+                    force = 1
+                    -- print(str .. " right", angledelta)
+                else
+                    -- turn left
+                    force = -1
+                    -- print(str .. " left", angledelta)
+                end
             else
-                -- turn left
-                force = -1
-                -- print(str .. " left", angledelta)
+                Obj.body:setAngularVelocity(0)
             end
-        else
-            Obj.body:setAngularVelocity(0)
+            force = force * 5
+            Obj.body:applyAngularImpulse( force  )
         end
-        force = force * 5
-        Obj.body:applyAngularImpulse( force  )
     end
 end
 
@@ -161,7 +163,7 @@ local function createNewBullet(Obj, bullet)
     local velx, vely = Obj.body:getLinearVelocity()
 
     -- thisobject.body:setLinearVelocity(math.cos(currentangle) * 1000, math.sin(currentangle) * 1000)
-    thisobject.body:setLinearVelocity(velx * 10, vely * 10)
+    thisobject.body:setLinearVelocity(velx * 3, vely * 3)
 
     table.insert(OBJECTS, thisobject)
 
@@ -177,20 +179,22 @@ local function fireWeapons(Obj, dt)
         Obj.weaponcooldown = 0
 
         if Obj.targetid ~= nil then
-            local objx = Obj.body:getX()
-            local objy = Obj.body:getY()
-            local targetx = OBJECTS[Obj.targetid].body:getX()
-            local targety = OBJECTS[Obj.targetid].body:getY()
+            if OBJECTS[Obj.targetid] ~= nil then
+                local objx = Obj.body:getX()
+                local objy = Obj.body:getY()
+                local targetx = OBJECTS[Obj.targetid].body:getX()
+                local targety = OBJECTS[Obj.targetid].body:getY()
 
 
-            local currentangle = Obj.body:getAngle()
-            local bearingtotarget = cf.getBearingRad(objx,objy,targetx,targety)
-            local angletotarget = bearingtotarget - currentangle
-            -- print(currentangle, bearingtotarget, angletotarget)
+                local currentangle = Obj.body:getAngle()
+                local bearingtotarget = cf.getBearingRad(objx,objy,targetx,targety)
+                local angletotarget = bearingtotarget - currentangle
+                -- print(currentangle, bearingtotarget, angletotarget)
 
-            if angletotarget > -0.13 and angletotarget < 0.13 then
-                Obj.weaponcooldown = 4
-                createNewBullet(Obj, true)       -- includes missiles and bombs. Use TRUE for fast moving bullets
+                if angletotarget > -0.13 and angletotarget < 0.13 then
+                    Obj.weaponcooldown = 4
+                    createNewBullet(Obj, true)       -- includes missiles and bombs. Use TRUE for fast moving bullets
+                end
             end
         end
     end

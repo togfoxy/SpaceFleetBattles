@@ -57,8 +57,8 @@ local function createFighter(forf, squadcallsign, squadid)
     thisobject.squadCallsign = squadcallsign
     thisobject.squadid = squadid
     thisobject.taskCooldown = 0
-    -- thisobject.maxForwardThrust = 100
-    thisobject.maxForwardThrust = 500
+    thisobject.maxForwardThrust = 100
+    -- thisobject.maxForwardThrust = 500
     thisobject.currentForwardThrust = 0
     thisobject.maxAcceleration = 25
     thisobject.maxDeacceleration = 25       -- set to 0 for bullets
@@ -144,8 +144,8 @@ function fight.mousemoved(x, y, dx, dy)
     local camx, camy = cam:toWorld(x, y)	-- converts screen x/y to world x/y
 
     if love.mouse.isDown(3) then
-        TRANSLATEX = TRANSLATEX - dx
-        TRANSLATEY = TRANSLATEY - dy
+        TRANSLATEX = TRANSLATEX - (dx * BOX2D_SCALE)
+        TRANSLATEY = TRANSLATEY - (dy * BOX2D_SCALE)
     end
 
 end
@@ -168,7 +168,7 @@ function fight.draw()
                 local str = "CS: " .. Obj.squadCallsign .. "-" .. string.sub(objguid, -2)
 
                 love.graphics.setColor(1,1,1,1)
-                love.graphics.print(str, drawx, drawy, 0, 1, 1, -15, 30)
+                love.graphics.print(str, drawx, drawy, 0, BOX2D_SCALE / 2, BOX2D_SCALE / 2, -15, 30)
 
                 -- draw a cool line next
                 local x2, y2 = drawx + 30, drawy - 14
