@@ -257,6 +257,14 @@ function swapScreen(newScreen, screenStack)
     table.remove(screenStack, #screenStack - 1)
 end
 
+function getBearingRad(x1, y1, x2, y2)
+	local x3 = x2 - x1
+	local y3 = y2 - y1
+	return math.atan2(y3, x3)
+
+end
+
+
 function getBearing(x1,y1,x2,y2)
 	-- returns the bearing between two points assuming straight up (north) is zero degrees
 	-- Straight down (below/south) is 180 degrees
@@ -402,4 +410,33 @@ function printAllPhysicsObjects(world, BOX2D_SCALE)
 			end
 		end
 	end
+end
+
+function isInFront(x, y, facing, x2, y2)
+    -- x,y is the object that is looking (real coordinates, i.e. not normalised and not translated to origin)
+    -- facing is the facing of the object at x, y
+    -- x2, y2 is the target that the first object is looking for
+	assert(x ~= nil and y ~= nil)
+	assert(x2 ~= nil and y2 ~= nil)
+	assert(facing ~= nil)
+
+    -- get a vector in the direction of facing
+    local x1, y1 = cf.addVectorToPoint(x,y,facing,5)        -- 5 is an arbitrary value that doesn't matter
+    -- reduce the real vector down to a delta vector
+    local deltax1 = x1 - x
+    local deltay1 = y1 - y
+
+    -- reduce the vector from object to target down to a delta vector
+    local deltax2 = x2 - x	-- the dot product assumes the same origin so need to translate
+    local deltay2 = y2 - y
+
+    -- can now do a dot product
+    local dotv = cf.dotVectors(deltax1, deltay1, deltax2, deltay2)
+
+    if dotv > 0 then
+        -- target is in front of entity
+        return true
+    else
+        return false
+    end
 end

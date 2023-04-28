@@ -5,6 +5,7 @@ local pause = false
 local commanderAI = {}
 local squadAI = {}
 local squadlist = {}
+shipspersquadron = 6
 
 local function createFighter(forf, squadcallsign, squadid)
     -- forf = friend or foe.  See enums
@@ -59,27 +60,6 @@ local function createFighter(forf, squadcallsign, squadid)
     table.insert(OBJECTS, thisobject)
 end
 
-local function createCapitalShip()
-    local rndx = love.math.random(50, SCREEN_WIDTH / 3)
-    local rndy = love.math.random(50, SCREEN_HEIGHT - 50)
-    local rndx = rndx / BOX2D_SCALE
-    local rndy = rndy / BOX2D_SCALE
-    local thisobject = {}
-    thisobject.body = love.physics.newBody(PHYSICSWORLD, rndx, rndy, "dynamic")
-	thisobject.body:setLinearDamping(0)
-	-- thisobject.body:setMass(1)
-    thisobject.shape = love.physics.newPolygonShape( -50, -15, 50, -15, 50, 15, -50, 15)
-	thisobject.fixture = love.physics.newFixture(thisobject.body, thisobject.shape, 1)		-- the 1 is the density
-    thisobject.fixture:setDensity( 1 )
-	thisobject.fixture:setRestitution(0.25)
-	thisobject.fixture:setSensor(false)
-    thisobject.fixture:setGroupIndex( 0 )
-    local guid = cf.getGUID()
-	thisobject.fixture:setUserData(guid)
-    thisobject.forwardThrust = 10
-    table.insert(OBJECTS, thisobject)
-end
-
 local function createSquadron(forf)
     -- create a wing of 6 units
     -- the squadron is a concept only and is created by giving x fighters the same squad id
@@ -100,9 +80,16 @@ local function createSquadron(forf)
     end
 
     local squadid = love.math.random(100, 999)                 --! make this less random and more unique
-    for i = 1, 6 do
-        createFighter(forf, squadcallsign, squadid)
-    end
+    -- if forf == enum.forfFriend then
+        for i = 1, shipspersquadron do
+            createFighter(forf, squadcallsign, squadid)
+        end
+    -- else
+    --     for i = 1, 3 do
+    --         createFighter(forf, squadcallsign, squadid)
+    --     end
+    --
+    -- end
 end
 
 local function initialiseSquadList()
@@ -162,38 +149,40 @@ function fight.draw()
 
     -- draw each object
     for k, Obj in pairs(OBJECTS) do
-        local thisbody = Obj.body
-        for k, fixture in pairs(thisbody:getFixtures()) do
+        local objx = Obj.body:getX()
+        local objy = Obj.body:getY()
+        local drawx = objx * BOX2D_SCALE
+        local drawy = objy * BOX2D_SCALE
+
+        for k, fixture in pairs(Obj.body:getFixtures()) do
 
             -- draw callsign first
             local objguid = Obj.fixture:getUserData()
             if Obj.squadCallsign ~= nil then
-                local str = Obj.squadCallsign .. "-" .. string.sub(objguid, -2)
-                local objx = Obj.body:getX()
-                local objy = Obj.body:getY()
-                local drawx = objx * BOX2D_SCALE
-                local drawy = objy * BOX2D_SCALE
+                local str = "CS: " .. Obj.squadCallsign .. "-" .. string.sub(objguid, -2)
+
                 love.graphics.setColor(1,1,1,1)
                 love.graphics.print(str, drawx, drawy, 0, 1, 1, -15, 30)
-
 
                 -- draw a cool line next
                 local x2, y2 = drawx + 30, drawy - 14
                 love.graphics.setColor(1,1,1,1)
                 love.graphics.line(drawx, drawy, x2, y2)
 
-                -- draw velocity
-                local vx, vy = Obj.body:getLinearVelocity()
-                local vel = cf.getDistance(0, 0, vx, vy)    -- get distance of velocity vector
-                vel = "v: " .. cf.round(vel, 0)
-                love.graphics.print(vel, drawx, drawy, 0, 1, 1, 30, 30)
 
             end
+
+            -- -- draw velocity
+            -- local vx, vy = Obj.body:getLinearVelocity()
+            -- local vel = cf.getDistance(0, 0, vx, vy)    -- get distance of velocity vector
+            -- vel = "v: " .. cf.round(vel, 0)
+            -- love.graphics.setColor(1,1,1,1)
+            -- love.graphics.print(vel, drawx, drawy, 0, 1, 1, 30, 30)
 
             -- draw the physics object
             local shape = fixture:getShape()
             if shape:typeOf("PolygonShape") then
-    			local points = {thisbody:getWorldPoints(shape:getPoints())}
+    			local points = {Obj.body:getWorldPoints(shape:getPoints())}
                 for i = 1, #points do
     	            points[i] = points[i] * BOX2D_SCALE
                 end
@@ -206,32 +195,28 @@ function fight.draw()
                 end
     			love.graphics.polygon("fill", points)
             elseif shape:typeOf("CircleShape") then
-				local drawx, drawy = thisbody:getWorldPoints(shape:getPoint())
+				local drawx, drawy = Obj.body:getWorldPoints(shape:getPoint())
 				drawx = drawx * BOX2D_SCALE
 				drawy = drawy * BOX2D_SCALE
 				local radius = shape:getRadius()
 				radius = radius * BOX2D_SCALE
 				love.graphics.setColor(1, 0, 0, 1)
 				love.graphics.circle("line", drawx, drawy, radius)
-				love.graphics.setColor(1, 1, 1, 1)
-				love.graphics.print("r:" .. cf.round(radius,2), drawx + 7, drawy - 3)
 			else
                 error()
             end
 
             -- draw the velocity indicator
-            local linx, liny = Obj.body:getLinearVelocity( )        --! a lot of duplicate code here. Can be cleand up
-            linx = linx * 2
-            liny = liny * 2
-
-            local objx, objy = Obj.body:getPosition( )
-            local objxscaled = objx * BOX2D_SCALE
-            local objyscaled = objy * BOX2D_SCALE
-            local pointxscaled = (objx + linx) * BOX2D_SCALE
-            local pointyscaled = (objy + liny) * BOX2D_SCALE
-
-            love.graphics.setColor(1,0,1,1)
-            love.graphics.line(objxscaled, objyscaled, pointxscaled, pointyscaled)
+            -- local linx, liny = Obj.body:getLinearVelocity( )        --! a lot of duplicate code here. Can be cleand up
+            -- linx = linx * 2
+            -- liny = liny * 2
+            -- local objx, objy = Obj.body:getPosition( )
+            -- local objxscaled = objx * BOX2D_SCALE
+            -- local objyscaled = objy * BOX2D_SCALE
+            -- local pointxscaled = (objx + linx) * BOX2D_SCALE
+            -- local pointyscaled = (objy + liny) * BOX2D_SCALE
+            -- love.graphics.setColor(1,0,1,1)
+            -- love.graphics.line(objxscaled, objyscaled, pointxscaled, pointyscaled)
 		end
     end
 

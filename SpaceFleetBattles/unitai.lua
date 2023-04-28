@@ -46,37 +46,35 @@ local function adjustAngle(Obj, dt)
     -- turn to face the current target
     -- if there is a nominated target then find the preferred angle and turn towards it
 
+    while Obj.body:getAngle() > (math.pi * 1) do
+        Obj.body:setAngle(Obj.body:getAngle() - (math.pi * 2))
+    end
+    while Obj.body:getAngle() < (math.pi * -1) do
+        Obj.body:setAngle(Obj.body:getAngle() + (math.pi * 2))
+    end
+    assert(Obj.body:getAngle() < (math.pi * 2) and Obj.body:getAngle() > (math.pi * -2))
+
     local bearingrad
     if Obj.targetid == nil or Obj.targetid  == 0 then
         -- nothing
     else
         local x1, y1 = Obj.body:getPosition()       -- BOX2D_SCALE
         local x2, y2 = OBJECTS[Obj.targetid].body:getPosition()
-        local bearing = cf.getBearing(x1,y1,x2,y2)         -- in degrees from north
-        local adjustedbearing = bearing - 90
-        bearingrad = math.rad(adjustedbearing)      -- rads
-        Obj.preferredAngle = bearingrad     -- rads
 
+        local force = 1
         local currentangle = Obj.body:getAngle()            -- rads
-        local angledelta = bearingrad - currentangle        -- a neg value means 'left' of east facing
 
-        while angledelta > (2*math.pi) do
-            angledelta = angledelta - (2*math.pi)
-        end
-        while angledelta < (-2*math.pi) do
-            angledelta = angledelta - (-2*math.pi)
-        end
+        assert(currentangle <= math.pi * 2)
+        assert(currentangle >= math.pi * -2)
 
-        local force = 0
+        local bearing = cf.getBearingRad(x1, y1, x2, y2)        -- this is absolute bearing in radians, starting from north
 
-        local objguid = Obj.fixture:getUserData()
-        local str = Obj.squadCallsign .. "-" .. string.sub(objguid, -2)
+        local bearingdelta = bearing - currentangle
 
-        str = str .. " target: " .. string.sub( OBJECTS[Obj.targetid].fixture:getUserData() , -2)
+        -- print(currentangle, bearing, bearingdelta)
 
-        if math.abs(angledelta) > 0.01 then       --0.0349
-            -- turn towards target
-            if angledelta < math.pi and angledelta > 0 then
+        if bearingdelta < -0.1 or bearingdelta > 0.1 then         -- rads
+            if bearingdelta > 0 then
                 -- turn right
                 force = 1
                 -- print(str .. " right", angledelta)
@@ -95,6 +93,8 @@ end
 
 local function adjustThrust(Obj, dt)
     -- -- move forward
+    assert(Obj.squadCallsign ~= nil)        -- bullets should not be sent to this function
+
     if Obj.targetid ~= nil then
         Obj.currentForwardThrust = Obj.currentForwardThrust + (Obj.maxAcceleration * dt)
         if Obj.currentForwardThrust > Obj.maxForwardThrust then Obj.currentForwardThrust = Obj.maxForwardThrust end
@@ -105,9 +105,14 @@ local function adjustThrust(Obj, dt)
 
     local currentangle = Obj.body:getAngle( )
     Obj.body:setLinearVelocity(math.cos(currentangle) * Obj.currentForwardThrust, math.sin(currentangle) * Obj.currentForwardThrust)
+
+    -- print("Velocity for " .. Obj.fixture:getUserData() .. " is now " .. Obj.body:getLinearVelocity())
 end
 
 local function createNewBullet(Obj, bullet)
+    -- input: bullet = true if bullet
+
+    assert(bullet ~= nil)
 
     local newx, newy = Obj.body:getPosition()
     --! don't want to place exactly on so need to offset
@@ -115,6 +120,7 @@ local function createNewBullet(Obj, bullet)
     thisobject.body = love.physics.newBody(PHYSICSWORLD, newx, newy, "dynamic")
     thisobject.body:setLinearDamping(0)
     thisobject.body:setMass(1)
+    thisobject.body:setBullet(bullet)
 
     thisobject.shape = love.physics.newCircleShape(1)
     thisobject.fixture = love.physics.newFixture(thisobject.body, thisobject.shape, 1)		-- the 1 is the density
@@ -132,11 +138,11 @@ local function createNewBullet(Obj, bullet)
     local currentangle = Obj.body:getAngle()
     thisobject.body:setAngle(currentangle)
 
-    local bulletspeed = 50000000
-    thisobject.body:setLinearVelocity(math.cos(currentangle) * bulletspeed, math.sin(currentangle) * bulletspeed)
+    thisobject.body:setLinearVelocity(math.cos(currentangle) * 1000, math.sin(currentangle) * 1000)
 
     table.insert(OBJECTS, thisobject)
 
+    -- print("Velocity for " .. guid .. " is now " .. thisobject.body:getLinearVelocity())
 end
 
 local function fireWeapons(Obj, dt)
@@ -144,8 +150,32 @@ local function fireWeapons(Obj, dt)
 
     Obj.weaponcooldown = Obj.weaponcooldown - dt
     if Obj.weaponcooldown <= 0 then
-        Obj.weaponcooldown = 4
-        createNewBullet(Obj, true)       -- includes missiles and bombs. Use TRUE for fast moving bullets
+        Obj.weaponcooldown = 0
+
+        if Obj.targetid ~= nil then
+            local objx = Obj.body:getX()
+            local objy = Obj.body:getY()
+            local targetx = OBJECTS[Obj.targetid].body:getX()
+            local targety = OBJECTS[Obj.targetid].body:getY()
+
+            -- using degs for easy understanding
+            local currentangledeg
+            local currentangle = Obj.body:getAngle()
+            if currentangle > 0 then
+                currentangledeg = math.deg(currentangle) + 90
+            else
+                currentangledeg = 90 + math.deg(currentangle)
+            end
+            local bearingtotargetdeg = cf.getBearing(objx,objy,targetx,targety)     -- returns compass bearing
+            local angletotargetdeg = currentangledeg - bearingtotargetdeg
+
+print(currentangle, currentangledeg, bearingtotargetdeg, angletotargetdeg)
+
+            if angletotargetdeg > -15 and angletotargetdeg < 15 then
+                Obj.weaponcooldown = 4
+                createNewBullet(Obj, true)       -- includes missiles and bombs. Use TRUE for fast moving bullets
+            end
+        end
     end
 
 end
@@ -155,7 +185,8 @@ function unitai.update(squadAI, dt)
     -- update the unit based on orders broadcasted in squadAI
 
     local squadorder
-    for k, Obj in pairs(OBJECTS) do
+    for k = #OBJECTS, 1, -1 do
+        Obj = OBJECTS[k]
         local callsign = Obj.squadCallsign
 
         -- print(callsign)
@@ -172,7 +203,11 @@ function unitai.update(squadAI, dt)
             updateUnitTask(Obj, squadorder, dt)     -- choose targets etc based on the current squad order
             adjustAngle(Obj, dt)         -- send the object and the order for its squad
             adjustThrust(Obj, dt)
-            fireWeapons(Obj, dt)
+            -- fireWeapons(Obj, dt)
+        else
+            -- print(inspect(Obj))
+            -- print(Obj.fixture:getUserData())
+            -- print(Obj.body:getLinearVelocity())
         end
     end
 end
