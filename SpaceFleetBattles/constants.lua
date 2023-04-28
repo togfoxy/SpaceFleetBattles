@@ -10,7 +10,7 @@ function constants.load()
     SCREEN_WIDTH, SCREEN_HEIGHT = res.getGame()
 
     -- camera
-    ZOOMFACTOR = 0.7
+    ZOOMFACTOR = 0.20
     -- ZOOMFACTOR = 1
     TRANSLATEX = cf.round(SCREEN_WIDTH / 2)		-- starts the camera in the middle of the ocean
     TRANSLATEY = cf.round(SCREEN_HEIGHT / 2)	-- need to round because this is working with pixels
@@ -34,7 +34,7 @@ function constants.load()
     enums.load()
     -- add extra items below this line
 
-    BOX2D_SCALE = 2
+    BOX2D_SCALE = 1
     PHYS_OBJECTS = {}       -- table of box2d
     OBJECTS = {}            -- table of items
     NUM_OF_OBJECTS = 10

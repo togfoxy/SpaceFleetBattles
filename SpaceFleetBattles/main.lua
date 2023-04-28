@@ -121,7 +121,7 @@ function love.load()
 	lovelyToasts.options.queueEnabled = true
 
 	---------------
-	love.physics.setMeter(1)
+	love.physics.setMeter(30)
 	PHYSICSWORLD = love.physics.newWorld(0,0,false)
 	PHYSICSWORLD:setCallbacks(beginContact,endContact,_,_)
 
