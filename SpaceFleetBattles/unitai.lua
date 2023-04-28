@@ -46,13 +46,14 @@ local function adjustAngle(Obj, dt)
     -- turn to face the current target
     -- if there is a nominated target then find the preferred angle and turn towards it
 
+    assert(Obj.body:isBullet() == false)
+
     while Obj.body:getAngle() > (math.pi * 1) do
         Obj.body:setAngle(Obj.body:getAngle() - (math.pi * 2))
     end
     while Obj.body:getAngle() < (math.pi * -1) do
         Obj.body:setAngle(Obj.body:getAngle() + (math.pi * 2))
     end
-    assert(Obj.body:getAngle() < (math.pi * 2) and Obj.body:getAngle() > (math.pi * -2))
 
     local bearingrad
     if Obj.targetid == nil or Obj.targetid  == 0 then
@@ -92,57 +93,74 @@ local function adjustAngle(Obj, dt)
 end
 
 local function adjustThrust(Obj, dt)
-    -- -- move forward
+    -- move forward
+    -- this shouldn't be called for bullets
     assert(Obj.squadCallsign ~= nil)        -- bullets should not be sent to this function
+    assert(Obj.body:isBullet() == false)
 
+    local currentangle = Obj.body:getAngle( )
     if Obj.targetid ~= nil then
-        Obj.currentForwardThrust = Obj.currentForwardThrust + (Obj.maxAcceleration * dt)
-        if Obj.currentForwardThrust > Obj.maxForwardThrust then Obj.currentForwardThrust = Obj.maxForwardThrust end
+        if Obj.currentForwardThrust < Obj.maxForwardThrust then
+            Obj.currentForwardThrust = Obj.currentForwardThrust + (Obj.maxAcceleration * dt)
+            if Obj.currentForwardThrust > Obj.maxForwardThrust then Obj.currentForwardThrust = Obj.maxForwardThrust end
+        end
     else
+        -- no target. Slow down and stop
         Obj.currentForwardThrust = Obj.currentForwardThrust - (Obj.maxDeacceleration * dt)  -- might be zero for bullets
         if Obj.currentForwardThrust < 0 then Obj.currentForwardThrust = 0 end
     end
 
-    local currentangle = Obj.body:getAngle( )
     Obj.body:setLinearVelocity(math.cos(currentangle) * Obj.currentForwardThrust, math.sin(currentangle) * Obj.currentForwardThrust)
-
-    -- print("Velocity for " .. Obj.fixture:getUserData() .. " is now " .. Obj.body:getLinearVelocity())
+    -- print("Velocity for " .. Obj.fixture:getUserData() .. " is now " .. Obj.body:getLinearVelocity() .. " and thrust is " .. Obj.currentForwardThrust)
 end
 
 local function createNewBullet(Obj, bullet)
     -- input: bullet = true if bullet
 
-    assert(bullet ~= nil)
+    assert(bullet ~= nil)       -- ensure parameter is not nil
 
-    local newx, newy = Obj.body:getPosition()
-    --! don't want to place exactly on so need to offset
+    local x, y = Obj.body:getPosition()
+    local currentangle = Obj.body:getAngle()
+    local currentangledeg = math.deg(currentangle + 1.5707) -- 90 deg
+
+    -- spawn the bullet in front of the object that is creating it
+    local newx, newy = cf.addVectorToPoint(x,y,currentangledeg,10)
+
     local thisobject = {}
     thisobject.body = love.physics.newBody(PHYSICSWORLD, newx, newy, "dynamic")
     thisobject.body:setLinearDamping(0)
-    thisobject.body:setMass(1)
+    thisobject.body:setMass(0)
     thisobject.body:setBullet(bullet)
 
     thisobject.shape = love.physics.newCircleShape(1)
     thisobject.fixture = love.physics.newFixture(thisobject.body, thisobject.shape, 1)		-- the 1 is the density
     thisobject.fixture:setRestitution(0)                    -- amount of bounce after a collision
     thisobject.fixture:setSensor(false)
-    -- thisobject.fixture:setGroupIndex( Obj.forf * -1)
-    thisobject.fixture:setCategory(enum.categoryBullet)
-    thisobject.fixture:setMask(enum.categoryBullet)
+    if Obj.forf == enum.forfFriend then
+        thisobject.fixture:setCategory(enum.categoryFriendlyBullet)
+        thisobject.fixture:setMask(enum.categoryFriendlyBullet, enum.categoryEnemyBullet, enum.categoryFriendlyFighter)
+    else
+        thisobject.fixture:setCategory(enum.categoryEnemyBullet)
+        thisobject.fixture:setMask(enum.categoryFriendlyBullet, enum.categoryEnemyBullet, enum.categoryEnemyFighter)
+    end
     local guid = cf.getGUID()
     thisobject.fixture:setUserData(guid)
 
     thisobject.squadCallsign = nil
     thisobject.lifetime = 10            -- seconds
 
-    local currentangle = Obj.body:getAngle()
+
     thisobject.body:setAngle(currentangle)
 
-    thisobject.body:setLinearVelocity(math.cos(currentangle) * 1000, math.sin(currentangle) * 1000)
+    local velx, vely = Obj.body:getLinearVelocity()
+
+    -- thisobject.body:setLinearVelocity(math.cos(currentangle) * 1000, math.sin(currentangle) * 1000)
+    thisobject.body:setLinearVelocity(velx * 10, vely * 10)
 
     table.insert(OBJECTS, thisobject)
 
-    -- print("Velocity for " .. guid .. " is now " .. thisobject.body:getLinearVelocity())
+    local x, y = thisobject.body:getLinearVelocity()
+    print("Velocity for " .. guid .. " is now " .. x, y)
 end
 
 local function fireWeapons(Obj, dt)
@@ -158,26 +176,18 @@ local function fireWeapons(Obj, dt)
             local targetx = OBJECTS[Obj.targetid].body:getX()
             local targety = OBJECTS[Obj.targetid].body:getY()
 
-            -- using degs for easy understanding
-            local currentangledeg
+
             local currentangle = Obj.body:getAngle()
-            if currentangle > 0 then
-                currentangledeg = math.deg(currentangle) + 90
-            else
-                currentangledeg = 90 + math.deg(currentangle)
-            end
-            local bearingtotargetdeg = cf.getBearing(objx,objy,targetx,targety)     -- returns compass bearing
-            local angletotargetdeg = currentangledeg - bearingtotargetdeg
+            local bearingtotarget = cf.getBearingRad(objx,objy,targetx,targety)
+            local angletotarget = bearingtotarget - currentangle
+            -- print(currentangle, bearingtotarget, angletotarget)
 
-print(currentangle, currentangledeg, bearingtotargetdeg, angletotargetdeg)
-
-            if angletotargetdeg > -15 and angletotargetdeg < 15 then
+            if angletotarget > -0.13 and angletotarget < 0.13 then
                 Obj.weaponcooldown = 4
                 createNewBullet(Obj, true)       -- includes missiles and bombs. Use TRUE for fast moving bullets
             end
         end
     end
-
 end
 
 function unitai.update(squadAI, dt)
@@ -194,6 +204,7 @@ function unitai.update(squadAI, dt)
         -- print(inspect(squadAI[callsign].orders))
 
         if callsign ~= nil then                     -- bullets won't have a callsign
+            assert(Obj.body:isBullet() == false)
             if #squadAI[callsign].orders == 0 then
                 squadorder = nil
             else
@@ -203,11 +214,11 @@ function unitai.update(squadAI, dt)
             updateUnitTask(Obj, squadorder, dt)     -- choose targets etc based on the current squad order
             adjustAngle(Obj, dt)         -- send the object and the order for its squad
             adjustThrust(Obj, dt)
-            -- fireWeapons(Obj, dt)
+            fireWeapons(Obj, dt)
         else
-            -- print(inspect(Obj))
-            -- print(Obj.fixture:getUserData())
-            -- print(Obj.body:getLinearVelocity())
+            local guid = Obj.fixture:getUserData()
+            local x, y = Obj.body:getLinearVelocity()
+            print("This is a bullet: " .. guid, x, y )
         end
     end
 end

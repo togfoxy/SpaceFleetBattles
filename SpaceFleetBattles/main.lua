@@ -35,7 +35,31 @@ function love.resize(w, h)
 end
 
 function beginContact(a, b, coll)
+	-- a and be are fixtures
 	print("Contact")
+	-- get the body that owns the fixture
+	local object1index, object2index
+
+	for i = 1, #OBJECTS do
+		if OBJECTS[i].fixture == a then
+			object1index = i
+		end
+		if OBJECTS[i].fixture == b then
+			object2index = i
+		end
+	end
+	if OBJECTS[object1index].body:isBullet() then
+		-- destroy Obj2
+		OBJECTS[object1index].lifetime = 0
+		OBJECTS[object2index].lifetime = 0
+		print("Obj 1 destroyed")
+	end
+	if OBJECTS[object2index].body:isBullet() then
+		-- destroy Obj1
+		OBJECTS[object2index].lifetime = 0
+		OBJECTS[object1index].lifetime = 0
+		print("Obj 2 destroyed")
+	end
 end
 
 function endContact(a, b, coll)

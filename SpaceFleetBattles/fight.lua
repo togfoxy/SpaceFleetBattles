@@ -41,10 +41,15 @@ local function createFighter(forf, squadcallsign, squadid)
 	thisobject.fixture = love.physics.newFixture(thisobject.body, thisobject.shape, 1)		-- the 1 is the density
 	thisobject.fixture:setRestitution(0.25)
 	thisobject.fixture:setSensor(false)
-    -- thisobject.fixture:setGroupIndex( forf * -1)
-    thisobject.fixture:setCategory(enum.categoryFighter)
-    -- thisobject.fixture:setMask(enum.categoryBullet)
-    thisobject.fixture:setMask(enum.categoryFighter)
+
+    if forf == enum.forfFriend then
+        thisobject.fixture:setCategory(enum.categoryFriendlyFighter)
+        thisobject.fixture:setMask(enum.categoryFriendlyFighter, enum.categoryFriendlyBullet, enum.categoryEnemyFighter)
+    else
+        thisobject.fixture:setCategory(enum.categoryEnemyFighter)
+        thisobject.fixture:setMask(enum.categoryEnemyFighter, enum.categoryEnemyBullet, enum.categoryFriendlyFighter)   -- these are the things that will not trigger a collision
+    end
+
     local guid = cf.getGUID()
 	thisobject.fixture:setUserData(guid)
 
@@ -168,16 +173,14 @@ function fight.draw()
                 local x2, y2 = drawx + 30, drawy - 14
                 love.graphics.setColor(1,1,1,1)
                 love.graphics.line(drawx, drawy, x2, y2)
-
-
             end
 
             -- -- draw velocity
-            -- local vx, vy = Obj.body:getLinearVelocity()
-            -- local vel = cf.getDistance(0, 0, vx, vy)    -- get distance of velocity vector
-            -- vel = "v: " .. cf.round(vel, 0)
-            -- love.graphics.setColor(1,1,1,1)
-            -- love.graphics.print(vel, drawx, drawy, 0, 1, 1, 30, 30)
+            local vx, vy = Obj.body:getLinearVelocity()
+            local vel = cf.getDistance(0, 0, vx, vy)    -- get distance of velocity vector
+            vel = "v: " .. cf.round(vel, 0)             -- this is not the same as getLinearVelocity x/y because this is the distance between two points
+            love.graphics.setColor(1,1,1,1)
+            love.graphics.print(vel, drawx, drawy, 0, 1, 1, 30, 30)
 
             -- draw the physics object
             local shape = fixture:getShape()

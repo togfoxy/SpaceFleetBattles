@@ -12,22 +12,22 @@ function squadai.update(commanderAI, squadAI, squadlist, dt)
                 -- check what commander is doing
                 for i = 1, #commanderAI do
                     if commanderAI[i].forf == enum.forfFriend then
-                        if commanderAI[i].orders[1].order == enum.commanderOrdersEngage then
-                            -- squad engages
-                            thisorder = {}
-                            thisorder.cooldown = 5
-                            thisorder.active = true         -- set to false if you want to queue it but not activate it
-                            thisorder.order = enum.squadOrdersEngage
-                            table.insert(squadAI[callsign].orders, thisorder)
-                        else
-                            error()
+                        if commanderAI[i] ~= nil and commanderAI[i].orders[1] ~= nil then
+                            if commanderAI[i].orders[1].order == enum.commanderOrdersEngage then
+                                -- squad engages
+                                thisorder = {}
+                                thisorder.cooldown = 5
+                                thisorder.active = true         -- set to false if you want to queue it but not activate it
+                                thisorder.order = enum.squadOrdersEngage
+                                table.insert(squadAI[callsign].orders, thisorder)
+                            else
+                                error()
+                            end
                         end
                     end
                 end
             elseif squadforf == enum.forfEnemy then
                 -- check what enemy commander is doing
-
-
             else
                 error()
 
