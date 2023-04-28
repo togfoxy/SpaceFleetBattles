@@ -57,7 +57,8 @@ local function createFighter(forf, squadcallsign, squadid)
     thisobject.squadCallsign = squadcallsign
     thisobject.squadid = squadid
     thisobject.taskCooldown = 0
-    thisobject.maxForwardThrust = 100
+    -- thisobject.maxForwardThrust = 100
+    thisobject.maxForwardThrust = 500
     thisobject.currentForwardThrust = 0
     thisobject.maxAcceleration = 25
     thisobject.maxDeacceleration = 25       -- set to 0 for bullets
