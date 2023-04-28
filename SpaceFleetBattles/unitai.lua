@@ -32,7 +32,13 @@ local function updateUnitTask(Obj, squadorder, dt)
         --! get a new task
         if squadorder == enum.squadOrdersEngage then
             -- get closest target
-            local targetid = getClosestObject(Obj, enum.forfEnemy)
+            local targetid
+            if Obj.forf == enum.forfFriend then
+                targetid = getClosestObject(Obj, enum.forfEnemy)
+            end
+            if Obj.forf == enum.forfEnemy then
+                targetid = getClosestObject(Obj, enum.forfFriend)
+            end
             if targetid > 0 then
                 Obj.targetid = targetid         -- this is same as OBJECTS[targetid]
             end
@@ -218,7 +224,7 @@ function unitai.update(squadAI, dt)
         else
             local guid = Obj.fixture:getUserData()
             local x, y = Obj.body:getLinearVelocity()
-            print("This is a bullet: " .. guid, x, y )
+            -- print("This is a bullet: " .. guid, x, y )
         end
     end
 end

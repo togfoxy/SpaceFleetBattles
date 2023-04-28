@@ -8,10 +8,10 @@ function squadai.update(commanderAI, squadAI, squadlist, dt)
         if squadAI[callsign].orders == nil then squadAI[callsign].orders = {} end
 
         if #squadAI[callsign].orders == 0 then
-            if squadforf == enum.forfFriend then
+            -- if squadforf == enum.forfFriend then
                 -- check what commander is doing
                 for i = 1, #commanderAI do
-                    if commanderAI[i].forf == enum.forfFriend then
+                    -- if commanderAI[i].forf == enum.forfFriend then
                         if commanderAI[i] ~= nil and commanderAI[i].orders[1] ~= nil then
                             if commanderAI[i].orders[1].order == enum.commanderOrdersEngage then
                                 -- squad engages
@@ -24,15 +24,13 @@ function squadai.update(commanderAI, squadAI, squadlist, dt)
                                 error()
                             end
                         end
-                    end
+                    -- end
                 end
-            elseif squadforf == enum.forfEnemy then
+            -- elseif squadforf == enum.forfEnemy then
                 -- check what enemy commander is doing
-            else
-                error()
-
-
-            end
+            -- else
+            --     error()
+            -- end
 
         else
             -- cycle through all orders for this commander
