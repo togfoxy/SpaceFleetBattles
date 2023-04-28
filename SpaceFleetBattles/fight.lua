@@ -40,7 +40,10 @@ local function createFighter(forf, squadcallsign, squadid)
 	thisobject.fixture = love.physics.newFixture(thisobject.body, thisobject.shape, 1)		-- the 1 is the density
 	thisobject.fixture:setRestitution(0.25)
 	thisobject.fixture:setSensor(false)
-    thisobject.fixture:setGroupIndex( -1 )
+    -- thisobject.fixture:setGroupIndex( forf * -1)
+    thisobject.fixture:setCategory(enum.categoryFighter)
+    -- thisobject.fixture:setMask(enum.categoryBullet)
+    thisobject.fixture:setMask(enum.categoryFighter)
     local guid = cf.getGUID()
 	thisobject.fixture:setUserData(guid)
 
@@ -97,7 +100,7 @@ local function createSquadron(forf)
     end
 
     local squadid = love.math.random(100, 999)                 --! make this less random and more unique
-    for i = 1, 1 do
+    for i = 1, 6 do
         createFighter(forf, squadcallsign, squadid)
     end
 end

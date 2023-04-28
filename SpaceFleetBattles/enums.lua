@@ -23,6 +23,9 @@ function enums.load()
     enum.forfEnemy = 2
     enum.forfNeutral = 3
 
+    enum.categoryFighter = 1
+    enum.categoryBullet = 2          -- includes missiles and bombs
+
     enum.commanderOrdersEngage = 1
 
     enum.squadOrdersEngage = 1

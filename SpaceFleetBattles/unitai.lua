@@ -120,7 +120,9 @@ local function createNewBullet(Obj, bullet)
     thisobject.fixture = love.physics.newFixture(thisobject.body, thisobject.shape, 1)		-- the 1 is the density
     thisobject.fixture:setRestitution(0)                    -- amount of bounce after a collision
     thisobject.fixture:setSensor(false)
-    thisobject.fixture:setGroupIndex( Obj.forf * -2)
+    -- thisobject.fixture:setGroupIndex( Obj.forf * -1)
+    thisobject.fixture:setCategory(enum.categoryBullet)
+    thisobject.fixture:setMask(enum.categoryBullet)
     local guid = cf.getGUID()
     thisobject.fixture:setUserData(guid)
 
