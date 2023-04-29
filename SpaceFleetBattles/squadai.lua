@@ -20,7 +20,7 @@ function squadai.update(commanderAI, squadAI, squadlist, dt)
                                 thisorder.active = true         -- set to false if you want to queue it but not activate it
                                 thisorder.order = enum.squadOrdersEngage
                                 table.insert(squadAI[callsign].orders, thisorder)
-                                print("Squad orders: engage")
+                                -- print("Squad orders: engage")
                             elseif commanderAI[i].orders[1].order == enum.commanderOrdersReturnToBase then
 
                                 thisorder = {}
@@ -28,7 +28,7 @@ function squadai.update(commanderAI, squadAI, squadlist, dt)
                                 thisorder.active = true         -- set to false if you want to queue it but not activate it
                                 thisorder.order = enum.squadOrdersReturnToBase
                                 table.insert(squadAI[callsign].orders, thisorder)
-                                print("Squad orders: RTB")
+                                -- print("Squad orders: RTB")
                             else
                                 error()
                             end

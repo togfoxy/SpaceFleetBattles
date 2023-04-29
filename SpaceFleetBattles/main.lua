@@ -18,6 +18,9 @@ nativefs = require 'lib.nativefs'
 lovelyToasts = require 'lib.lovelyToasts'
 -- https://github.com/Loucee/Lovely-Toasts
 
+anim8 = require 'lib.anim8'
+-- https://github.com/kikito/anim8
+
 -- these are core modules
 require 'lib.buttons'
 require 'enums'
@@ -52,16 +55,26 @@ function beginContact(a, b, coll)
 		-- destroy Obj2
 		OBJECTS[object1index].lifetime = 0
 		OBJECTS[object2index].lifetime = 0
-		print("Obj 1 destroyed")
+		print("Obj 2 destroyed")
 		unitai.clearTarget(object2index)
-
-
 	end
 	if OBJECTS[object2index].body:isBullet() then
 		-- destroy Obj1
+		print("Obj 1 destroyed")
 		OBJECTS[object2index].lifetime = 0
 		OBJECTS[object1index].lifetime = 0
-		print("Obj 2 destroyed")
+
+		unitai.clearTarget(object1index)
+
+		local grid = GRIDS[enum.gridExplosion]
+		local frames = grid('1-4', '3-4')
+		local anim = anim8.newAnimation(frames, 0.1)
+		anim.drawx = OBJECTS[object1index].body:getX()
+		anim.drawy = OBJECTS[object1index].body:getY()
+		anim.angle = OBJECTS[object1index].body:getAngle()
+		-- anim.duration = 0.9		-- seconds
+		anim.duration = 0.9		-- seconds
+		table.insert(ANIMATIONS, anim)
 	end
 end
 
@@ -128,8 +141,7 @@ function love.load()
 	PHYSICSWORLD = love.physics.newWorld(0,0,false)
 	PHYSICSWORLD:setCallbacks(beginContact,endContact,_,_)
 
-
-
+	GRIDS[enum.gridExplosion] = anim8.newGrid(16, 16, IMAGE[enum.imageExplosion]:getWidth(), IMAGE[enum.imageExplosion]:getHeight())
 end
 
 
@@ -138,6 +150,13 @@ function love.draw()
 	local currentscene = cf.currentScreenName(SCREEN_STACK)
 	if currentscene == enum.sceneFight then
 		fight.draw()
+	end
+
+	love.graphics.setColor(1,1,1,1)
+	local scale = love.physics.getMeter( )
+	for _, animation in pairs(ANIMATIONS) do
+		local drawx, drawy = cam:toScreen(animation.drawx, animation.drawy)
+		animation:draw(IMAGE[enum.imageExplosion], drawx, drawy, animation.angle, 1, 1, 0, 0)
 	end
 
     res.stop()
@@ -150,6 +169,13 @@ function love.update(dt)
         fight.update(dt)
 	end
 
+	for i = #ANIMATIONS, 1, -1 do
+		ANIMATIONS[i]:update(dt)
 
+		ANIMATIONS[i].duration = ANIMATIONS[i].duration - dt
+		if ANIMATIONS[i].duration <= 0 then
+			table.remove(ANIMATIONS, i)
+		end
+	end
 
 end

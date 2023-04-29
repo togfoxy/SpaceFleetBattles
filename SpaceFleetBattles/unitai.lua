@@ -18,7 +18,7 @@ local function getClosestObject(thisObj, desiredforf)
     -- returns zero if none found
     local closestdist = 999999999       -- ridiculously large
     local closestid = 0
-    local thisobjx, thisobjy = thisObj.body:getPosition()       -- BOX2D_SCALE
+    local thisobjx, thisobjy = thisObj.body:getPosition()
 
     for k, Obj in pairs(OBJECTS) do
         -- get distance to this obj
@@ -43,7 +43,7 @@ local function updateUnitTask(Obj, squadorder, dt)
     if Obj.taskCooldown <= 0 then
         Obj.taskCooldown = 5
 
-        print("Received squad order: " .. tostring(squadorder))
+        -- print("Received squad order: " .. tostring(squadorder))
 
         -- task has cooled. Get a new task
         if squadorder == enum.squadOrdersEngage then
@@ -73,7 +73,7 @@ local function updateUnitTask(Obj, squadorder, dt)
                 end
                 Obj.desty = Obj.body:getY()
             end
-            print("Unit task: RTB")
+            -- print("Unit task: RTB")
         else
             --! no squad order or unexpected squad order
             print("No squad order available")
@@ -141,7 +141,7 @@ local function adjustAngle(Obj, dt)
         end
 
     elseif Obj.targetid ~= nil then
-        local x1, y1 = Obj.body:getPosition()       -- BOX2D_SCALE
+        local x1, y1 = Obj.body:getPosition()
         if OBJECTS[Obj.targetid] ~= nil then
             local x2, y2 = OBJECTS[Obj.targetid].body:getPosition()
             turnToObjective(Obj, x2, y2, dt)
