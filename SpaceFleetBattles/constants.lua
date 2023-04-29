@@ -2,7 +2,7 @@ constants = {}
 
 function constants.load()
 
-    GAME_VERSION = "1.0"
+    GAME_VERSION = "0.01"
 
     SCREEN_STACK = {}
 
@@ -10,7 +10,7 @@ function constants.load()
     SCREEN_WIDTH, SCREEN_HEIGHT = res.getGame()
 
     -- camera
-    ZOOMFACTOR = 0.20
+    ZOOMFACTOR = 1
     -- ZOOMFACTOR = 1
     TRANSLATEX = cf.round(SCREEN_WIDTH / 2)		-- starts the camera in the middle of the ocean
     TRANSLATEY = cf.round(SCREEN_HEIGHT / 2)	-- need to round because this is working with pixels

@@ -94,7 +94,7 @@ local function adjustAngle(Obj, dt)
             else
                 Obj.body:setAngularVelocity(0)
             end
-            force = force * 5
+            force = force * 1 * dt
             Obj.body:applyAngularImpulse( force  )
         end
     end
@@ -157,18 +157,12 @@ local function createNewBullet(Obj, bullet)
     thisobject.squadCallsign = nil
     thisobject.lifetime = 10            -- seconds
 
-
     thisobject.body:setAngle(currentangle)
-
     local velx, vely = Obj.body:getLinearVelocity()
-
-    -- thisobject.body:setLinearVelocity(math.cos(currentangle) * 1000, math.sin(currentangle) * 1000)
-    thisobject.body:setLinearVelocity(velx * 3, vely * 3)
+    thisobject.body:setLinearVelocity(math.cos(currentangle) * 300, math.sin(currentangle) * 300)
 
     table.insert(OBJECTS, thisobject)
 
-    local x, y = thisobject.body:getLinearVelocity()
-    print("Velocity for " .. guid .. " is now " .. x, y)
 end
 
 local function fireWeapons(Obj, dt)
