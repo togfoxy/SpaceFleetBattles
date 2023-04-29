@@ -46,4 +46,21 @@ function functions.updateAnimations(dt)
 	end
 end
 
+function functions.getImpactedComponent(Obj)
+
+    local totalsize = 0
+    for i = 1, #Obj.componentSize do
+        totalsize = totalsize + Obj.componentSize[i]
+    end
+    local rndnum = love.math.random(1, totalsize)
+    local tempvalue = totalsize
+    for k, v in pairs(Obj.componentSize) do
+        -- print(k, v)
+        rndnum = rndnum - v
+        if rndnum <= 0 then return k end
+    end
+    error()     -- should not reach this point
+end
+
+
 return functions

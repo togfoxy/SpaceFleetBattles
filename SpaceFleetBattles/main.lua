@@ -66,6 +66,8 @@ function beginContact(a, b, coll)
 		OBJECTS[object2index].lifetime = 0
 		OBJECTS[object1index].lifetime = 0
 
+		print("Component hit: " .. fun.getImpactedComponent(OBJECTS[object1index]))
+
 		unitai.clearTarget(object1index)
 
 		fun.createAnimation(OBJECTS[object1index].body:getX(), OBJECTS[object1index].body:getY(), OBJECTS[object1index].body:getAngle(), enum.animExplosion)

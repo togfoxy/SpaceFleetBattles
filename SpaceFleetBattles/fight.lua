@@ -6,7 +6,7 @@ local snapcamera = true
 local commanderAI = {}
 local squadAI = {}
 local squadlist = {}
-local shipspersquadron = 6
+local shipspersquadron = 12
 local playerguid                    -- the call sign assigned to the player. Is the guid of the fighter
 
 local function createFighter(forf, squadcallsign, squadid)
@@ -265,8 +265,8 @@ function fight.update(dt)
 
         -- create a squadron
         createSquadron(enum.forfFriend)
-        createSquadron(enum.forfFriend)
-        createSquadron(enum.forfEnemy)
+        -- createSquadron(enum.forfFriend)
+        -- createSquadron(enum.forfEnemy)
         createSquadron(enum.forfEnemy)
 
         playerguid = OBJECTS[1].fixture:getUserData()
