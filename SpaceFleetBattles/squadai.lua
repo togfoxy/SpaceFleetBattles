@@ -20,6 +20,15 @@ function squadai.update(commanderAI, squadAI, squadlist, dt)
                                 thisorder.active = true         -- set to false if you want to queue it but not activate it
                                 thisorder.order = enum.squadOrdersEngage
                                 table.insert(squadAI[callsign].orders, thisorder)
+                                print("Squad orders: engage")
+                            elseif commanderAI[i].orders[1].order == enum.commanderOrdersReturnToBase then
+
+                                thisorder = {}
+                                thisorder.cooldown = 5
+                                thisorder.active = true         -- set to false if you want to queue it but not activate it
+                                thisorder.order = enum.squadOrdersReturnToBase
+                                table.insert(squadAI[callsign].orders, thisorder)
+                                print("Squad orders: RTB")
                             else
                                 error()
                             end
@@ -38,6 +47,9 @@ function squadai.update(commanderAI, squadAI, squadlist, dt)
                 squadAI[callsign].orders[j].cooldown = squadAI[callsign].orders[j].cooldown - dt
                 if squadAI[callsign].orders[j].cooldown <= 0 then
                     table.remove(squadAI[callsign].orders, j)
+
+                    -- print("A squad order timed out. This is the squad order table:" .. inspect(callsign))
+                    -- print(inspect(squadAI[callsign].orders))
                 end
             end
         end

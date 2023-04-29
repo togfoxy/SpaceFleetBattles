@@ -25,12 +25,14 @@ function enums.load()
 
     enum.categoryFriendlyFighter = 1
     enum.categoryEnemyFighter = 2
-    enum.categoryFriendlyBullet = 3          -- includes missiles and bombs
-    enum.categoryEnemyBullet = 4          -- includes missiles and bombs
+    enum.categoryFriendlyBullet = 3             -- includes missiles and bombs
+    enum.categoryEnemyBullet = 4                -- includes missiles and bombs
 
     enum.commanderOrdersEngage = 1
+    enum.commanderOrdersReturnToBase = 2
 
     enum.squadOrdersEngage = 1
+    enum.squadOrdersReturnToBase = 2
 
 end
 

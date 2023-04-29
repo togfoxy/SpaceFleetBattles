@@ -53,6 +53,9 @@ function beginContact(a, b, coll)
 		OBJECTS[object1index].lifetime = 0
 		OBJECTS[object2index].lifetime = 0
 		print("Obj 1 destroyed")
+		unitai.clearTarget(object2index)
+
+
 	end
 	if OBJECTS[object2index].body:isBullet() then
 		-- destroy Obj1

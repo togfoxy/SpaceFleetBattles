@@ -27,6 +27,8 @@ function commanderai.update(commanderAI, dt)
                 error()
             end
 
+            -- print("Commander opponent count: " .. numofobjs)
+
             if numofobjs > 0 then
                 -- set orders to engage
                 thisorder = {}
@@ -34,6 +36,15 @@ function commanderai.update(commanderAI, dt)
                 thisorder.active = true         -- set to false if you want to queue it but not activate it
                 thisorder.order = enum.commanderOrdersEngage
                 table.insert(commanderAI[i].orders, thisorder)
+                -- print("Commander orders: engage")
+            else
+                -- set orders to return to base
+                thisorder = {}
+                thisorder.cooldown = 10
+                thisorder.active = true         -- set to false if you want to queue it but not activate it
+                thisorder.order = enum.commanderOrdersReturnToBase
+                table.insert(commanderAI[i].orders, thisorder)
+                -- print("Commander orders: RTB")
             end
         else
             -- adjust cooldown on the order stack

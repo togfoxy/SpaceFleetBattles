@@ -5,7 +5,7 @@ local pause = false
 local commanderAI = {}
 local squadAI = {}
 local squadlist = {}
-shipspersquadron = 6
+shipspersquadron = 2
 
 local function createFighter(forf, squadcallsign, squadid)
     -- forf = friend or foe.  See enums
@@ -63,6 +63,8 @@ local function createFighter(forf, squadcallsign, squadid)
     thisobject.maxAcceleration = 25
     thisobject.maxDeacceleration = 25       -- set to 0 for bullets
     thisobject.weaponcooldown = 0           --! might be more than one weapon in the future
+    thisobject.destx = nil
+    thisobject.desty = nil
     table.insert(OBJECTS, thisobject)
 end
 
@@ -168,7 +170,7 @@ function fight.draw()
                 local str = "CS: " .. Obj.squadCallsign .. "-" .. string.sub(objguid, -2)
 
                 love.graphics.setColor(1,1,1,1)
-                love.graphics.print(str, drawx, drawy, 0, BOX2D_SCALE / 2, BOX2D_SCALE / 2, -15, 30)
+                love.graphics.print(str, drawx, drawy, 0, 1, 1, -15, 30)
 
                 -- draw a cool line next
                 local x2, y2 = drawx + 30, drawy - 14
@@ -177,11 +179,11 @@ function fight.draw()
             end
 
             -- -- draw velocity
-            local vx, vy = Obj.body:getLinearVelocity()
-            local vel = cf.getDistance(0, 0, vx, vy)    -- get distance of velocity vector
-            vel = "v: " .. cf.round(vel, 0)             -- this is not the same as getLinearVelocity x/y because this is the distance between two points
-            love.graphics.setColor(1,1,1,1)
-            love.graphics.print(vel, drawx, drawy, 0, 1, 1, 30, 30)
+            -- local vx, vy = Obj.body:getLinearVelocity()
+            -- local vel = cf.getDistance(0, 0, vx, vy)    -- get distance of velocity vector
+            -- vel = "v: " .. cf.round(vel, 0)             -- this is not the same as getLinearVelocity x/y because this is the distance between two points
+            -- love.graphics.setColor(1,1,1,1)
+            -- love.graphics.print(vel, drawx, drawy, 0, 1, 1, 30, 30)
 
             -- draw the physics object
             local shape = fixture:getShape()
@@ -243,7 +245,9 @@ function fight.update(dt)
 
         -- create a squadron
         createSquadron(enum.forfFriend)
+        -- createSquadron(enum.forfFriend)
         createSquadron(enum.forfEnemy)
+        -- createSquadron(enum.forfEnemy)
     end
 
     if not pause then
