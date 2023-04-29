@@ -39,7 +39,7 @@ end
 
 function beginContact(a, b, coll)
 	-- a and be are fixtures
-	print("Contact")
+	-- print("Contact")
 	-- get the body that owns the fixture
 	local object1index, object2index
 
@@ -55,26 +55,21 @@ function beginContact(a, b, coll)
 		-- destroy Obj2
 		OBJECTS[object1index].lifetime = 0
 		OBJECTS[object2index].lifetime = 0
-		print("Obj 2 destroyed")
+		-- print("Obj 2 destroyed")
 		unitai.clearTarget(object2index)
+
+		functions.createAnimation(OBJECTS[object2index].body:getX(), OBJECTS[object2index].body:getY(), OBJECTS[object2index].body:getAngle(), enum.animExplosion)
 	end
 	if OBJECTS[object2index].body:isBullet() then
 		-- destroy Obj1
-		print("Obj 1 destroyed")
+		-- print("Obj 1 destroyed")
 		OBJECTS[object2index].lifetime = 0
 		OBJECTS[object1index].lifetime = 0
 
 		unitai.clearTarget(object1index)
 
-		local grid = GRIDS[enum.gridExplosion]
-		local frames = grid('1-4', '3-4')
-		local anim = anim8.newAnimation(frames, 0.1)
-		anim.drawx = OBJECTS[object1index].body:getX()
-		anim.drawy = OBJECTS[object1index].body:getY()
-		anim.angle = OBJECTS[object1index].body:getAngle()
-		-- anim.duration = 0.9		-- seconds
-		anim.duration = 0.9		-- seconds
-		table.insert(ANIMATIONS, anim)
+		fun.createAnimation(OBJECTS[object1index].body:getX(), OBJECTS[object1index].body:getY(), OBJECTS[object1index].body:getAngle(), enum.animExplosion)
+
 	end
 end
 
@@ -169,13 +164,6 @@ function love.update(dt)
         fight.update(dt)
 	end
 
-	for i = #ANIMATIONS, 1, -1 do
-		ANIMATIONS[i]:update(dt)
-
-		ANIMATIONS[i].duration = ANIMATIONS[i].duration - dt
-		if ANIMATIONS[i].duration <= 0 then
-			table.remove(ANIMATIONS, i)
-		end
-	end
+	fun.updateAnimations(dt)
 
 end

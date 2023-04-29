@@ -245,8 +245,8 @@ function fight.update(dt)
 
         -- create a squadron
         createSquadron(enum.forfFriend)
-        -- createSquadron(enum.forfFriend)
-        -- createSquadron(enum.forfEnemy)
+        createSquadron(enum.forfFriend)
+        createSquadron(enum.forfEnemy)
         createSquadron(enum.forfEnemy)
 
         playerguid = OBJECTS[1].fixture:getUserData()

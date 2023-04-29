@@ -38,6 +38,8 @@ function enums.load()
 
     enum.gridExplosion = 1
 
+    enum.animExplosion = 1
+
 end
 
 return enums
