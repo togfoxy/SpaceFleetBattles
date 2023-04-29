@@ -133,7 +133,7 @@ local function adjustAngle(Obj, dt)
             local destx, desty = Obj.destx, Obj.desty
             local disttodest = cf.getDistance(objx, objy, destx, desty)
             if disttodest < 10 then
-                print("Arrived at destination")
+                -- print("Arrived at destination")
                 Obj.currentForwardThrust = 0                --! this is for testing only
             else
                 turnToObjective(Obj, destx, desty, dt)

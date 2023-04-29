@@ -162,7 +162,7 @@ function fight.draw()
         local drawx = objx * BOX2D_SCALE
         local drawy = objy * BOX2D_SCALE
 
-        for k, fixture in pairs(Obj.body:getFixtures()) do
+        for _, fixture in pairs(Obj.body:getFixtures()) do
 
             -- draw callsign first
             local objguid = Obj.fixture:getUserData()
@@ -199,6 +199,7 @@ function fight.draw()
                 elseif Obj.forf == enum.forfNeutral then
                     love.graphics.setColor(0.5,0.5,0.5,1)
                 end
+                if k == 1 then love.graphics.setColor(1,1,0,1) end
     			love.graphics.polygon("fill", points)
             elseif shape:typeOf("CircleShape") then
 				local drawx, drawy = Obj.body:getWorldPoints(shape:getPoint())
@@ -245,9 +246,9 @@ function fight.update(dt)
 
         -- create a squadron
         createSquadron(enum.forfFriend)
-        -- createSquadron(enum.forfFriend)
+        createSquadron(enum.forfFriend)
         createSquadron(enum.forfEnemy)
-        -- createSquadron(enum.forfEnemy)
+        createSquadron(enum.forfEnemy)
     end
 
     if not pause then
