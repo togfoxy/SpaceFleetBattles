@@ -10,7 +10,7 @@ function constants.load()
     SCREEN_WIDTH, SCREEN_HEIGHT = res.getGame()
 
     -- camera
-    ZOOMFACTOR = 1
+    ZOOMFACTOR = 1.3
     -- ZOOMFACTOR = 1
     TRANSLATEX = cf.round(SCREEN_WIDTH / 2)		-- starts the camera in the middle of the ocean
     TRANSLATEY = cf.round(SCREEN_HEIGHT / 2)	-- need to round because this is working with pixels
@@ -38,6 +38,14 @@ function constants.load()
     PHYS_OBJECTS = {}       -- table of box2d
     OBJECTS = {}            -- table of items
     NUM_OF_OBJECTS = 10
+
+    -- animate stuff. --! check if all are necessary
+    QUADS = {}		-- quads for animations
+    GRIDS = {}		-- grids are used to load quads for anim8
+    FRAMES = {}		-- frames within the grid. Used by anim8
+    ANIMATIONS = {}	-- holds all anim8 animations
+
+    
 
 end
 

@@ -18,6 +18,9 @@ nativefs = require 'lib.nativefs'
 lovelyToasts = require 'lib.lovelyToasts'
 -- https://github.com/Loucee/Lovely-Toasts
 
+anim8 = require 'lib.anim8'
+-- https://github.com/kikito/anim8
+
 -- these are core modules
 require 'lib.buttons'
 require 'enums'
@@ -36,7 +39,7 @@ end
 
 function beginContact(a, b, coll)
 	-- a and be are fixtures
-	print("Contact")
+	-- print("Contact")
 	-- get the body that owns the fixture
 	local object1index, object2index
 
@@ -52,13 +55,21 @@ function beginContact(a, b, coll)
 		-- destroy Obj2
 		OBJECTS[object1index].lifetime = 0
 		OBJECTS[object2index].lifetime = 0
-		print("Obj 1 destroyed")
+		-- print("Obj 2 destroyed")
+		unitai.clearTarget(object2index)
+
+		functions.createAnimation(OBJECTS[object2index].body:getX(), OBJECTS[object2index].body:getY(), OBJECTS[object2index].body:getAngle(), enum.animExplosion)
 	end
 	if OBJECTS[object2index].body:isBullet() then
 		-- destroy Obj1
+		-- print("Obj 1 destroyed")
 		OBJECTS[object2index].lifetime = 0
 		OBJECTS[object1index].lifetime = 0
-		print("Obj 2 destroyed")
+
+		unitai.clearTarget(object1index)
+
+		fun.createAnimation(OBJECTS[object1index].body:getX(), OBJECTS[object1index].body:getY(), OBJECTS[object1index].body:getAngle(), enum.animExplosion)
+
 	end
 end
 
@@ -125,8 +136,7 @@ function love.load()
 	PHYSICSWORLD = love.physics.newWorld(0,0,false)
 	PHYSICSWORLD:setCallbacks(beginContact,endContact,_,_)
 
-
-
+	GRIDS[enum.gridExplosion] = anim8.newGrid(16, 16, IMAGE[enum.imageExplosion]:getWidth(), IMAGE[enum.imageExplosion]:getHeight())
 end
 
 
@@ -135,6 +145,13 @@ function love.draw()
 	local currentscene = cf.currentScreenName(SCREEN_STACK)
 	if currentscene == enum.sceneFight then
 		fight.draw()
+	end
+
+	love.graphics.setColor(1,1,1,1)
+	local scale = love.physics.getMeter( )
+	for _, animation in pairs(ANIMATIONS) do
+		local drawx, drawy = cam:toScreen(animation.drawx, animation.drawy)
+		animation:draw(IMAGE[enum.imageExplosion], drawx, drawy, animation.angle, 1, 1, 0, 0)
 	end
 
     res.stop()
@@ -147,6 +164,6 @@ function love.update(dt)
         fight.update(dt)
 	end
 
-
+	fun.updateAnimations(dt)
 
 end

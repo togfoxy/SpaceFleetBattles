@@ -2,10 +2,12 @@ fight = {}
 
 local sceneHasLoaded = false
 local pause = false
+local snapcamera = true
 local commanderAI = {}
 local squadAI = {}
 local squadlist = {}
-shipspersquadron = 6
+local shipspersquadron = 6
+local playerguid                    -- the call sign assigned to the player. Is the guid of the fighter
 
 local function createFighter(forf, squadcallsign, squadid)
     -- forf = friend or foe.  See enums
@@ -26,8 +28,8 @@ local function createFighter(forf, squadcallsign, squadid)
         error()
     end
 
-    rndx = rndx / BOX2D_SCALE
-    rndy = rndy / BOX2D_SCALE
+    rndx = rndx
+    rndy = rndy
 
     local thisobject = {}
     thisobject.body = love.physics.newBody(PHYSICSWORLD, rndx, rndy, "dynamic")
@@ -63,6 +65,8 @@ local function createFighter(forf, squadcallsign, squadid)
     thisobject.maxAcceleration = 25
     thisobject.maxDeacceleration = 25       -- set to 0 for bullets
     thisobject.weaponcooldown = 0           --! might be more than one weapon in the future
+    thisobject.destx = nil
+    thisobject.desty = nil
     table.insert(OBJECTS, thisobject)
 end
 
@@ -86,16 +90,10 @@ local function createSquadron(forf)
     end
 
     local squadid = love.math.random(100, 999)                 --! make this less random and more unique
-    -- if forf == enum.forfFriend then
-        for i = 1, shipspersquadron do
-            createFighter(forf, squadcallsign, squadid)
-        end
-    -- else
-    --     for i = 1, 3 do
-    --         createFighter(forf, squadcallsign, squadid)
-    --     end
-    --
-    -- end
+    for i = 1, shipspersquadron do
+        createFighter(forf, squadcallsign, squadid)
+    end
+
 end
 
 local function initialiseSquadList()
@@ -122,9 +120,8 @@ local function destroyObjects(dt)
 end
 
 function fight.keyreleased(key, scancode)
-    if key == "space" then
-        pause = not pause
-    end
+    if key == "space" then pause = not pause end
+    if key == "c" then snapcamera = not snapcamera end
 end
 
 function fight.wheelmoved(x, y)
@@ -144,8 +141,8 @@ function fight.mousemoved(x, y, dx, dy)
     local camx, camy = cam:toWorld(x, y)	-- converts screen x/y to world x/y
 
     if love.mouse.isDown(3) then
-        TRANSLATEX = TRANSLATEX - (dx * BOX2D_SCALE)
-        TRANSLATEY = TRANSLATEY - (dy * BOX2D_SCALE)
+        TRANSLATEX = TRANSLATEX - dx
+        TRANSLATEY = TRANSLATEY - dy
     end
 
 end
@@ -157,10 +154,10 @@ function fight.draw()
     for k, Obj in pairs(OBJECTS) do
         local objx = Obj.body:getX()
         local objy = Obj.body:getY()
-        local drawx = objx * BOX2D_SCALE
-        local drawy = objy * BOX2D_SCALE
+        local drawx = objx
+        local drawy = objy
 
-        for k, fixture in pairs(Obj.body:getFixtures()) do
+        for _, fixture in pairs(Obj.body:getFixtures()) do
 
             -- draw callsign first
             local objguid = Obj.fixture:getUserData()
@@ -168,7 +165,7 @@ function fight.draw()
                 local str = "CS: " .. Obj.squadCallsign .. "-" .. string.sub(objguid, -2)
 
                 love.graphics.setColor(1,1,1,1)
-                love.graphics.print(str, drawx, drawy, 0, BOX2D_SCALE / 2, BOX2D_SCALE / 2, -15, 30)
+                love.graphics.print(str, drawx, drawy, 0, 1, 1, -15, 30)
 
                 -- draw a cool line next
                 local x2, y2 = drawx + 30, drawy - 14
@@ -177,33 +174,38 @@ function fight.draw()
             end
 
             -- -- draw velocity
-            local vx, vy = Obj.body:getLinearVelocity()
-            local vel = cf.getDistance(0, 0, vx, vy)    -- get distance of velocity vector
-            vel = "v: " .. cf.round(vel, 0)             -- this is not the same as getLinearVelocity x/y because this is the distance between two points
-            love.graphics.setColor(1,1,1,1)
-            love.graphics.print(vel, drawx, drawy, 0, 1, 1, 30, 30)
+            -- local vx, vy = Obj.body:getLinearVelocity()
+            -- local vel = cf.getDistance(0, 0, vx, vy)    -- get distance of velocity vector
+            -- vel = "v: " .. cf.round(vel, 0)             -- this is not the same as getLinearVelocity x/y because this is the distance between two points
+            -- love.graphics.setColor(1,1,1,1)
+            -- love.graphics.print(vel, drawx, drawy, 0, 1, 1, 30, 30)
 
             -- draw the physics object
             local shape = fixture:getShape()
             if shape:typeOf("PolygonShape") then
     			local points = {Obj.body:getWorldPoints(shape:getPoints())}
-                for i = 1, #points do
-    	            points[i] = points[i] * BOX2D_SCALE
-                end
                 if Obj.forf == enum.forfFriend then
                     love.graphics.setColor(0,1,0,1)
                 elseif Obj.forf == enum.forfEnemy then
                     love.graphics.setColor(0,0,1,1)
                 elseif Obj.forf == enum.forfNeutral then
                     love.graphics.setColor(0.5,0.5,0.5,1)
+                else
+                    error()
                 end
+
+                if objguid == playerguid then
+                    love.graphics.setColor(1,1,0,1)
+                end
+
     			love.graphics.polygon("fill", points)
+
             elseif shape:typeOf("CircleShape") then
 				local drawx, drawy = Obj.body:getWorldPoints(shape:getPoint())
-				drawx = drawx * BOX2D_SCALE
-				drawy = drawy * BOX2D_SCALE
+				drawx = drawx
+				drawy = drawy
 				local radius = shape:getRadius()
-				radius = radius * BOX2D_SCALE
+				radius = radius
 				love.graphics.setColor(1, 0, 0, 1)
 				love.graphics.circle("line", drawx, drawy, radius)
 			else
@@ -215,16 +217,16 @@ function fight.draw()
             -- linx = linx * 2
             -- liny = liny * 2
             -- local objx, objy = Obj.body:getPosition( )
-            -- local objxscaled = objx * BOX2D_SCALE
-            -- local objyscaled = objy * BOX2D_SCALE
-            -- local pointxscaled = (objx + linx) * BOX2D_SCALE
-            -- local pointyscaled = (objy + liny) * BOX2D_SCALE
+            -- local objxscaled = objx
+            -- local objyscaled = objy
+            -- local pointxscaled = (objx + linx)
+            -- local pointyscaled = (objy + liny)
             -- love.graphics.setColor(1,0,1,1)
             -- love.graphics.line(objxscaled, objyscaled, pointxscaled, pointyscaled)
 		end
     end
 
-    -- cf.printAllPhysicsObjects(PHYSICSWORLD, BOX2D_SCALE)
+    -- cf.printAllPhysicsObjects(PHYSICSWORLD, 1)
     cam:detach()
 end
 
@@ -243,7 +245,11 @@ function fight.update(dt)
 
         -- create a squadron
         createSquadron(enum.forfFriend)
+        createSquadron(enum.forfFriend)
         createSquadron(enum.forfEnemy)
+        createSquadron(enum.forfEnemy)
+
+        playerguid = OBJECTS[1].fixture:getUserData()
     end
 
     if not pause then
@@ -256,6 +262,11 @@ function fight.update(dt)
         PHYSICSWORLD:update(dt) --this puts the world into motion
     end
     lovelyToasts.update(dt)
+
+    if snapcamera then
+        TRANSLATEX = OBJECTS[1].body:getX()     -- if 1 == player then this works well
+        TRANSLATEY = OBJECTS[1].body:getY()     -- if 1 ~= player then still works well
+    end
 
     cam:setZoom(ZOOMFACTOR)
     cam:setPos(TRANSLATEX,	TRANSLATEY)

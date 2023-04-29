@@ -1,10 +1,24 @@
 unitai = {}
 
+function unitai.clearTarget(deadtarget)
+    -- move through all objects and clear target id if target ID = input parameter
+    -- use this to remove targets from other craft if a target is destroyed
+    for k, Obj in pairs(OBJECTS) do
+        if Obj.targetid == nil then
+           -- do nothing
+        else
+            if Obj.targetid == deadtarget then
+                Obj.targetid = nil
+            end
+        end
+    end
+end
+
 local function getClosestObject(thisObj, desiredforf)
     -- returns zero if none found
     local closestdist = 999999999       -- ridiculously large
     local closestid = 0
-    local thisobjx, thisobjy = thisObj.body:getPosition()       -- BOX2D_SCALE
+    local thisobjx, thisobjy = thisObj.body:getPosition()
 
     for k, Obj in pairs(OBJECTS) do
         -- get distance to this obj
@@ -29,9 +43,14 @@ local function updateUnitTask(Obj, squadorder, dt)
     if Obj.taskCooldown <= 0 then
         Obj.taskCooldown = 5
 
-        --! get a new task
+        -- print("Received squad order: " .. tostring(squadorder))
+
+        -- task has cooled. Get a new task
         if squadorder == enum.squadOrdersEngage then
+
             -- get closest target
+            Obj.destx = nil         -- clear previous destinations if any
+            Obj.desty = nil
             local targetid
             if Obj.forf == enum.forfFriend then
                 targetid = getClosestObject(Obj, enum.forfEnemy)
@@ -42,10 +61,54 @@ local function updateUnitTask(Obj, squadorder, dt)
             if targetid > 0 then
                 Obj.targetid = targetid         -- this is same as OBJECTS[targetid]
             end
+            -- print("Unit task: setting target id")
+        elseif squadorder == enum.squadOrdersReturnToBase then
+            Obj.targetid = nil
+            if Obj.destx == nil then
+
+                if Obj.forf == enum.forfFriend then
+                    Obj.destx = 0
+                elseif Obj.forf == enum.forfEnemy then
+                    Obj.destx = SCREEN_WIDTH
+                end
+                Obj.desty = Obj.body:getY()
+            end
+            -- print("Unit task: RTB")
         else
             --! no squad order or unexpected squad order
+            print("No squad order available")
         end
     end
+end
+
+local function turnToObjective(Obj, destx, desty, dt)
+    -- turn the object towards the destx/desty
+
+    local force = 1
+    local currentangle = Obj.body:getAngle()            -- rads
+
+    assert(currentangle <= math.pi * 2)
+    assert(currentangle >= math.pi * -2)
+
+    local bearing = cf.getBearingRad(Obj.body:getX(), Obj.body:getY(), destx, desty)        -- this is absolute bearing in radians, starting from north
+
+    local bearingdelta = bearing - currentangle
+
+    if bearingdelta < -0.1 or bearingdelta > 0.1 then         -- rads
+        if bearingdelta > 0 then
+            -- turn right
+            force = 1
+            -- print(str .. " right", angledelta)
+        else
+            -- turn left
+            force = -1
+            -- print(str .. " left", angledelta)
+        end
+    else
+        Obj.body:setAngularVelocity(0)
+    end
+    force = force * 1 * dt
+    Obj.body:applyAngularImpulse( force  )
 end
 
 local function adjustAngle(Obj, dt)
@@ -64,39 +127,27 @@ local function adjustAngle(Obj, dt)
     local bearingrad
     if Obj.targetid == nil or Obj.targetid  == 0 then
         -- nothing
-    else
-        local x1, y1 = Obj.body:getPosition()       -- BOX2D_SCALE
+        if Obj.destx ~= nil then
+            -- move to destination
+            local objx, objy = Obj.body:getPosition()
+            local destx, desty = Obj.destx, Obj.desty
+            local disttodest = cf.getDistance(objx, objy, destx, desty)
+            if disttodest < 10 then
+                -- print("Arrived at destination")
+                Obj.currentForwardThrust = 0                --! this is for testing only
+            else
+                turnToObjective(Obj, destx, desty, dt)
+            end
+        end
+
+    elseif Obj.targetid ~= nil then
+        local x1, y1 = Obj.body:getPosition()
         if OBJECTS[Obj.targetid] ~= nil then
             local x2, y2 = OBJECTS[Obj.targetid].body:getPosition()
-
-            local force = 1
-            local currentangle = Obj.body:getAngle()            -- rads
-
-            assert(currentangle <= math.pi * 2)
-            assert(currentangle >= math.pi * -2)
-
-            local bearing = cf.getBearingRad(x1, y1, x2, y2)        -- this is absolute bearing in radians, starting from north
-
-            local bearingdelta = bearing - currentangle
-
-            -- print(currentangle, bearing, bearingdelta)
-
-            if bearingdelta < -0.1 or bearingdelta > 0.1 then         -- rads
-                if bearingdelta > 0 then
-                    -- turn right
-                    force = 1
-                    -- print(str .. " right", angledelta)
-                else
-                    -- turn left
-                    force = -1
-                    -- print(str .. " left", angledelta)
-                end
-            else
-                Obj.body:setAngularVelocity(0)
-            end
-            force = force * 1 * dt
-            Obj.body:applyAngularImpulse( force  )
+            turnToObjective(Obj, x2, y2, dt)
         end
+    else
+        -- nothing. Is this an error?
     end
 end
 
@@ -108,6 +159,11 @@ local function adjustThrust(Obj, dt)
 
     local currentangle = Obj.body:getAngle( )
     if Obj.targetid ~= nil then
+        if Obj.currentForwardThrust < Obj.maxForwardThrust then
+            Obj.currentForwardThrust = Obj.currentForwardThrust + (Obj.maxAcceleration * dt)
+            if Obj.currentForwardThrust > Obj.maxForwardThrust then Obj.currentForwardThrust = Obj.maxForwardThrust end
+        end
+    elseif Obj.destx ~= nil then
         if Obj.currentForwardThrust < Obj.maxForwardThrust then
             Obj.currentForwardThrust = Obj.currentForwardThrust + (Obj.maxAcceleration * dt)
             if Obj.currentForwardThrust > Obj.maxForwardThrust then Obj.currentForwardThrust = Obj.maxForwardThrust end

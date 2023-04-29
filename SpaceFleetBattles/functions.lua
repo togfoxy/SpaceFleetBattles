@@ -1,7 +1,7 @@
 functions = {}
 
 function functions.loadImages()
-    -- IMAGE[enum.imageXXX] = love.graphics.newImage("assets/images/XXX.png")
+    IMAGE[enum.imageExplosion] = love.graphics.newImage("assets/images/SmokeFireQuads.png")
 end
 
 function functions.loadFonts()
@@ -16,6 +16,34 @@ end
 
 function functions.loadAudio()
     -- AUDIO[enum.audioMainMenu] = love.audio.newSource("assets/audio/XXX.mp3", "stream")
+end
+
+function functions.createAnimation(objx, objy, objangle, animtype)
+    -- obj: the x, y and angle of the object displaying the animation
+    -- input: animtype == enum for displaying different types of animations
+
+    if animtype == enum.animExplosion then
+        local grid = GRIDS[enum.gridExplosion]
+        local frames = grid('1-4', '3-4')
+        local anim = anim8.newAnimation(frames, 0.15)
+        anim.drawx = objx
+        anim.drawy = objy
+        anim.angle = objangle
+
+        anim.duration = 0.9 	-- seconds
+        table.insert(ANIMATIONS, anim)
+    end
+end
+
+function functions.updateAnimations(dt)
+	for i = #ANIMATIONS, 1, -1 do
+		ANIMATIONS[i]:update(dt)
+
+		ANIMATIONS[i].duration = ANIMATIONS[i].duration - dt
+		if ANIMATIONS[i].duration <= 0 then
+			table.remove(ANIMATIONS, i)
+		end
+	end
 end
 
 return functions
