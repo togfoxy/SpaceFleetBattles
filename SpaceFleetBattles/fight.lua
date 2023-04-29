@@ -59,14 +59,34 @@ local function createFighter(forf, squadcallsign, squadid)
     thisobject.squadCallsign = squadcallsign
     thisobject.squadid = squadid
     thisobject.taskCooldown = 0
+    thisobject.weaponcooldown = 0           --! might be more than one weapon in the future
+
+    thisobject.currentMaxForwardThrust = 100    -- can be less than max if battle damaged
     thisobject.maxForwardThrust = 100
-    -- thisobject.maxForwardThrust = 500
     thisobject.currentForwardThrust = 0
     thisobject.maxAcceleration = 25
     thisobject.maxDeacceleration = 25       -- set to 0 for bullets
-    thisobject.weaponcooldown = 0           --! might be more than one weapon in the future
+    thisobject.currentMaxAcceleration = 25 -- this can be less than maxAcceleration if battle damaged
+    thisobject.maxSideThrust = 1
+    thisobject.currentSideThrust = 1
+
+    thisobject.componentSize = {}
+    thisobject.componentSize[enum.componentStructure] = 3
+    thisobject.componentSize[enum.componentThruster] = 2
+    thisobject.componentSize[enum.componentAccelerator] = 1
+    thisobject.componentSize[enum.componentWeapon] = 1
+    thisobject.componentSize[enum.componentSideThruster] = 1
+
+    thisobject.componentHealth = {}
+    thisobject.componentHealth[enum.componentStructure] = 100
+    thisobject.componentHealth[enum.componentThruster] = 100
+    thisobject.componentHealth[enum.componentAccelerator] = 100
+    thisobject.componentHealth[enum.componentWeapon] = 100
+    thisobject.componentHealth[enum.componentSideThruster] = 100
+
     thisobject.destx = nil
     thisobject.desty = nil
+
     table.insert(OBJECTS, thisobject)
 end
 

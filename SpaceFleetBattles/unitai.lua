@@ -98,16 +98,13 @@ local function turnToObjective(Obj, destx, desty, dt)
         if bearingdelta > 0 then
             -- turn right
             force = 1
-            -- print(str .. " right", angledelta)
         else
-            -- turn left
             force = -1
-            -- print(str .. " left", angledelta)
         end
     else
         Obj.body:setAngularVelocity(0)
     end
-    force = force * 1 * dt
+    force = force * Obj.currentSideThrust * dt
     Obj.body:applyAngularImpulse( force  )
 end
 
@@ -159,14 +156,14 @@ local function adjustThrust(Obj, dt)
 
     local currentangle = Obj.body:getAngle( )
     if Obj.targetid ~= nil then
-        if Obj.currentForwardThrust < Obj.maxForwardThrust then
-            Obj.currentForwardThrust = Obj.currentForwardThrust + (Obj.maxAcceleration * dt)
-            if Obj.currentForwardThrust > Obj.maxForwardThrust then Obj.currentForwardThrust = Obj.maxForwardThrust end
+        if Obj.currentForwardThrust < Obj.currentMaxForwardThrust then
+            Obj.currentForwardThrust = Obj.currentForwardThrust + (Obj.currentMaxAcceleration * dt)
+            if Obj.currentForwardThrust > Obj.currentMaxForwardThrust then Obj.currentForwardThrust = Obj.currentMaxForwardThrust end
         end
     elseif Obj.destx ~= nil then
-        if Obj.currentForwardThrust < Obj.maxForwardThrust then
-            Obj.currentForwardThrust = Obj.currentForwardThrust + (Obj.maxAcceleration * dt)
-            if Obj.currentForwardThrust > Obj.maxForwardThrust then Obj.currentForwardThrust = Obj.maxForwardThrust end
+        if Obj.currentForwardThrust < Obj.currentMaxForwardThrust then
+            Obj.currentForwardThrust = Obj.currentForwardThrust + (Obj.currentMaxAcceleration * dt)
+            if Obj.currentForwardThrust > Obj.currentMaxForwardThrust then Obj.currentForwardThrust = Obj.currentMaxForwardThrust end
         end
     else
         -- no target. Slow down and stop
