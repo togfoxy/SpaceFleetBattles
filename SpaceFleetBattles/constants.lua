@@ -37,7 +37,9 @@ function constants.load()
     BOX2D_SCALE = 1
     PHYS_OBJECTS = {}       -- table of box2d
     OBJECTS = {}            -- table of items
+    SOUNDS = {}             -- sound effects
     NUM_OF_OBJECTS = 10
+    PLAYER_GUID = nil
 
     -- animate stuff. --! check if all are necessary
     QUADS = {}		-- quads for animations
@@ -45,7 +47,7 @@ function constants.load()
     FRAMES = {}		-- frames within the grid. Used by anim8
     ANIMATIONS = {}	-- holds all anim8 animations
 
-    
+
 
 end
 

@@ -6,8 +6,7 @@ local snapcamera = true
 local commanderAI = {}
 local squadAI = {}
 local squadlist = {}
-local shipspersquadron = 6
-local playerguid                    -- the call sign assigned to the player. Is the guid of the fighter
+local shipspersquadron = 12
 
 local function createFighter(forf, squadcallsign, squadid)
     -- forf = friend or foe.  See enums
@@ -54,19 +53,40 @@ local function createFighter(forf, squadcallsign, squadid)
 
     local guid = cf.getGUID()
 	thisobject.fixture:setUserData(guid)
+    thisobject.guid = guid
 
     thisobject.forf = forf
     thisobject.squadCallsign = squadcallsign
     thisobject.squadid = squadid
     thisobject.taskCooldown = 0
+    thisobject.weaponcooldown = 0           --! might be more than one weapon in the future
+
+    thisobject.currentMaxForwardThrust = 100    -- can be less than max if battle damaged
     thisobject.maxForwardThrust = 100
-    -- thisobject.maxForwardThrust = 500
     thisobject.currentForwardThrust = 0
     thisobject.maxAcceleration = 25
     thisobject.maxDeacceleration = 25       -- set to 0 for bullets
-    thisobject.weaponcooldown = 0           --! might be more than one weapon in the future
+    thisobject.currentMaxAcceleration = 25 -- this can be less than maxAcceleration if battle damaged
+    thisobject.maxSideThrust = 1
+    thisobject.currentSideThrust = 1
+
+    thisobject.componentSize = {}
+    thisobject.componentSize[enum.componentStructure] = 3
+    thisobject.componentSize[enum.componentThruster] = 2
+    thisobject.componentSize[enum.componentAccelerator] = 1
+    thisobject.componentSize[enum.componentWeapon] = 1
+    thisobject.componentSize[enum.componentSideThruster] = 1
+
+    thisobject.componentHealth = {}
+    thisobject.componentHealth[enum.componentStructure] = 100
+    thisobject.componentHealth[enum.componentThruster] = 100
+    thisobject.componentHealth[enum.componentAccelerator] = 100
+    thisobject.componentHealth[enum.componentWeapon] = 100
+    thisobject.componentHealth[enum.componentSideThruster] = 100
+
     thisobject.destx = nil
     thisobject.desty = nil
+
     table.insert(OBJECTS, thisobject)
 end
 
@@ -141,6 +161,7 @@ function fight.mousemoved(x, y, dx, dy)
     local camx, camy = cam:toWorld(x, y)	-- converts screen x/y to world x/y
 
     if love.mouse.isDown(3) then
+        snapcamera = false
         TRANSLATEX = TRANSLATEX - dx
         TRANSLATEY = TRANSLATEY - dy
     end
@@ -173,12 +194,14 @@ function fight.draw()
                 love.graphics.line(drawx, drawy, x2, y2)
             end
 
-            -- -- draw velocity
-            -- local vx, vy = Obj.body:getLinearVelocity()
-            -- local vel = cf.getDistance(0, 0, vx, vy)    -- get distance of velocity vector
-            -- vel = "v: " .. cf.round(vel, 0)             -- this is not the same as getLinearVelocity x/y because this is the distance between two points
-            -- love.graphics.setColor(1,1,1,1)
-            -- love.graphics.print(vel, drawx, drawy, 0, 1, 1, 30, 30)
+            -- draw velocity
+            -- if not Obj.body:isBullet() then
+            --     local vx, vy = Obj.body:getLinearVelocity()
+            --     local vel = cf.getDistance(0, 0, vx, vy)    -- get distance of velocity vector
+            --     vel = "v: " .. cf.round(vel, 0)             -- this is not the same as getLinearVelocity x/y because this is the distance between two points
+            --     love.graphics.setColor(1,1,1,1)
+            --     love.graphics.print(vel, drawx, drawy, 0, 1, 1, 30, 30)
+            -- end
 
             -- draw the physics object
             local shape = fixture:getShape()
@@ -194,12 +217,11 @@ function fight.draw()
                     error()
                 end
 
-                if objguid == playerguid then
+                if objguid == PLAYER_GUID then
                     love.graphics.setColor(1,1,0,1)
                 end
 
     			love.graphics.polygon("fill", points)
-
             elseif shape:typeOf("CircleShape") then
 				local drawx, drawy = Obj.body:getWorldPoints(shape:getPoint())
 				drawx = drawx
@@ -211,6 +233,11 @@ function fight.draw()
 			else
                 error()
             end
+
+
+
+
+
 
             -- draw the velocity indicator
             -- local linx, liny = Obj.body:getLinearVelocity( )        --! a lot of duplicate code here. Can be cleand up
@@ -224,6 +251,17 @@ function fight.draw()
             -- love.graphics.setColor(1,0,1,1)
             -- love.graphics.line(objxscaled, objyscaled, pointxscaled, pointyscaled)
 		end
+    end
+
+    -- draw target recticle for player 1
+    if OBJECTS[1].guid == PLAYER_GUID then
+        -- player still alive
+        local targetid = OBJECTS[1].targetid        -- OBJECTS index
+        local drawx = OBJECTS[targetid].body:getX()
+        local drawy = OBJECTS[targetid].body:getY()
+
+        love.graphics.setColor(1,0,0,1)
+        love.graphics.circle("line", drawx, drawy, 10)
     end
 
     -- cf.printAllPhysicsObjects(PHYSICSWORLD, 1)
@@ -245,11 +283,11 @@ function fight.update(dt)
 
         -- create a squadron
         createSquadron(enum.forfFriend)
-        createSquadron(enum.forfFriend)
-        createSquadron(enum.forfEnemy)
+        -- createSquadron(enum.forfFriend)
+        -- createSquadron(enum.forfEnemy)
         createSquadron(enum.forfEnemy)
 
-        playerguid = OBJECTS[1].fixture:getUserData()
+        PLAYER_GUID = OBJECTS[1].fixture:getUserData()
     end
 
     if not pause then

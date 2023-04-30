@@ -51,25 +51,27 @@ function beginContact(a, b, coll)
 			object2index = i
 		end
 	end
+
+	local fighter = {}			-- this will contain the fighter object that was hit
+	local hitindex = nil		-- the OBJECTS index that is impacted
 	if OBJECTS[object1index].body:isBullet() then
 		-- destroy Obj2
+		fighter = OBJECTS[object2index]
 		OBJECTS[object1index].lifetime = 0
-		OBJECTS[object2index].lifetime = 0
-		-- print("Obj 2 destroyed")
-		unitai.clearTarget(object2index)
-
-		functions.createAnimation(OBJECTS[object2index].body:getX(), OBJECTS[object2index].body:getY(), OBJECTS[object2index].body:getAngle(), enum.animExplosion)
+		hitindex = 2
 	end
 	if OBJECTS[object2index].body:isBullet() then
 		-- destroy Obj1
-		-- print("Obj 1 destroyed")
+		fighter = OBJECTS[object1index]
 		OBJECTS[object2index].lifetime = 0
-		OBJECTS[object1index].lifetime = 0
+		hitindex = 1
+	end
 
-		unitai.clearTarget(object1index)
+	fun.applyDamage(fighter)
 
-		fun.createAnimation(OBJECTS[object1index].body:getX(), OBJECTS[object1index].body:getY(), OBJECTS[object1index].body:getAngle(), enum.animExplosion)
-
+	-- play sounds if player is hit  		--! what about explosion if dead?
+	if fighter.guid == PLAYER_GUID then
+		cf.playAudio(enum.audioBulletPing, false, true)
 	end
 end
 
@@ -151,7 +153,12 @@ function love.draw()
 	local scale = love.physics.getMeter( )
 	for _, animation in pairs(ANIMATIONS) do
 		local drawx, drawy = cam:toScreen(animation.drawx, animation.drawy)
-		animation:draw(IMAGE[enum.imageExplosion], drawx, drawy, animation.angle, 1, 1, 0, 0)
+		if animation.type == enum.animExplosion then
+			animation:draw(IMAGE[enum.imageExplosion], drawx, drawy, animation.angle, 1, 1, 0, 0)
+		elseif animation.type == enum.animSmoke then
+			-- different offset
+			animation:draw(IMAGE[enum.imageExplosion], drawx, drawy, animation.angle, 1, 1, 10, 10)
+		end
 	end
 
     res.stop()

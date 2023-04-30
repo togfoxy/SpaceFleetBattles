@@ -15,7 +15,7 @@ function unitai.clearTarget(deadtarget)
 end
 
 local function getClosestObject(thisObj, desiredforf)
-    -- returns zero if none found
+    -- returns OBJECTS index or zero if none found
     local closestdist = 999999999       -- ridiculously large
     local closestid = 0
     local thisobjx, thisobjy = thisObj.body:getPosition()
@@ -35,6 +35,18 @@ local function getClosestObject(thisObj, desiredforf)
     return closestid
 end
 
+local function setTaskRTB(Obj)
+    Obj.targetid = nil
+    if Obj.destx == nil then
+        if Obj.forf == enum.forfFriend then
+            Obj.destx = 0
+        elseif Obj.forf == enum.forfEnemy then
+            Obj.destx = SCREEN_WIDTH
+        end
+        Obj.desty = Obj.body:getY()
+    end
+end
+
 local function updateUnitTask(Obj, squadorder, dt)
     -- this adjusts targets or other goals based on the squad order
 
@@ -43,36 +55,37 @@ local function updateUnitTask(Obj, squadorder, dt)
     if Obj.taskCooldown <= 0 then
         Obj.taskCooldown = 5
 
-        -- print("Received squad order: " .. tostring(squadorder))
+        -- do self-preservation checks firstly. Remember the ordering matters
+        if Obj.componentHealth[enum.componentWeapon] <= 0 then
+            setTaskRTB(Obj)
+        elseif Obj.componentHealth[enum.componentThruster] <= 50 then
+            setTaskRTB(Obj)
+        elseif Obj.componentHealth[enum.componentSideThruster] <= 50 then
+            setTaskRTB(Obj)
+        elseif Obj.componentHealth[enum.componentAccelerator] <= 25 then
+            setTaskRTB(Obj)
+        elseif Obj.componentHealth[enum.componentStructure] <= 50 then
+            setTaskRTB(Obj)
 
         -- task has cooled. Get a new task
-        if squadorder == enum.squadOrdersEngage then
+        elseif squadorder == enum.squadOrdersEngage then
 
             -- get closest target
             Obj.destx = nil         -- clear previous destinations if any
             Obj.desty = nil
             local targetid
             if Obj.forf == enum.forfFriend then
-                targetid = getClosestObject(Obj, enum.forfEnemy)
+                targetid = getClosestObject(Obj, enum.forfEnemy)        -- this OBJECTS index
             end
             if Obj.forf == enum.forfEnemy then
-                targetid = getClosestObject(Obj, enum.forfFriend)
+                targetid = getClosestObject(Obj, enum.forfFriend)       -- this OBJECTS index
             end
             if targetid > 0 then
                 Obj.targetid = targetid         -- this is same as OBJECTS[targetid]
             end
             -- print("Unit task: setting target id")
         elseif squadorder == enum.squadOrdersReturnToBase then
-            Obj.targetid = nil
-            if Obj.destx == nil then
-
-                if Obj.forf == enum.forfFriend then
-                    Obj.destx = 0
-                elseif Obj.forf == enum.forfEnemy then
-                    Obj.destx = SCREEN_WIDTH
-                end
-                Obj.desty = Obj.body:getY()
-            end
+                setTaskRTB(Obj)
             -- print("Unit task: RTB")
         else
             --! no squad order or unexpected squad order
@@ -94,20 +107,17 @@ local function turnToObjective(Obj, destx, desty, dt)
 
     local bearingdelta = bearing - currentangle
 
-    if bearingdelta < -0.1 or bearingdelta > 0.1 then         -- rads
+    if bearingdelta < -0.05 or bearingdelta > 0.05 then         -- rads
         if bearingdelta > 0 then
             -- turn right
             force = 1
-            -- print(str .. " right", angledelta)
         else
-            -- turn left
             force = -1
-            -- print(str .. " left", angledelta)
         end
     else
         Obj.body:setAngularVelocity(0)
     end
-    force = force * 1 * dt
+    force = force * Obj.currentSideThrust * dt
     Obj.body:applyAngularImpulse( force  )
 end
 
@@ -159,15 +169,11 @@ local function adjustThrust(Obj, dt)
 
     local currentangle = Obj.body:getAngle( )
     if Obj.targetid ~= nil then
-        if Obj.currentForwardThrust < Obj.maxForwardThrust then
-            Obj.currentForwardThrust = Obj.currentForwardThrust + (Obj.maxAcceleration * dt)
-            if Obj.currentForwardThrust > Obj.maxForwardThrust then Obj.currentForwardThrust = Obj.maxForwardThrust end
-        end
+        Obj.currentForwardThrust = Obj.currentForwardThrust + (Obj.currentMaxAcceleration * dt)
+        if Obj.currentForwardThrust > Obj.currentMaxForwardThrust then Obj.currentForwardThrust = Obj.currentMaxForwardThrust end
     elseif Obj.destx ~= nil then
-        if Obj.currentForwardThrust < Obj.maxForwardThrust then
-            Obj.currentForwardThrust = Obj.currentForwardThrust + (Obj.maxAcceleration * dt)
-            if Obj.currentForwardThrust > Obj.maxForwardThrust then Obj.currentForwardThrust = Obj.maxForwardThrust end
-        end
+        Obj.currentForwardThrust = Obj.currentForwardThrust + (Obj.currentMaxAcceleration * dt)
+        if Obj.currentForwardThrust > Obj.currentMaxForwardThrust then Obj.currentForwardThrust = Obj.currentMaxForwardThrust end
     else
         -- no target. Slow down and stop
         Obj.currentForwardThrust = Obj.currentForwardThrust - (Obj.maxDeacceleration * dt)  -- might be zero for bullets
@@ -218,7 +224,6 @@ local function createNewBullet(Obj, bullet)
     thisobject.body:setLinearVelocity(math.cos(currentangle) * 300, math.sin(currentangle) * 300)
 
     table.insert(OBJECTS, thisobject)
-
 end
 
 local function fireWeapons(Obj, dt)
@@ -228,22 +233,23 @@ local function fireWeapons(Obj, dt)
     if Obj.weaponcooldown <= 0 then
         Obj.weaponcooldown = 0
 
-        if Obj.targetid ~= nil then
-            if OBJECTS[Obj.targetid] ~= nil then
-                local objx = Obj.body:getX()
-                local objy = Obj.body:getY()
-                local targetx = OBJECTS[Obj.targetid].body:getX()
-                local targety = OBJECTS[Obj.targetid].body:getY()
+        if Obj.componentHealth[enum.componentWeapon] > 0 then
+            if Obj.targetid ~= nil then
+                if OBJECTS[Obj.targetid] ~= nil then
+                    local objx = Obj.body:getX()
+                    local objy = Obj.body:getY()
+                    local targetx = OBJECTS[Obj.targetid].body:getX()
+                    local targety = OBJECTS[Obj.targetid].body:getY()
 
+                    local currentangle = Obj.body:getAngle()
+                    local bearingtotarget = cf.getBearingRad(objx,objy,targetx,targety)
+                    local angletotarget = bearingtotarget - currentangle
+                    -- print(currentangle, bearingtotarget, angletotarget)
 
-                local currentangle = Obj.body:getAngle()
-                local bearingtotarget = cf.getBearingRad(objx,objy,targetx,targety)
-                local angletotarget = bearingtotarget - currentangle
-                -- print(currentangle, bearingtotarget, angletotarget)
-
-                if angletotarget > -0.13 and angletotarget < 0.13 then
-                    Obj.weaponcooldown = 4
-                    createNewBullet(Obj, true)       -- includes missiles and bombs. Use TRUE for fast moving bullets
+                    if angletotarget > -0.13 and angletotarget < 0.13 then
+                        Obj.weaponcooldown = 4
+                        createNewBullet(Obj, true)       -- includes missiles and bombs. Use TRUE for fast moving bullets
+                    end
                 end
             end
         end
