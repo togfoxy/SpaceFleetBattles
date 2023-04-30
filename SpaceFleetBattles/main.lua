@@ -157,7 +157,7 @@ function love.draw()
 			animation:draw(IMAGE[enum.imageExplosion], drawx, drawy, animation.angle, 1, 1, 0, 0)
 		elseif animation.type == enum.animSmoke then
 			-- different offset
-			animation:draw(IMAGE[enum.imageExplosion], drawx, drawy, animation.angle, 1, 1, 10, 0)
+			animation:draw(IMAGE[enum.imageExplosion], drawx, drawy, animation.angle, 1, 1, 10, 10)
 		end
 	end
 

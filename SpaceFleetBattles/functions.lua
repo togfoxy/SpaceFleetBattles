@@ -54,9 +54,11 @@ function functions.updateAnimations(dt)
 	for i = #ANIMATIONS, 1, -1 do
         if ANIMATIONS[i].attachtoobject ~= nil then
             -- update the x/y of this animation
-            ANIMATIONS[i].drawx = ANIMATIONS[i].attachtoobject.body:getX()
-            ANIMATIONS[i].drawy = ANIMATIONS[i].attachtoobject.body:getY()
-            ANIMATIONS[i].angle = ANIMATIONS[i].attachtoobject.body:getAngle()
+            if not ANIMATIONS[i].attachtoobject.body:isDestroyed() then
+                ANIMATIONS[i].drawx = ANIMATIONS[i].attachtoobject.body:getX()
+                ANIMATIONS[i].drawy = ANIMATIONS[i].attachtoobject.body:getY()
+                ANIMATIONS[i].angle = ANIMATIONS[i].attachtoobject.body:getAngle()
+            end
         end
 
         ANIMATIONS[i].duration = ANIMATIONS[i].duration - dt

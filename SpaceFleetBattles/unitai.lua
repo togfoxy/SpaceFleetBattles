@@ -15,7 +15,7 @@ function unitai.clearTarget(deadtarget)
 end
 
 local function getClosestObject(thisObj, desiredforf)
-    -- returns zero if none found
+    -- returns OBJECTS index or zero if none found
     local closestdist = 999999999       -- ridiculously large
     local closestid = 0
     local thisobjx, thisobjy = thisObj.body:getPosition()
@@ -75,10 +75,10 @@ local function updateUnitTask(Obj, squadorder, dt)
             Obj.desty = nil
             local targetid
             if Obj.forf == enum.forfFriend then
-                targetid = getClosestObject(Obj, enum.forfEnemy)
+                targetid = getClosestObject(Obj, enum.forfEnemy)        -- this OBJECTS index
             end
             if Obj.forf == enum.forfEnemy then
-                targetid = getClosestObject(Obj, enum.forfFriend)
+                targetid = getClosestObject(Obj, enum.forfFriend)       -- this OBJECTS index
             end
             if targetid > 0 then
                 Obj.targetid = targetid         -- this is same as OBJECTS[targetid]
@@ -233,8 +233,7 @@ local function fireWeapons(Obj, dt)
     if Obj.weaponcooldown <= 0 then
         Obj.weaponcooldown = 0
 
-        if Obj.componentHealth[enum.componentWeapon] > 0 then       --! a unit with no weapon needs to update it's current task
-
+        if Obj.componentHealth[enum.componentWeapon] > 0 then
             if Obj.targetid ~= nil then
                 if OBJECTS[Obj.targetid] ~= nil then
                     local objx = Obj.body:getX()

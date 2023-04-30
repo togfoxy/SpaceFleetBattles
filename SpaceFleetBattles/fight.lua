@@ -222,7 +222,6 @@ function fight.draw()
                 end
 
     			love.graphics.polygon("fill", points)
-
             elseif shape:typeOf("CircleShape") then
 				local drawx, drawy = Obj.body:getWorldPoints(shape:getPoint())
 				drawx = drawx
@@ -234,6 +233,11 @@ function fight.draw()
 			else
                 error()
             end
+
+
+
+
+
 
             -- draw the velocity indicator
             -- local linx, liny = Obj.body:getLinearVelocity( )        --! a lot of duplicate code here. Can be cleand up
@@ -247,6 +251,17 @@ function fight.draw()
             -- love.graphics.setColor(1,0,1,1)
             -- love.graphics.line(objxscaled, objyscaled, pointxscaled, pointyscaled)
 		end
+    end
+
+    -- draw target recticle for player 1
+    if OBJECTS[1].guid == PLAYER_GUID then
+        -- player still alive
+        local targetid = OBJECTS[1].targetid        -- OBJECTS index
+        local drawx = OBJECTS[targetid].body:getX()
+        local drawy = OBJECTS[targetid].body:getY()
+
+        love.graphics.setColor(1,0,0,1)
+        love.graphics.circle("line", drawx, drawy, 10)
     end
 
     -- cf.printAllPhysicsObjects(PHYSICSWORLD, 1)
