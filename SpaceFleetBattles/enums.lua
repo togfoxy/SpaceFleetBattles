@@ -39,6 +39,7 @@ function enums.load()
     enum.gridExplosion = 1
 
     enum.animExplosion = 1
+    enum.animSmoke = 2
 
     enum.componentStructure = 1
     enum.componentThruster = 2

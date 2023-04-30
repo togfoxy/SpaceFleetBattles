@@ -161,6 +161,7 @@ function fight.mousemoved(x, y, dx, dy)
     local camx, camy = cam:toWorld(x, y)	-- converts screen x/y to world x/y
 
     if love.mouse.isDown(3) then
+        snapcamera = false
         TRANSLATEX = TRANSLATEX - dx
         TRANSLATEY = TRANSLATEY - dy
     end
@@ -194,13 +195,13 @@ function fight.draw()
             end
 
             -- draw velocity
-            if not Obj.body:isBullet() then
-                local vx, vy = Obj.body:getLinearVelocity()
-                local vel = cf.getDistance(0, 0, vx, vy)    -- get distance of velocity vector
-                vel = "v: " .. cf.round(vel, 0)             -- this is not the same as getLinearVelocity x/y because this is the distance between two points
-                love.graphics.setColor(1,1,1,1)
-                love.graphics.print(vel, drawx, drawy, 0, 1, 1, 30, 30)
-            end
+            -- if not Obj.body:isBullet() then
+            --     local vx, vy = Obj.body:getLinearVelocity()
+            --     local vel = cf.getDistance(0, 0, vx, vy)    -- get distance of velocity vector
+            --     vel = "v: " .. cf.round(vel, 0)             -- this is not the same as getLinearVelocity x/y because this is the distance between two points
+            --     love.graphics.setColor(1,1,1,1)
+            --     love.graphics.print(vel, drawx, drawy, 0, 1, 1, 30, 30)
+            -- end
 
             -- draw the physics object
             local shape = fixture:getShape()

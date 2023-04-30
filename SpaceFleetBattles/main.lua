@@ -153,7 +153,12 @@ function love.draw()
 	local scale = love.physics.getMeter( )
 	for _, animation in pairs(ANIMATIONS) do
 		local drawx, drawy = cam:toScreen(animation.drawx, animation.drawy)
-		animation:draw(IMAGE[enum.imageExplosion], drawx, drawy, animation.angle, 1, 1, 0, 0)
+		if animation.type == enum.animExplosion then
+			animation:draw(IMAGE[enum.imageExplosion], drawx, drawy, animation.angle, 1, 1, 0, 0)
+		elseif animation.type == enum.animSmoke then
+			-- different offset
+			animation:draw(IMAGE[enum.imageExplosion], drawx, drawy, animation.angle, 1, 1, 10, 0)
+		end
 	end
 
     res.stop()

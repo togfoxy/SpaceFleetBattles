@@ -107,7 +107,7 @@ local function turnToObjective(Obj, destx, desty, dt)
 
     local bearingdelta = bearing - currentangle
 
-    if bearingdelta < -0.1 or bearingdelta > 0.1 then         -- rads
+    if bearingdelta < -0.05 or bearingdelta > 0.05 then         -- rads
         if bearingdelta > 0 then
             -- turn right
             force = 1
