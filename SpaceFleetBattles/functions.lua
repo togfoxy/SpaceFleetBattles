@@ -15,7 +15,7 @@ function functions.loadFonts()
 end
 
 function functions.loadAudio()
-    -- AUDIO[enum.audioMainMenu] = love.audio.newSource("assets/audio/XXX.mp3", "stream")
+    AUDIO[enum.audioBulletPing] = love.audio.newSource("assets/audio/407361__forthehorde68__fx_ricochet.mp3", "static")
 end
 
 function functions.createAnimation(objx, objy, objangle, animtype)
@@ -62,5 +62,44 @@ function functions.getImpactedComponent(Obj)
     error()     -- should not reach this point
 end
 
+function functions.applyDamage(fighter)
+
+    local componenthit = fun.getImpactedComponent(fighter)
+    fighter.componentHealth[componenthit] = fighter.componentHealth[componenthit] - love.math.random(15, 35)
+    if fighter.componentHealth[componenthit] < 0 then fighter.componentHealth[componenthit] = 0 end
+
+	--! debugging
+	if fighter.guid == PLAYER_GUID then
+		print(inspect(fighter.componentHealth))
+	end
+
+	if fighter.componentHealth[enum.componentStructure] <= 0 then
+		-- boom
+		fun.createAnimation(fighter.body:getX(), fighter.body:getY(), fighter.body:getAngle(), enum.animExplosion)
+        fighter.lifetime = 0
+        unitai.clearTarget(hitindex)		-- anyone that is targetting this needs a new target
+	end
+
+    fighter.currentMaxForwardThrust = fighter.maxForwardThrust * (fighter.componentHealth[enum.componentThruster] / 100)
+    fighter.currentMaxAcceleration = fighter.maxAcceleration * (fighter.componentHealth[enum.componentAccelerator] / 100)
+    fighter.currentSideThrust = fighter.maxSideThrust * (fighter.componentHealth[enum.componentSideThruster] / 100)
+
+    if fighter.componentHealth[enum.componentWeapon] <= 0 then
+        Obj.taskCooldown = 0        -- get a new task
+    end
+    if fighter.componentHealth[enum.componentThruster] <= 50 then
+        Obj.taskCooldown = 0        -- get a new task
+    end
+    if fighter.componentHealth[enum.componentSideThruster] <= 50 then
+        Obj.taskCooldown = 0        -- get a new task
+    end
+    if fighter.componentHealth[enum.componentAccelerator] <= 25 then
+        Obj.taskCooldown = 0        -- get a new task
+    end
+    if fighter.componentHealth[enum.componentStructure] <= 50 then
+        Obj.taskCooldown = 0        -- get a new task
+    end
+
+end
 
 return functions

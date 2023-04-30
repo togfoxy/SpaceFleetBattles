@@ -7,7 +7,6 @@ local commanderAI = {}
 local squadAI = {}
 local squadlist = {}
 local shipspersquadron = 12
-local playerguid                    -- the call sign assigned to the player. Is the guid of the fighter
 
 local function createFighter(forf, squadcallsign, squadid)
     -- forf = friend or foe.  See enums
@@ -54,6 +53,7 @@ local function createFighter(forf, squadcallsign, squadid)
 
     local guid = cf.getGUID()
 	thisobject.fixture:setUserData(guid)
+    thisobject.guid = guid
 
     thisobject.forf = forf
     thisobject.squadCallsign = squadcallsign
@@ -193,12 +193,14 @@ function fight.draw()
                 love.graphics.line(drawx, drawy, x2, y2)
             end
 
-            -- -- draw velocity
-            -- local vx, vy = Obj.body:getLinearVelocity()
-            -- local vel = cf.getDistance(0, 0, vx, vy)    -- get distance of velocity vector
-            -- vel = "v: " .. cf.round(vel, 0)             -- this is not the same as getLinearVelocity x/y because this is the distance between two points
-            -- love.graphics.setColor(1,1,1,1)
-            -- love.graphics.print(vel, drawx, drawy, 0, 1, 1, 30, 30)
+            -- draw velocity
+            if not Obj.body:isBullet() then
+                local vx, vy = Obj.body:getLinearVelocity()
+                local vel = cf.getDistance(0, 0, vx, vy)    -- get distance of velocity vector
+                vel = "v: " .. cf.round(vel, 0)             -- this is not the same as getLinearVelocity x/y because this is the distance between two points
+                love.graphics.setColor(1,1,1,1)
+                love.graphics.print(vel, drawx, drawy, 0, 1, 1, 30, 30)
+            end
 
             -- draw the physics object
             local shape = fixture:getShape()
@@ -214,7 +216,7 @@ function fight.draw()
                     error()
                 end
 
-                if objguid == playerguid then
+                if objguid == PLAYER_GUID then
                     love.graphics.setColor(1,1,0,1)
                 end
 
@@ -269,7 +271,7 @@ function fight.update(dt)
         -- createSquadron(enum.forfEnemy)
         createSquadron(enum.forfEnemy)
 
-        playerguid = OBJECTS[1].fixture:getUserData()
+        PLAYER_GUID = OBJECTS[1].fixture:getUserData()
     end
 
     if not pause then

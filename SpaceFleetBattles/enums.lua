@@ -46,6 +46,8 @@ function enums.load()
     enum.componentWeapon = 4
     enum.componentSideThruster = 5
 
+    enum.audioBulletPing = 1
+
 end
 
 return enums

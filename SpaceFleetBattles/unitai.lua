@@ -35,6 +35,18 @@ local function getClosestObject(thisObj, desiredforf)
     return closestid
 end
 
+local function setTaskRTB(Obj)
+    Obj.targetid = nil
+    if Obj.destx == nil then
+        if Obj.forf == enum.forfFriend then
+            Obj.destx = 0
+        elseif Obj.forf == enum.forfEnemy then
+            Obj.destx = SCREEN_WIDTH
+        end
+        Obj.desty = Obj.body:getY()
+    end
+end
+
 local function updateUnitTask(Obj, squadorder, dt)
     -- this adjusts targets or other goals based on the squad order
 
@@ -43,10 +55,20 @@ local function updateUnitTask(Obj, squadorder, dt)
     if Obj.taskCooldown <= 0 then
         Obj.taskCooldown = 5
 
-        -- print("Received squad order: " .. tostring(squadorder))
+        -- do self-preservation checks firstly. Remember the ordering matters
+        if Obj.componentHealth[enum.componentWeapon] <= 0 then
+            setTaskRTB(Obj)
+        elseif Obj.componentHealth[enum.componentThruster] <= 50 then
+            setTaskRTB(Obj)
+        elseif Obj.componentHealth[enum.componentSideThruster] <= 50 then
+            setTaskRTB(Obj)
+        elseif Obj.componentHealth[enum.componentAccelerator] <= 25 then
+            setTaskRTB(Obj)
+        elseif Obj.componentHealth[enum.componentStructure] <= 50 then
+            setTaskRTB(Obj)
 
         -- task has cooled. Get a new task
-        if squadorder == enum.squadOrdersEngage then
+        elseif squadorder == enum.squadOrdersEngage then
 
             -- get closest target
             Obj.destx = nil         -- clear previous destinations if any
@@ -63,16 +85,7 @@ local function updateUnitTask(Obj, squadorder, dt)
             end
             -- print("Unit task: setting target id")
         elseif squadorder == enum.squadOrdersReturnToBase then
-            Obj.targetid = nil
-            if Obj.destx == nil then
-
-                if Obj.forf == enum.forfFriend then
-                    Obj.destx = 0
-                elseif Obj.forf == enum.forfEnemy then
-                    Obj.destx = SCREEN_WIDTH
-                end
-                Obj.desty = Obj.body:getY()
-            end
+                setTaskRTB(Obj)
             -- print("Unit task: RTB")
         else
             --! no squad order or unexpected squad order
@@ -156,15 +169,11 @@ local function adjustThrust(Obj, dt)
 
     local currentangle = Obj.body:getAngle( )
     if Obj.targetid ~= nil then
-        if Obj.currentForwardThrust < Obj.currentMaxForwardThrust then
-            Obj.currentForwardThrust = Obj.currentForwardThrust + (Obj.currentMaxAcceleration * dt)
-            if Obj.currentForwardThrust > Obj.currentMaxForwardThrust then Obj.currentForwardThrust = Obj.currentMaxForwardThrust end
-        end
+        Obj.currentForwardThrust = Obj.currentForwardThrust + (Obj.currentMaxAcceleration * dt)
+        if Obj.currentForwardThrust > Obj.currentMaxForwardThrust then Obj.currentForwardThrust = Obj.currentMaxForwardThrust end
     elseif Obj.destx ~= nil then
-        if Obj.currentForwardThrust < Obj.currentMaxForwardThrust then
-            Obj.currentForwardThrust = Obj.currentForwardThrust + (Obj.currentMaxAcceleration * dt)
-            if Obj.currentForwardThrust > Obj.currentMaxForwardThrust then Obj.currentForwardThrust = Obj.currentMaxForwardThrust end
-        end
+        Obj.currentForwardThrust = Obj.currentForwardThrust + (Obj.currentMaxAcceleration * dt)
+        if Obj.currentForwardThrust > Obj.currentMaxForwardThrust then Obj.currentForwardThrust = Obj.currentMaxForwardThrust end
     else
         -- no target. Slow down and stop
         Obj.currentForwardThrust = Obj.currentForwardThrust - (Obj.maxDeacceleration * dt)  -- might be zero for bullets
@@ -215,7 +224,6 @@ local function createNewBullet(Obj, bullet)
     thisobject.body:setLinearVelocity(math.cos(currentangle) * 300, math.sin(currentangle) * 300)
 
     table.insert(OBJECTS, thisobject)
-
 end
 
 local function fireWeapons(Obj, dt)
@@ -225,22 +233,24 @@ local function fireWeapons(Obj, dt)
     if Obj.weaponcooldown <= 0 then
         Obj.weaponcooldown = 0
 
-        if Obj.targetid ~= nil then
-            if OBJECTS[Obj.targetid] ~= nil then
-                local objx = Obj.body:getX()
-                local objy = Obj.body:getY()
-                local targetx = OBJECTS[Obj.targetid].body:getX()
-                local targety = OBJECTS[Obj.targetid].body:getY()
+        if Obj.componentHealth[enum.componentWeapon] > 0 then       --! a unit with no weapon needs to update it's current task
 
+            if Obj.targetid ~= nil then
+                if OBJECTS[Obj.targetid] ~= nil then
+                    local objx = Obj.body:getX()
+                    local objy = Obj.body:getY()
+                    local targetx = OBJECTS[Obj.targetid].body:getX()
+                    local targety = OBJECTS[Obj.targetid].body:getY()
 
-                local currentangle = Obj.body:getAngle()
-                local bearingtotarget = cf.getBearingRad(objx,objy,targetx,targety)
-                local angletotarget = bearingtotarget - currentangle
-                -- print(currentangle, bearingtotarget, angletotarget)
+                    local currentangle = Obj.body:getAngle()
+                    local bearingtotarget = cf.getBearingRad(objx,objy,targetx,targety)
+                    local angletotarget = bearingtotarget - currentangle
+                    -- print(currentangle, bearingtotarget, angletotarget)
 
-                if angletotarget > -0.13 and angletotarget < 0.13 then
-                    Obj.weaponcooldown = 4
-                    createNewBullet(Obj, true)       -- includes missiles and bombs. Use TRUE for fast moving bullets
+                    if angletotarget > -0.13 and angletotarget < 0.13 then
+                        Obj.weaponcooldown = 4
+                        createNewBullet(Obj, true)       -- includes missiles and bombs. Use TRUE for fast moving bullets
+                    end
                 end
             end
         end
