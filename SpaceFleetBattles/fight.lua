@@ -5,128 +5,7 @@ local pause = false
 local snapcamera = true
 local showmenu = false
 local commanderAI = {}
-local squadAI = {}
-local squadlist = {}
 local shipspersquadron = 6
-
-local function createFighter(forf, squadcallsign, squadid)
-    -- forf = friend or foe.  See enums
-    -- callsign is plain text eg "Rogue One"
-    -- squadid is a number that is not seen by player
-
-    local rndx, rndy
-    if forf == enum.forfFriend then
-        -- rndx = love.math.random(50, SCREEN_WIDTH /3)
-        rndx = FRIEND_START_X + love.math.random(-10, 10)
-        rndy = love.math.random(50, SCREEN_HEIGHT - 50)
-    elseif forf == enum.forfEnemy then
-        -- rndx = love.math.random(SCREEN_WIDTH * 0.66, SCREEN_WIDTH - 50)
-        rndx = FOE_START_X + love.math.random(-10, 10)
-        rndy = love.math.random(50, SCREEN_HEIGHT - 50)
-    elseif forf == enum.forfNeutral then
-        rndx = love.math.random(50, SCREEN_WIDTH - 50)
-        rndy = love.math.random(50, SCREEN_HEIGHT - 50)
-    else
-        error()
-    end
-
-    rndx = rndx
-    rndy = rndy
-
-    local thisobject = {}
-    thisobject.body = love.physics.newBody(PHYSICSWORLD, rndx, rndy, "dynamic")
-	thisobject.body:setLinearDamping(0)
-	-- thisobject.body:setMass(100)
-    if forf == enum.forfEnemy then
-        thisobject.body:setAngle(math.pi)
-    end
-
-    thisobject.shape = love.physics.newPolygonShape( -5, -5, 5, 0, -5, 5, -7, 0)
-	thisobject.fixture = love.physics.newFixture(thisobject.body, thisobject.shape, 1)		-- the 1 is the density
-	thisobject.fixture:setRestitution(0.25)
-	thisobject.fixture:setSensor(false)
-
-    if forf == enum.forfFriend then
-        thisobject.fixture:setCategory(enum.categoryFriendlyFighter)
-        thisobject.fixture:setMask(enum.categoryFriendlyFighter, enum.categoryFriendlyBullet, enum.categoryEnemyFighter)
-    else
-        thisobject.fixture:setCategory(enum.categoryEnemyFighter)
-        thisobject.fixture:setMask(enum.categoryEnemyFighter, enum.categoryEnemyBullet, enum.categoryFriendlyFighter)   -- these are the things that will not trigger a collision
-    end
-
-    local guid = cf.getGUID()
-	thisobject.fixture:setUserData(guid)
-    thisobject.guid = guid
-
-    thisobject.forf = forf
-    thisobject.squadCallsign = squadcallsign
-    thisobject.squadid = squadid
-    thisobject.taskCooldown = 0
-    thisobject.weaponcooldown = 0           --! might be more than one weapon in the future
-
-    thisobject.currentMaxForwardThrust = 100    -- can be less than max if battle damaged
-    thisobject.maxForwardThrust = 100
-    thisobject.currentForwardThrust = 0
-    thisobject.maxAcceleration = 25
-    thisobject.maxDeacceleration = 25       -- set to 0 for bullets
-    thisobject.currentMaxAcceleration = 25 -- this can be less than maxAcceleration if battle damaged
-    thisobject.maxSideThrust = 1
-    thisobject.currentSideThrust = 1
-
-    thisobject.componentSize = {}
-    thisobject.componentSize[enum.componentStructure] = 3
-    thisobject.componentSize[enum.componentThruster] = 2
-    thisobject.componentSize[enum.componentAccelerator] = 1
-    thisobject.componentSize[enum.componentWeapon] = 1
-    thisobject.componentSize[enum.componentSideThruster] = 1
-
-    thisobject.componentHealth = {}
-    thisobject.componentHealth[enum.componentStructure] = 100
-    thisobject.componentHealth[enum.componentThruster] = 100
-    thisobject.componentHealth[enum.componentAccelerator] = 100
-    thisobject.componentHealth[enum.componentWeapon] = 100
-    thisobject.componentHealth[enum.componentSideThruster] = 100
-
-    thisobject.destx = nil
-    thisobject.desty = nil
-
-    table.insert(OBJECTS, thisobject)
-end
-
-local function createSquadron(forf)
-    -- create a wing of 6 units
-    -- the squadron is a concept only and is created by giving x fighters the same squad id
-    -- input: forf = friend or foe. example: enum.forfFriend
-
-    -- get a random and empty callsign from the squadlist
-    local squadcallsign = nil
-    while squadcallsign == nil do
-        local txt = string.char(love.math.random(65, 90))
-        local txt = txt .. tostring(love.math.random(1,9))
-        if squadlist[txt] == nil then
-            squadcallsign = txt
-            squadlist[txt] = forf       -- mark this squad as friend or enemy
-
-            squadAI[txt] = {}
-            squadAI[txt].orders = {}
-        end
-    end
-
-    local squadid = love.math.random(100, 999)                 --! make this less random and more unique
-    for i = 1, shipspersquadron do
-        createFighter(forf, squadcallsign, squadid)
-    end
-end
-
-local function initialiseSquadList()
-    squadlist = {}
-    for i = 65, 90 do
-        for j = 1, 9 do
-            local str = string.char(i) .. tostring(j)
-            squadlist[str] = nil            -- setting to nil makes it available for selection
-        end
-    end
-end
 
 local function destroyObjects(dt)
 
@@ -252,34 +131,24 @@ function fight.draw()
         local drawx = objx
         local drawy = objy
 
+        -- draw callsign first
+        if Obj.squadCallsign ~= nil then
+            local str = "CS: " .. Obj.squadCallsign .. "-" .. string.sub(Obj.guid, -2)
+
+            love.graphics.setColor(1,1,1,1)
+            love.graphics.print(str, drawx, drawy, 0, 1, 1, -15, 30)
+
+            -- draw a cool line next
+            local x2, y2 = drawx + 30, drawy - 14
+            love.graphics.setColor(1,1,1,1)
+            love.graphics.line(drawx, drawy, x2, y2)
+        end
+
+        -- draw the physics object
         for _, fixture in pairs(Obj.body:getFixtures()) do
-
-            -- draw callsign first
-            local objguid = Obj.fixture:getUserData()
-            if Obj.squadCallsign ~= nil then
-                local str = "CS: " .. Obj.squadCallsign .. "-" .. string.sub(objguid, -2)
-
-                love.graphics.setColor(1,1,1,1)
-                love.graphics.print(str, drawx, drawy, 0, 1, 1, -15, 30)
-
-                -- draw a cool line next
-                local x2, y2 = drawx + 30, drawy - 14
-                love.graphics.setColor(1,1,1,1)
-                love.graphics.line(drawx, drawy, x2, y2)
-            end
-
-            -- draw velocity
-            -- if not Obj.body:isBullet() then
-            --     local vx, vy = Obj.body:getLinearVelocity()
-            --     local vel = cf.getDistance(0, 0, vx, vy)    -- get distance of velocity vector
-            --     vel = "v: " .. cf.round(vel, 0)             -- this is not the same as getLinearVelocity x/y because this is the distance between two points
-            --     love.graphics.setColor(1,1,1,1)
-            --     love.graphics.print(vel, drawx, drawy, 0, 1, 1, 30, 30)
-            -- end
-
-            -- draw the physics object
             local shape = fixture:getShape()
             if shape:typeOf("PolygonShape") then
+                --
     			local points = {Obj.body:getWorldPoints(shape:getPoints())}
                 if Obj.forf == enum.forfFriend then
                     love.graphics.setColor(0,1,0,1)
@@ -297,7 +166,8 @@ function fight.draw()
 
     			love.graphics.polygon("fill", points)
             elseif shape:typeOf("CircleShape") then
-				local drawx, drawy = Obj.body:getWorldPoints(shape:getPoint())
+                --
+                local drawx, drawy = Obj.body:getWorldPoints(shape:getPoint())
 				drawx = drawx
 				drawy = drawy
 				local radius = shape:getRadius()
@@ -307,19 +177,28 @@ function fight.draw()
 			else
                 error()
             end
-
-            -- draw the velocity indicator
-            -- local linx, liny = Obj.body:getLinearVelocity( )        --! a lot of duplicate code here. Can be cleand up
-            -- linx = linx * 2
-            -- liny = liny * 2
-            -- local objx, objy = Obj.body:getPosition( )
-            -- local objxscaled = objx
-            -- local objyscaled = objy
-            -- local pointxscaled = (objx + linx)
-            -- local pointyscaled = (objy + liny)
-            -- love.graphics.setColor(1,0,1,1)
-            -- love.graphics.line(objxscaled, objyscaled, pointxscaled, pointyscaled)
 		end
+
+        -- draw velocity
+        -- if not Obj.body:isBullet() then
+        --     local vx, vy = Obj.body:getLinearVelocity()
+        --     local vel = cf.getDistance(0, 0, vx, vy)    -- get distance of velocity vector
+        --     vel = "v: " .. cf.round(vel, 0)             -- this is not the same as getLinearVelocity x/y because this is the distance between two points
+        --     love.graphics.setColor(1,1,1,1)
+        --     love.graphics.print(vel, drawx, drawy, 0, 1, 1, 30, 30)
+        -- end
+
+        -- draw the velocity indicator (purple line)
+        -- local linx, liny = Obj.body:getLinearVelocity( )        --! a lot of duplicate code here. Can be cleand up
+        -- linx = linx * 2
+        -- liny = liny * 2
+        -- local objx, objy = Obj.body:getPosition( )
+        -- local objxscaled = objx
+        -- local objyscaled = objy
+        -- local pointxscaled = (objx + linx)
+        -- local pointyscaled = (objy + liny)
+        -- love.graphics.setColor(1,0,1,1)
+        -- love.graphics.line(objxscaled, objyscaled, pointxscaled, pointyscaled)
     end
 
     -- draw target recticle for player 1
@@ -354,14 +233,24 @@ function fight.draw()
         -- local drawx, drawy = cam:toScreen(OBJECTS[1].body:getX(), OBJECTS[1].body:getY()) -- need to convert physical to screen
         local drawx, drawy = res.toGame(OBJECTS[1].body:getX(), OBJECTS[1].body:getY()) -- need to convert physical to screen
 
-        -- fill the menu
+        -- fill the menu box
         local menuwidth = 100
         love.graphics.setColor(0.5, 0.5, 0.5, 1)
         love.graphics.rectangle("fill", drawx, drawy, menuwidth, 75, 10, 10)
 
         -- draw an outline
-        love.graphics.setColor(1,1,1, 1)
+        love.graphics.setColor(1,1,1,1)
         love.graphics.rectangle("line", drawx, drawy, menuwidth, 75, 10, 10)
+
+        -- draw squad orders
+        -- local txt = "Hello world"
+        local squadcallsign = OBJECTS[1].squadCallsign
+        local txt = squadAI[squadcallsign].orders[1].order
+        love.graphics.setColor(0,0,0,1)
+        love.graphics.print(txt, drawx + 5, drawy)
+        love.graphics.setColor(1,1,1,1)
+        love.graphics.line(drawx, drawy + 15, drawx + menuwidth, drawy + 15)
+
 
     end
 
@@ -380,20 +269,20 @@ function fight.update(dt)
         --! neutral commander?
 
         -- initialise squad callsigns
-        initialiseSquadList()
+        squadai.initialiseSquadList()
 
-        -- create a squadron
-        createSquadron(enum.forfFriend)
-        createSquadron(enum.forfFriend)
-        createSquadron(enum.forfEnemy)
-        createSquadron(enum.forfEnemy)
+        -- create squadrons
+        squadai.createSquadron(enum.forfFriend, shipspersquadron)
+        squadai.createSquadron(enum.forfFriend, shipspersquadron)
+        squadai.createSquadron(enum.forfEnemy, shipspersquadron)
+        squadai.createSquadron(enum.forfEnemy, shipspersquadron)
 
         PLAYER_GUID = OBJECTS[1].fixture:getUserData()
     end
 
     if not pause then
         commanderai.update(commanderAI, dt)
-        squadai.update(commanderAI, squadAI, squadlist, dt)
+        squadai.update(commanderAI, squadAI, dt)
         unitai.update(squadAI, dt)
 
         destroyObjects(dt)
