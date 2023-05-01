@@ -6,7 +6,7 @@ local snapcamera = true
 local commanderAI = {}
 local squadAI = {}
 local squadlist = {}
-local shipspersquadron = 12
+local shipspersquadron = 6
 
 local function createFighter(forf, squadcallsign, squadid)
     -- forf = friend or foe.  See enums
@@ -141,6 +141,16 @@ local function destroyObjects(dt)
     end
 end
 
+local function playerIsTargetted()
+
+    for i = 1, #OBJECTS do
+        if OBJECTS[i].targetguid == PLAYER_GUID then
+            return true
+        end
+    end
+    return false
+end
+
 function fight.keyreleased(key, scancode)
     if key == "space" then pause = not pause end
     if key == "c" then snapcamera = not snapcamera end
@@ -212,7 +222,6 @@ function fight.draw()
     -- draw BG
     love.graphics.setColor(1,1,1,0.25)
     love.graphics.draw(IMAGE[enum.imageFightBG], 0, 0, 0, 2.4, 1)
-
 
     -- draw the boundary
     love.graphics.setColor(1,1,1,0.25)
@@ -312,6 +321,16 @@ function fight.draw()
         end
     end
 
+    if playerIsTargetted() then
+        -- draw yellow recticle on player craft
+        local objx = OBJECTS[1].body:getX()
+        local objy = OBJECTS[1].body:getY()
+
+        local linelength = 12
+        love.graphics.setColor(1, 0.5, 0, 1)
+        love.graphics.line(objx, objy - linelength, objx + linelength, objy + linelength, objx - linelength, objy + linelength, objx, objy - linelength)
+    end
+
     -- cf.printAllPhysicsObjects(PHYSICSWORLD, 1)
     cam:detach()
 end
@@ -331,8 +350,8 @@ function fight.update(dt)
 
         -- create a squadron
         createSquadron(enum.forfFriend)
-        -- createSquadron(enum.forfFriend)
-        -- createSquadron(enum.forfEnemy)
+        createSquadron(enum.forfFriend)
+        createSquadron(enum.forfEnemy)
         createSquadron(enum.forfEnemy)
 
         PLAYER_GUID = OBJECTS[1].fixture:getUserData()
