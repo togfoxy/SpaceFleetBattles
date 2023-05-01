@@ -36,6 +36,7 @@ function enums.load()
 
     enum.imageExplosion = 1
     enum.imageFightHUD = 2
+    enum.imageFightBG = 3
 
     enum.gridExplosion = 1
 

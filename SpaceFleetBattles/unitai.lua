@@ -151,9 +151,12 @@ local function adjustAngle(Obj, dt)
     elseif Obj.targetguid ~= nil then
         local x1, y1 = Obj.body:getPosition()
         local enemyobject = fun.getObject(Obj.targetguid)
-        if not enemyobject.body:isDestroyed() then        -- check if target is dead
+        --! this throws an error
+        if enemyobject ~= nil and not enemyobject.body:isDestroyed() then        -- check if target is dead
             local x2, y2 = enemyobject.body:getPosition()
             turnToObjective(Obj, x2, y2, dt)
+        else
+            --! is this an error?
         end
     else
         -- nothing. Is this an error?
@@ -235,7 +238,7 @@ local function fireWeapons(Obj, dt)
         if Obj.componentHealth[enum.componentWeapon] > 0 then
             if Obj.targetguid ~= nil then
                 local enemyobject = fun.getObject(Obj.targetguid)
-                if not enemyobject.body:isDestroyed() then        -- check if target is dead
+                if enemyobject ~= nil and not enemyobject.body:isDestroyed() then        -- check if target is dead
                     local objx = Obj.body:getX()
                     local objy = Obj.body:getY()
                     local targetx = enemyobject.body:getX()

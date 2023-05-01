@@ -209,6 +209,11 @@ function fight.draw()
 
     cam:attach()
 
+    -- draw BG
+    love.graphics.setColor(1,1,1,0.25)
+    love.graphics.draw(IMAGE[enum.imageFightBG], 0, 0, 0, 2.4, 1)
+
+
     -- draw the boundary
     love.graphics.setColor(1,1,1,0.25)
     love.graphics.line(0,0, FRIEND_START_X, SCREEN_HEIGHT)
@@ -301,7 +306,9 @@ function fight.draw()
         -- player still alive
         local guid = OBJECTS[1].targetguid
         local enemy = fun.getObject(guid)
-        if not enemy.body:isDestroyed() then
+
+        print(inspect(enemy))
+        if enemy ~= nil and not enemy.body:isDestroyed() then
             local drawx = enemy.body:getX()
             local drawy = enemy.body:getY()
 
