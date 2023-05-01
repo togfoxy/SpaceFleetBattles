@@ -15,7 +15,8 @@ function functions.loadFonts()
 end
 
 function functions.loadAudio()
-    AUDIO[enum.audioBulletPing] = love.audio.newSource("assets/audio/407361__forthehorde68__fx_ricochet.mp3", "static")
+    -- AUDIO[enum.audioBulletPing] = love.audio.newSource("assets/audio/407361__forthehorde68__fx_ricochet.mp3", "static")
+    AUDIO[enum.audioBulletPing] = love.audio.newSource("assets/audio/ricochet_1.mp3", "static")
 end
 
 function functions.createAnimation(Obj, animtype)

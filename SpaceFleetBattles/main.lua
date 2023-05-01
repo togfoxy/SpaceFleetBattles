@@ -76,7 +76,6 @@ function beginContact(a, b, coll)
 end
 
 function endContact(a, b, coll)
-
 end
 
 function love.keyreleased( key, scancode )
@@ -108,7 +107,9 @@ function love.load()
 
 	res.init({width = 1920, height = 1080, mode = 2})
 
-	local width, height = love.window.getDesktopDimensions( 1 )
+	local _, _, flags = love.window.getMode()
+	local width, height = love.window.getDesktopDimensions(flags.display)
+	-- local width, height = love.window.getDesktopDimensions(1)
 	res.setMode(width, height, {resizable = true})
 
 	constants.load()		-- also loads enums
@@ -136,7 +137,7 @@ function love.load()
 	---------------
 	love.physics.setMeter(30)
 	PHYSICSWORLD = love.physics.newWorld(0,0,false)
-	PHYSICSWORLD:setCallbacks(beginContact,endContact,_,_)
+	PHYSICSWORLD:setCallbacks( beginContact, endContact, preSolve, postSolve )
 
 	GRIDS[enum.gridExplosion] = anim8.newGrid(16, 16, IMAGE[enum.imageExplosion]:getWidth(), IMAGE[enum.imageExplosion]:getHeight())
 end

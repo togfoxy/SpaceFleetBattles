@@ -15,10 +15,12 @@ local function createFighter(forf, squadcallsign, squadid)
 
     local rndx, rndy
     if forf == enum.forfFriend then
-        rndx = love.math.random(50, SCREEN_WIDTH /3)
+        -- rndx = love.math.random(50, SCREEN_WIDTH /3)
+        rndx = FRIEND_START_X + love.math.random(-10, 10)
         rndy = love.math.random(50, SCREEN_HEIGHT - 50)
     elseif forf == enum.forfEnemy then
-        rndx = love.math.random(SCREEN_WIDTH * 0.66, SCREEN_WIDTH - 50)
+        -- rndx = love.math.random(SCREEN_WIDTH * 0.66, SCREEN_WIDTH - 50)
+        rndx = FOE_START_X + love.math.random(-10, 10)
         rndy = love.math.random(50, SCREEN_HEIGHT - 50)
     elseif forf == enum.forfNeutral then
         rndx = love.math.random(50, SCREEN_WIDTH - 50)
