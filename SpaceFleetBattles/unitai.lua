@@ -34,7 +34,11 @@ local function getClosestObject(thisObj, desiredforf)
             end
         end
     end
-    return OBJECTS[closestid].guid
+    if closestid == nil then
+        return nil
+    else
+        return OBJECTS[closestid].guid
+    end
 end
 
 local function setTaskRTB(Obj)
@@ -143,6 +147,7 @@ local function adjustAngle(Obj, dt)
             if disttodest < 10 then
                 -- print("Arrived at destination")      --! need to remove the fighter from play
                 Obj.currentForwardThrust = 0                --! this is for testing only
+                Obj.lifetime = 0                        -- destroy the object
             else
                 turnToObjective(Obj, destx, desty, dt)
             end
@@ -220,6 +225,7 @@ local function createNewBullet(Obj, bullet)
 
     thisobject.squadCallsign = nil
     thisobject.lifetime = 10            -- seconds
+    thisobject.ownerObjectguid = Obj.guid
 
     thisobject.body:setAngle(currentangle)
     local velx, vely = Obj.body:getLinearVelocity()

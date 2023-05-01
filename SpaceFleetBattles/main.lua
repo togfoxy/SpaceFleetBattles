@@ -52,25 +52,25 @@ function beginContact(a, b, coll)
 		end
 	end
 
-	local fighter = {}			-- this will contain the fighter object that was hit
-	local hitindex = nil		-- the OBJECTS index that is impacted
+	local victim = {}			-- this will contain the fighter object that was hit
+	local bullet = {}
 	if OBJECTS[object1index].body:isBullet() then
 		-- destroy Obj2
-		fighter = OBJECTS[object2index]
+		victim = OBJECTS[object2index]
+		bullet = OBJECTS[object1index]
 		OBJECTS[object1index].lifetime = 0
-		hitindex = 2
 	end
 	if OBJECTS[object2index].body:isBullet() then
 		-- destroy Obj1
-		fighter = OBJECTS[object1index]
+		victim = OBJECTS[object1index]
+		bullet = OBJECTS[object2index]
 		OBJECTS[object2index].lifetime = 0
-		hitindex = 1
 	end
 
-	fun.applyDamage(fighter)
+	fun.applyDamage(victim, bullet)		-- assumes bullet hit fighter
 
 	-- play sounds if player is hit  		--! what about explosion if dead?
-	if fighter.guid == PLAYER_GUID then
+	if victim.guid == PLAYER_GUID then
 		cf.playAudio(enum.audioBulletPing, false, true)
 	end
 end

@@ -282,11 +282,6 @@ function fight.draw()
                 error()
             end
 
-
-
-
-
-
             -- draw the velocity indicator
             -- local linx, liny = Obj.body:getLinearVelocity( )        --! a lot of duplicate code here. Can be cleand up
             -- linx = linx * 2
@@ -307,7 +302,7 @@ function fight.draw()
         local guid = OBJECTS[1].targetguid
         local enemy = fun.getObject(guid)
 
-        print(inspect(enemy))
+        -- print(inspect(enemy))
         if enemy ~= nil and not enemy.body:isDestroyed() then
             local drawx = enemy.body:getX()
             local drawy = enemy.body:getY()

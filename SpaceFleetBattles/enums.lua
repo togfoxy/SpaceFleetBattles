@@ -50,6 +50,7 @@ function enums.load()
     enum.componentSideThruster = 5
 
     enum.audioBulletPing = 1
+    enum.audioBulletHit = 2
 
 end
 
