@@ -103,6 +103,17 @@ function love.mousemoved(x, y, dx, dy, istouch )
 	end
 end
 
+function love.mousereleased(x, y, button, isTouch)
+	local rx, ry = res.toGame(x,y)
+	local currentscene = cf.currentScreenName(SCREEN_STACK)
+
+	if currentscene == enum.sceneFight then
+		fight.mousereleased(rx, ry, x, y, button)		-- need to send through the res adjusted x/y and the 'real' x/y
+	elseif currentscene == enum.scenePodium then
+	elseif currentscene == enum.sceneMainMenu then
+	end
+end
+
 function love.load()
 
 	res.init({width = 1920, height = 1080, mode = 2})

@@ -3,6 +3,7 @@ fight = {}
 local sceneHasLoaded = false
 local pause = false
 local snapcamera = true
+local showmenu = false
 local commanderAI = {}
 local squadAI = {}
 local squadlist = {}
@@ -115,7 +116,6 @@ local function createSquadron(forf)
     for i = 1, shipspersquadron do
         createFighter(forf, squadcallsign, squadid)
     end
-
 end
 
 local function initialiseSquadList()
@@ -170,18 +170,35 @@ function fight.wheelmoved(x, y)
 end
 
 function fight.mousemoved(x, y, dx, dy)
-    local camx, camy = cam:toWorld(x, y)	-- converts screen x/y to world x/y
-
     if love.mouse.isDown(3) then
         snapcamera = false
         TRANSLATEX = TRANSLATEX - dx
         TRANSLATEY = TRANSLATEY - dy
     end
+end
 
+function fight.mousereleased(rx, ry, x, y, button)
+    if button == 1 then
+        if fun.isPlayerAlive() then
+            -- see if player unit is clicked
+            local objscreenx, objscreeny = cam:toScreen(OBJECTS[1].body:getX(), OBJECTS[1].body:getY()) -- need to convert physical to screen
+            local dist = cf.getDistance(rx, ry, objscreenx, objscreeny)
+            if dist <= 20 then
+                -- player unit is clicked
+                showmenu = not showmenu
+                if showmenu then
+                    pause = true
+                else
+                    pause = false
+                end
+            end
+        end
+    end
 end
 
 local function drawHUD()
 
+    love.graphics.setColor(1,1,1,1)
     love.graphics.draw(IMAGE[enum.imageFightHUD], 0, 0)
 
     if OBJECTS[1].guid == PLAYER_GUID then
@@ -321,6 +338,7 @@ function fight.draw()
         end
     end
 
+    -- draw yellow recticle if player is targeted
     if playerIsTargetted() then
         -- draw yellow recticle on player craft
         local objx = OBJECTS[1].body:getX()
@@ -329,6 +347,22 @@ function fight.draw()
         local linelength = 12
         love.graphics.setColor(1, 0.5, 0, 1)
         love.graphics.line(objx, objy - linelength, objx + linelength, objy + linelength, objx - linelength, objy + linelength, objx, objy - linelength)
+    end
+
+    -- draw the menu if menu is open
+    if showmenu and fun.isPlayerAlive() then
+        -- local drawx, drawy = cam:toScreen(OBJECTS[1].body:getX(), OBJECTS[1].body:getY()) -- need to convert physical to screen
+        local drawx, drawy = res.toGame(OBJECTS[1].body:getX(), OBJECTS[1].body:getY()) -- need to convert physical to screen
+
+        -- fill the menu
+        local menuwidth = 100
+        love.graphics.setColor(0.5, 0.5, 0.5, 1)
+        love.graphics.rectangle("fill", drawx, drawy, menuwidth, 75, 10, 10)
+
+        -- draw an outline
+        love.graphics.setColor(1,1,1, 1)
+        love.graphics.rectangle("line", drawx, drawy, menuwidth, 75, 10, 10)
+
     end
 
     -- cf.printAllPhysicsObjects(PHYSICSWORLD, 1)
