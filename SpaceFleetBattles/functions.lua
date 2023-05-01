@@ -2,6 +2,8 @@ functions = {}
 
 function functions.loadImages()
     IMAGE[enum.imageExplosion] = love.graphics.newImage("assets/images/SmokeFireQuads.png")
+    IMAGE[enum.imageFightHUD] = love.graphics.newImage("assets/images/fighthud.png")
+    IMAGE[enum.imageFightBG] = love.graphics.newImage("assets/images/background1.png")
 end
 
 function functions.loadFonts()
@@ -15,7 +17,8 @@ function functions.loadFonts()
 end
 
 function functions.loadAudio()
-    AUDIO[enum.audioBulletPing] = love.audio.newSource("assets/audio/407361__forthehorde68__fx_ricochet.mp3", "static")
+    AUDIO[enum.audioBulletHit] = love.audio.newSource("assets/audio/cannon_fire.ogg", "static")
+    AUDIO[enum.audioBulletPing] = love.audio.newSource("assets/audio/ricochet_1.mp3", "static")
 end
 
 function functions.createAnimation(Obj, animtype)
@@ -86,47 +89,69 @@ function functions.getImpactedComponent(Obj)
     error()     -- should not reach this point
 end
 
-function functions.applyDamage(fighter)
+function functions.applyDamage(victim, bullet)
 
-    local componenthit = fun.getImpactedComponent(fighter)
-    fighter.componentHealth[componenthit] = fighter.componentHealth[componenthit] - love.math.random(15, 35)
-    if fighter.componentHealth[componenthit] < 0 then fighter.componentHealth[componenthit] = 0 end
+    local componenthit = fun.getImpactedComponent(victim)
+    victim.componentHealth[componenthit] = victim.componentHealth[componenthit] - love.math.random(15, 35)
+    if victim.componentHealth[componenthit] < 0 then victim.componentHealth[componenthit] = 0 end
 
 	--! debugging
-	if fighter.guid == PLAYER_GUID then
-		print(inspect(fighter.componentHealth))
+	if victim.guid == PLAYER_GUID then
+		print(inspect(victim.componentHealth))
 	end
 
-	if fighter.componentHealth[enum.componentStructure] <= 0 then
-		-- boom
-		fun.createAnimation(fighter, enum.animExplosion)
-        fighter.lifetime = 0
+	if victim.componentHealth[enum.componentStructure] <= 0 then
+		-- boom. Victim is dead
+		fun.createAnimation(victim, enum.animExplosion)
+        victim.lifetime = 0
         unitai.clearTarget(hitindex)		-- anyone that is targetting this needs a new target
     else
-        -- attach a smoke animation to the object
-        fun.createAnimation(fighter, enum.animSmoke)
+        -- victim not dead so attach a smoke animation to the object
+        fun.createAnimation(victim, enum.animSmoke)
+        if fun.isPlayerAlive() and bullet.ownerObjectguid == PLAYER_GUID then
+            -- this bullet is the players bullet. Make an audible
+            cf.playAudio(enum.audioBulletHit, false, true)
+        end
 	end
 
-    fighter.currentMaxForwardThrust = fighter.maxForwardThrust * (fighter.componentHealth[enum.componentThruster] / 100)
-    fighter.currentMaxAcceleration = fighter.maxAcceleration * (fighter.componentHealth[enum.componentAccelerator] / 100)
-    fighter.currentSideThrust = fighter.maxSideThrust * (fighter.componentHealth[enum.componentSideThruster] / 100)
+    -- adjust object performance after receiving battle damage
+    victim.currentMaxForwardThrust = victim.maxForwardThrust * (victim.componentHealth[enum.componentThruster] / 100)
+    victim.currentMaxAcceleration = victim.maxAcceleration * (victim.componentHealth[enum.componentAccelerator] / 100)
+    victim.currentSideThrust = victim.maxSideThrust * (victim.componentHealth[enum.componentSideThruster] / 100)
 
-    if fighter.componentHealth[enum.componentWeapon] <= 0 then
+    if victim.componentHealth[enum.componentWeapon] <= 0 then
         Obj.taskCooldown = 0        -- get a new task
     end
-    if fighter.componentHealth[enum.componentThruster] <= 50 then
+    if victim.componentHealth[enum.componentThruster] <= 50 then
         Obj.taskCooldown = 0        -- get a new task
     end
-    if fighter.componentHealth[enum.componentSideThruster] <= 50 then
+    if victim.componentHealth[enum.componentSideThruster] <= 50 then
         Obj.taskCooldown = 0        -- get a new task
     end
-    if fighter.componentHealth[enum.componentAccelerator] <= 25 then
+    if victim.componentHealth[enum.componentAccelerator] <= 25 then
         Obj.taskCooldown = 0        -- get a new task
     end
-    if fighter.componentHealth[enum.componentStructure] <= 33 then
+    if victim.componentHealth[enum.componentStructure] <= 33 then
         Obj.taskCooldown = 0        -- get a new task
     end
 
+end
+
+function functions.getObject(guid)
+    -- cycle through OBJECTS until found GUID
+    for i = 1, #OBJECTS do
+        if OBJECTS[i].guid == guid then
+            return OBJECTS[i]
+        end
+    end
+end
+
+function functions.isPlayerAlive()
+    if OBJECTS[1].guid == PLAYER_GUID then
+        return true
+    else
+        return false
+    end
 end
 
 return functions

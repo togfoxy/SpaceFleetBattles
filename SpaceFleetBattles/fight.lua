@@ -3,10 +3,11 @@ fight = {}
 local sceneHasLoaded = false
 local pause = false
 local snapcamera = true
+local showmenu = false
 local commanderAI = {}
 local squadAI = {}
 local squadlist = {}
-local shipspersquadron = 12
+local shipspersquadron = 6
 
 local function createFighter(forf, squadcallsign, squadid)
     -- forf = friend or foe.  See enums
@@ -15,10 +16,12 @@ local function createFighter(forf, squadcallsign, squadid)
 
     local rndx, rndy
     if forf == enum.forfFriend then
-        rndx = love.math.random(50, SCREEN_WIDTH /3)
+        -- rndx = love.math.random(50, SCREEN_WIDTH /3)
+        rndx = FRIEND_START_X + love.math.random(-10, 10)
         rndy = love.math.random(50, SCREEN_HEIGHT - 50)
     elseif forf == enum.forfEnemy then
-        rndx = love.math.random(SCREEN_WIDTH * 0.66, SCREEN_WIDTH - 50)
+        -- rndx = love.math.random(SCREEN_WIDTH * 0.66, SCREEN_WIDTH - 50)
+        rndx = FOE_START_X + love.math.random(-10, 10)
         rndy = love.math.random(50, SCREEN_HEIGHT - 50)
     elseif forf == enum.forfNeutral then
         rndx = love.math.random(50, SCREEN_WIDTH - 50)
@@ -113,7 +116,6 @@ local function createSquadron(forf)
     for i = 1, shipspersquadron do
         createFighter(forf, squadcallsign, squadid)
     end
-
 end
 
 local function initialiseSquadList()
@@ -139,6 +141,16 @@ local function destroyObjects(dt)
     end
 end
 
+local function playerIsTargetted()
+
+    for i = 1, #OBJECTS do
+        if OBJECTS[i].targetguid == PLAYER_GUID then
+            return true
+        end
+    end
+    return false
+end
+
 function fight.keyreleased(key, scancode)
     if key == "space" then pause = not pause end
     if key == "c" then snapcamera = not snapcamera end
@@ -158,18 +170,80 @@ function fight.wheelmoved(x, y)
 end
 
 function fight.mousemoved(x, y, dx, dy)
-    local camx, camy = cam:toWorld(x, y)	-- converts screen x/y to world x/y
-
     if love.mouse.isDown(3) then
         snapcamera = false
         TRANSLATEX = TRANSLATEX - dx
         TRANSLATEY = TRANSLATEY - dy
     end
+end
 
+function fight.mousereleased(rx, ry, x, y, button)
+    if button == 1 then
+        if fun.isPlayerAlive() then
+            -- see if player unit is clicked
+            local objscreenx, objscreeny = cam:toScreen(OBJECTS[1].body:getX(), OBJECTS[1].body:getY()) -- need to convert physical to screen
+            local dist = cf.getDistance(rx, ry, objscreenx, objscreeny)
+            if dist <= 20 then
+                -- player unit is clicked
+                showmenu = not showmenu
+                if showmenu then
+                    pause = true
+                else
+                    pause = false
+                end
+            end
+        end
+    end
+end
+
+local function drawHUD()
+
+    love.graphics.setColor(1,1,1,1)
+    love.graphics.draw(IMAGE[enum.imageFightHUD], 0, 0)
+
+    if OBJECTS[1].guid == PLAYER_GUID then
+
+        local barlength = 100       -- unnecessary but a reminder that the barlength is a convenient 100 pixels
+        local barheight = 10
+        love.graphics.setColor(0,1,0,0.3)
+
+        -- structure bar
+        local drawlength = OBJECTS[1].componentHealth[enum.componentStructure]
+        love.graphics.rectangle("fill", 145, 47, drawlength, 10)
+
+        -- thrusters bar
+        local drawlength = OBJECTS[1].componentHealth[enum.componentThruster]
+        love.graphics.rectangle("fill", 145, 71, drawlength, 10)
+
+        -- weapon bar
+        local drawlength = OBJECTS[1].componentHealth[enum.componentWeapon]
+        love.graphics.rectangle("fill", 145, 95, drawlength, 10)
+
+        -- Steering bar (side thrusters)
+        local drawlength = OBJECTS[1].componentHealth[enum.componentSideThruster]
+        love.graphics.rectangle("fill", 145, 119, drawlength, 10)
+
+        -- throttle bar (componentAccelerator)
+        local drawlength = OBJECTS[1].componentHealth[enum.componentAccelerator]
+        love.graphics.rectangle("fill", 145, 143, drawlength, 10)
+
+    end
 end
 
 function fight.draw()
+
+    drawHUD()       -- do this before the attach
+
     cam:attach()
+
+    -- draw BG
+    love.graphics.setColor(1,1,1,0.25)
+    love.graphics.draw(IMAGE[enum.imageFightBG], 0, 0, 0, 2.4, 1)
+
+    -- draw the boundary
+    love.graphics.setColor(1,1,1,0.25)
+    love.graphics.line(0,0, FRIEND_START_X, SCREEN_HEIGHT)
+    love.graphics.line(FOE_START_X, 0, FOE_START_X, SCREEN_HEIGHT)
 
     -- draw each object
     for k, Obj in pairs(OBJECTS) do
@@ -234,11 +308,6 @@ function fight.draw()
                 error()
             end
 
-
-
-
-
-
             -- draw the velocity indicator
             -- local linx, liny = Obj.body:getLinearVelocity( )        --! a lot of duplicate code here. Can be cleand up
             -- linx = linx * 2
@@ -256,12 +325,44 @@ function fight.draw()
     -- draw target recticle for player 1
     if OBJECTS[1].guid == PLAYER_GUID then
         -- player still alive
-        local targetid = OBJECTS[1].targetid        -- OBJECTS index
-        local drawx = OBJECTS[targetid].body:getX()
-        local drawy = OBJECTS[targetid].body:getY()
+        local guid = OBJECTS[1].targetguid
+        local enemy = fun.getObject(guid)
 
-        love.graphics.setColor(1,0,0,1)
-        love.graphics.circle("line", drawx, drawy, 10)
+        -- print(inspect(enemy))
+        if enemy ~= nil and not enemy.body:isDestroyed() then
+            local drawx = enemy.body:getX()
+            local drawy = enemy.body:getY()
+
+            love.graphics.setColor(1,0,0,1)
+            love.graphics.circle("line", drawx, drawy, 10)
+        end
+    end
+
+    -- draw yellow recticle if player is targeted
+    if playerIsTargetted() then
+        -- draw yellow recticle on player craft
+        local objx = OBJECTS[1].body:getX()
+        local objy = OBJECTS[1].body:getY()
+
+        local linelength = 12
+        love.graphics.setColor(1, 0.5, 0, 1)
+        love.graphics.line(objx, objy - linelength, objx + linelength, objy + linelength, objx - linelength, objy + linelength, objx, objy - linelength)
+    end
+
+    -- draw the menu if menu is open
+    if showmenu and fun.isPlayerAlive() then
+        -- local drawx, drawy = cam:toScreen(OBJECTS[1].body:getX(), OBJECTS[1].body:getY()) -- need to convert physical to screen
+        local drawx, drawy = res.toGame(OBJECTS[1].body:getX(), OBJECTS[1].body:getY()) -- need to convert physical to screen
+
+        -- fill the menu
+        local menuwidth = 100
+        love.graphics.setColor(0.5, 0.5, 0.5, 1)
+        love.graphics.rectangle("fill", drawx, drawy, menuwidth, 75, 10, 10)
+
+        -- draw an outline
+        love.graphics.setColor(1,1,1, 1)
+        love.graphics.rectangle("line", drawx, drawy, menuwidth, 75, 10, 10)
+
     end
 
     -- cf.printAllPhysicsObjects(PHYSICSWORLD, 1)
@@ -283,8 +384,8 @@ function fight.update(dt)
 
         -- create a squadron
         createSquadron(enum.forfFriend)
-        -- createSquadron(enum.forfFriend)
-        -- createSquadron(enum.forfEnemy)
+        createSquadron(enum.forfFriend)
+        createSquadron(enum.forfEnemy)
         createSquadron(enum.forfEnemy)
 
         PLAYER_GUID = OBJECTS[1].fixture:getUserData()

@@ -6,7 +6,6 @@ function constants.load()
 
     SCREEN_STACK = {}
 
-    -- SCREEN_WIDTH, SCREEN_HEIGHT = love.window.getDesktopDimensions(1)
     SCREEN_WIDTH, SCREEN_HEIGHT = res.getGame()
 
     -- camera
@@ -28,17 +27,19 @@ function constants.load()
     if love.filesystem.isFused() then
         savedir = savedir .. "\\savedata\\"
     else
-        savedir = savedir .. "/FormulaSpeed/savedata/"
+        savedir = savedir .. "/SpaceFleetBattles/savedata/"
     end
 
     enums.load()
-    -- add extra items below this line
+    -- add extra items below this line ======================================================
 
-    BOX2D_SCALE = 1
+    NUM_OF_OBJECTS = 10
+    FRIEND_START_X = 0      -- left side of screen
+    FOE_START_X = SCREEN_WIDTH * 2
     PHYS_OBJECTS = {}       -- table of box2d
     OBJECTS = {}            -- table of items
     SOUNDS = {}             -- sound effects
-    NUM_OF_OBJECTS = 10
+
     PLAYER_GUID = nil
 
     -- animate stuff. --! check if all are necessary

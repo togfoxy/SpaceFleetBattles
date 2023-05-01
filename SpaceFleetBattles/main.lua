@@ -52,31 +52,30 @@ function beginContact(a, b, coll)
 		end
 	end
 
-	local fighter = {}			-- this will contain the fighter object that was hit
-	local hitindex = nil		-- the OBJECTS index that is impacted
+	local victim = {}			-- this will contain the fighter object that was hit
+	local bullet = {}
 	if OBJECTS[object1index].body:isBullet() then
 		-- destroy Obj2
-		fighter = OBJECTS[object2index]
+		victim = OBJECTS[object2index]
+		bullet = OBJECTS[object1index]
 		OBJECTS[object1index].lifetime = 0
-		hitindex = 2
 	end
 	if OBJECTS[object2index].body:isBullet() then
 		-- destroy Obj1
-		fighter = OBJECTS[object1index]
+		victim = OBJECTS[object1index]
+		bullet = OBJECTS[object2index]
 		OBJECTS[object2index].lifetime = 0
-		hitindex = 1
 	end
 
-	fun.applyDamage(fighter)
+	fun.applyDamage(victim, bullet)		-- assumes bullet hit fighter
 
 	-- play sounds if player is hit  		--! what about explosion if dead?
-	if fighter.guid == PLAYER_GUID then
+	if victim.guid == PLAYER_GUID then
 		cf.playAudio(enum.audioBulletPing, false, true)
 	end
 end
 
 function endContact(a, b, coll)
-
 end
 
 function love.keyreleased( key, scancode )
@@ -104,11 +103,24 @@ function love.mousemoved(x, y, dx, dy, istouch )
 	end
 end
 
+function love.mousereleased(x, y, button, isTouch)
+	local rx, ry = res.toGame(x,y)
+	local currentscene = cf.currentScreenName(SCREEN_STACK)
+
+	if currentscene == enum.sceneFight then
+		fight.mousereleased(rx, ry, x, y, button)		-- need to send through the res adjusted x/y and the 'real' x/y
+	elseif currentscene == enum.scenePodium then
+	elseif currentscene == enum.sceneMainMenu then
+	end
+end
+
 function love.load()
 
 	res.init({width = 1920, height = 1080, mode = 2})
 
-	local width, height = love.window.getDesktopDimensions( 1 )
+	local _, _, flags = love.window.getMode()
+	local width, height = love.window.getDesktopDimensions(flags.display)
+	-- local width, height = love.window.getDesktopDimensions(1)
 	res.setMode(width, height, {resizable = true})
 
 	constants.load()		-- also loads enums
@@ -136,7 +148,7 @@ function love.load()
 	---------------
 	love.physics.setMeter(30)
 	PHYSICSWORLD = love.physics.newWorld(0,0,false)
-	PHYSICSWORLD:setCallbacks(beginContact,endContact,_,_)
+	PHYSICSWORLD:setCallbacks( beginContact, endContact, preSolve, postSolve )
 
 	GRIDS[enum.gridExplosion] = anim8.newGrid(16, 16, IMAGE[enum.imageExplosion]:getWidth(), IMAGE[enum.imageExplosion]:getHeight())
 end

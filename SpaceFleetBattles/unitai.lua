@@ -1,23 +1,25 @@
 unitai = {}
 
-function unitai.clearTarget(deadtarget)
-    -- move through all objects and clear target id if target ID = input parameter
+function unitai.clearTarget(deadtargetguid)
+    -- move through all objects and clear target guid if target guid = input parameter
     -- use this to remove targets from other craft if a target is destroyed
+    -- input: deadtargetguid = guid of the target that is dead
     for k, Obj in pairs(OBJECTS) do
-        if Obj.targetid == nil then
+        if Obj.targetguid == nil then
            -- do nothing
         else
-            if Obj.targetid == deadtarget then
-                Obj.targetid = nil
+            if Obj.targetguid == deadtargetguid then
+                Obj.targetguid = nil
             end
         end
     end
 end
 
 local function getClosestObject(thisObj, desiredforf)
-    -- returns OBJECTS index or zero if none found
+    -- returns the guid of the closest object (or nil)
+
     local closestdist = 999999999       -- ridiculously large
-    local closestid = 0
+    local closestid = nil
     local thisobjx, thisobjy = thisObj.body:getPosition()
 
     for k, Obj in pairs(OBJECTS) do
@@ -32,16 +34,20 @@ local function getClosestObject(thisObj, desiredforf)
             end
         end
     end
-    return closestid
+    if closestid == nil then
+        return nil
+    else
+        return OBJECTS[closestid].guid
+    end
 end
 
 local function setTaskRTB(Obj)
-    Obj.targetid = nil
+    Obj.targetguid = nil
     if Obj.destx == nil then
         if Obj.forf == enum.forfFriend then
-            Obj.destx = 0
+            Obj.destx = FRIEND_START_X
         elseif Obj.forf == enum.forfEnemy then
-            Obj.destx = SCREEN_WIDTH
+            Obj.destx = FOE_START_X
         end
         Obj.desty = Obj.body:getY()
     end
@@ -60,7 +66,7 @@ local function updateUnitTask(Obj, squadorder, dt)
             setTaskRTB(Obj)
         elseif Obj.componentHealth[enum.componentThruster] <= 50 then
             setTaskRTB(Obj)
-        elseif Obj.componentHealth[enum.componentSideThruster] <= 50 then
+        elseif Obj.componentHealth[enum.componentSideThruster] <= 25 then
             setTaskRTB(Obj)
         elseif Obj.componentHealth[enum.componentAccelerator] <= 25 then
             setTaskRTB(Obj)
@@ -73,16 +79,13 @@ local function updateUnitTask(Obj, squadorder, dt)
             -- get closest target
             Obj.destx = nil         -- clear previous destinations if any
             Obj.desty = nil
-            local targetid
             if Obj.forf == enum.forfFriend then
-                targetid = getClosestObject(Obj, enum.forfEnemy)        -- this OBJECTS index
+                Obj.targetguid = getClosestObject(Obj, enum.forfEnemy)        -- this OBJECTS guid
             end
             if Obj.forf == enum.forfEnemy then
-                targetid = getClosestObject(Obj, enum.forfFriend)       -- this OBJECTS index
+                Obj.targetguid = getClosestObject(Obj, enum.forfFriend)       -- this OBJECTS guid
             end
-            if targetid > 0 then
-                Obj.targetid = targetid         -- this is same as OBJECTS[targetid]
-            end
+
             -- print("Unit task: setting target id")
         elseif squadorder == enum.squadOrdersReturnToBase then
                 setTaskRTB(Obj)
@@ -135,26 +138,30 @@ local function adjustAngle(Obj, dt)
     end
 
     local bearingrad
-    if Obj.targetid == nil or Obj.targetid  == 0 then
-        -- nothing
+    if Obj.targetguid == nil or Obj.targetguid == 0 then
         if Obj.destx ~= nil then
             -- move to destination
             local objx, objy = Obj.body:getPosition()
             local destx, desty = Obj.destx, Obj.desty
             local disttodest = cf.getDistance(objx, objy, destx, desty)
             if disttodest < 10 then
-                -- print("Arrived at destination")
+                -- print("Arrived at destination")      --! need to remove the fighter from play
                 Obj.currentForwardThrust = 0                --! this is for testing only
+                Obj.lifetime = 0                        -- destroy the object
             else
                 turnToObjective(Obj, destx, desty, dt)
             end
         end
 
-    elseif Obj.targetid ~= nil then
+    elseif Obj.targetguid ~= nil then
         local x1, y1 = Obj.body:getPosition()
-        if OBJECTS[Obj.targetid] ~= nil then
-            local x2, y2 = OBJECTS[Obj.targetid].body:getPosition()
+        local enemyobject = fun.getObject(Obj.targetguid)
+        --! this throws an error
+        if enemyobject ~= nil and not enemyobject.body:isDestroyed() then        -- check if target is dead
+            local x2, y2 = enemyobject.body:getPosition()
             turnToObjective(Obj, x2, y2, dt)
+        else
+            --! is this an error?
         end
     else
         -- nothing. Is this an error?
@@ -168,7 +175,7 @@ local function adjustThrust(Obj, dt)
     assert(Obj.body:isBullet() == false)
 
     local currentangle = Obj.body:getAngle( )
-    if Obj.targetid ~= nil then
+    if Obj.targetguid ~= nil then
         Obj.currentForwardThrust = Obj.currentForwardThrust + (Obj.currentMaxAcceleration * dt)
         if Obj.currentForwardThrust > Obj.currentMaxForwardThrust then Obj.currentForwardThrust = Obj.currentMaxForwardThrust end
     elseif Obj.destx ~= nil then
@@ -218,6 +225,7 @@ local function createNewBullet(Obj, bullet)
 
     thisobject.squadCallsign = nil
     thisobject.lifetime = 10            -- seconds
+    thisobject.ownerObjectguid = Obj.guid
 
     thisobject.body:setAngle(currentangle)
     local velx, vely = Obj.body:getLinearVelocity()
@@ -234,19 +242,20 @@ local function fireWeapons(Obj, dt)
         Obj.weaponcooldown = 0
 
         if Obj.componentHealth[enum.componentWeapon] > 0 then
-            if Obj.targetid ~= nil then
-                if OBJECTS[Obj.targetid] ~= nil then
+            if Obj.targetguid ~= nil then
+                local enemyobject = fun.getObject(Obj.targetguid)
+                if enemyobject ~= nil and not enemyobject.body:isDestroyed() then        -- check if target is dead
                     local objx = Obj.body:getX()
                     local objy = Obj.body:getY()
-                    local targetx = OBJECTS[Obj.targetid].body:getX()
-                    local targety = OBJECTS[Obj.targetid].body:getY()
+                    local targetx = enemyobject.body:getX()
+                    local targety = enemyobject.body:getY()
 
                     local currentangle = Obj.body:getAngle()
                     local bearingtotarget = cf.getBearingRad(objx,objy,targetx,targety)
                     local angletotarget = bearingtotarget - currentangle
                     -- print(currentangle, bearingtotarget, angletotarget)
 
-                    if angletotarget > -0.13 and angletotarget < 0.13 then
+                    if angletotarget > -0.10 and angletotarget < 0.10 then
                         Obj.weaponcooldown = 4
                         createNewBullet(Obj, true)       -- includes missiles and bombs. Use TRUE for fast moving bullets
                     end

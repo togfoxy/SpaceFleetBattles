@@ -35,6 +35,8 @@ function enums.load()
     enum.squadOrdersReturnToBase = 2
 
     enum.imageExplosion = 1
+    enum.imageFightHUD = 2
+    enum.imageFightBG = 3
 
     enum.gridExplosion = 1
 
@@ -48,6 +50,7 @@ function enums.load()
     enum.componentSideThruster = 5
 
     enum.audioBulletPing = 1
+    enum.audioBulletHit = 2
 
 end
 
