@@ -160,7 +160,7 @@ function fight.draw()
                     error()
                 end
 
-                if objguid == PLAYER_GUID then
+                if Obj.guid == PLAYER_GUID then
                     love.graphics.setColor(1,1,0,1)
                 end
 
@@ -242,7 +242,7 @@ function fight.draw()
         love.graphics.setColor(1,1,1,1)
         love.graphics.rectangle("line", drawx, drawy, menuwidth, 75, 10, 10)
 
-        -- draw squad orders
+        -- draw squad orders an a line
         -- local txt = "Hello world"
         local squadcallsign = OBJECTS[1].squadCallsign
         local txt = squadAI[squadcallsign].orders[1].order
@@ -250,6 +250,16 @@ function fight.draw()
         love.graphics.print(txt, drawx + 5, drawy)
         love.graphics.setColor(1,1,1,1)
         love.graphics.line(drawx, drawy + 15, drawx + menuwidth, drawy + 15)
+
+        -- draw current action and a line
+        txt = OBJECTS[1].currentAction
+        love.graphics.setColor(0,0,0,1)
+        love.graphics.print(txt, drawx + 5, drawy + 18)
+        love.graphics.setColor(1,1,1,1)
+        love.graphics.line(drawx, drawy + 36, drawx + menuwidth, drawy + 36)
+
+
+
 
 
     end

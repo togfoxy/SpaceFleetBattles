@@ -51,6 +51,7 @@ function unitai.createFighter(forf, squadcallsign)
 
     thisobject.forf = forf
     thisobject.squadCallsign = squadcallsign
+    thisobject.currentAction = nil              -- this will be influenced by squad orders + player choices
     thisobject.taskCooldown = 0
     thisobject.weaponcooldown = 0           --! might be more than one weapon in the future
 
@@ -98,7 +99,7 @@ function unitai.clearTarget(deadtargetguid)
     end
 end
 
-local function getClosestObject(thisObj, desiredforf)
+local function getClosestFighter(thisObj, desiredforf)
     -- returns the guid of the closest object (or nil)
 
     local closestdist = 999999999       -- ridiculously large
@@ -107,7 +108,7 @@ local function getClosestObject(thisObj, desiredforf)
 
     for k, Obj in pairs(OBJECTS) do
         -- get distance to this obj
-        if Obj.forf == desiredforf then
+        if Obj.forf == desiredforf and not Obj.body:isBullet() then
             local objx, objy = Obj.body:getPosition()
             local dist = cf.getDistance(thisobjx, thisobjy, objx, objy)
             if closestid == 0 or dist < closestdist then
@@ -126,6 +127,7 @@ end
 
 local function setTaskRTB(Obj)
     Obj.targetguid = nil
+    Obj.currentAction = enum.unitActionReturningToBase
     if Obj.destx == nil then
         if Obj.forf == enum.forfFriend then
             Obj.destx = FRIEND_START_X
@@ -160,13 +162,14 @@ local function updateUnitTask(Obj, squadorder, dt)
         elseif squadorder == enum.squadOrdersEngage then
 
             -- get closest target
+            Obj.currentAction = enum.unitActionEngaging
             Obj.destx = nil         -- clear previous destinations if any
             Obj.desty = nil
             if Obj.forf == enum.forfFriend then
-                Obj.targetguid = getClosestObject(Obj, enum.forfEnemy)        -- this OBJECTS guid
+                Obj.targetguid = getClosestFighter(Obj, enum.forfEnemy)        -- this OBJECTS guid
             end
             if Obj.forf == enum.forfEnemy then
-                Obj.targetguid = getClosestObject(Obj, enum.forfFriend)       -- this OBJECTS guid
+                Obj.targetguid = getClosestFighter(Obj, enum.forfFriend)       -- this OBJECTS guid
             end
 
             -- print("Unit task: setting target id")
@@ -175,6 +178,7 @@ local function updateUnitTask(Obj, squadorder, dt)
             -- print("Unit task: RTB")
         else
             --! no squad order or unexpected squad order
+            Obj.currentAction = nil
             print("No squad order available")
         end
     end
