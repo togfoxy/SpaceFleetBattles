@@ -299,10 +299,11 @@ function fight.draw()
     -- draw target recticle for player 1
     if OBJECTS[1].guid == PLAYER_GUID then
         -- player still alive
-        local targetid = OBJECTS[1].targetid        -- OBJECTS index
-        if not OBJECTS[targetid].body:isDestroyed() then
-            local drawx = OBJECTS[targetid].body:getX()
-            local drawy = OBJECTS[targetid].body:getY()
+        local guid = OBJECTS[1].targetguid
+        local enemy = fun.getObject(guid)
+        if not enemy.body:isDestroyed() then
+            local drawx = enemy.body:getX()
+            local drawy = enemy.body:getY()
 
             love.graphics.setColor(1,0,0,1)
             love.graphics.circle("line", drawx, drawy, 10)

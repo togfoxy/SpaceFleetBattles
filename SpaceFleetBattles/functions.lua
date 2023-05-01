@@ -131,4 +131,13 @@ function functions.applyDamage(fighter)
 
 end
 
+function functions.getObject(guid)
+    -- cycle through OBJECTS until found GUID
+    for i = 1, #OBJECTS do
+        if OBJECTS[i].guid == guid then
+            return OBJECTS[i]
+        end
+    end
+end
+
 return functions
