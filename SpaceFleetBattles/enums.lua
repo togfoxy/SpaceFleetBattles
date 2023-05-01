@@ -35,6 +35,7 @@ function enums.load()
     enum.squadOrdersReturnToBase = 2
 
     enum.imageExplosion = 1
+    enum.imageFightHUD = 2
 
     enum.gridExplosion = 1
 

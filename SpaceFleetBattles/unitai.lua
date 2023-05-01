@@ -39,9 +39,9 @@ local function setTaskRTB(Obj)
     Obj.targetid = nil
     if Obj.destx == nil then
         if Obj.forf == enum.forfFriend then
-            Obj.destx = 0
+            Obj.destx = FRIEND_START_X
         elseif Obj.forf == enum.forfEnemy then
-            Obj.destx = SCREEN_WIDTH
+            Obj.destx = FOE_START_X
         end
         Obj.desty = Obj.body:getY()
     end
@@ -143,7 +143,7 @@ local function adjustAngle(Obj, dt)
             local destx, desty = Obj.destx, Obj.desty
             local disttodest = cf.getDistance(objx, objy, destx, desty)
             if disttodest < 10 then
-                -- print("Arrived at destination")
+                -- print("Arrived at destination")      --! need to remove the fighter from play
                 Obj.currentForwardThrust = 0                --! this is for testing only
             else
                 turnToObjective(Obj, destx, desty, dt)

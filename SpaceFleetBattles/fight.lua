@@ -170,8 +170,49 @@ function fight.mousemoved(x, y, dx, dy)
 
 end
 
+local function drawHUD()
+
+    love.graphics.draw(IMAGE[enum.imageFightHUD], 0, 0)
+
+    if OBJECTS[1].guid == PLAYER_GUID then
+
+        local barlength = 100       -- unnecessary but a reminder that the barlength is a convenient 100 pixels
+        local barheight = 10
+        love.graphics.setColor(0,1,0,0.3)
+
+        -- structure bar
+        local drawlength = OBJECTS[1].componentHealth[enum.componentStructure]
+        love.graphics.rectangle("fill", 145, 47, drawlength, 10)
+
+        -- thrusters bar
+        local drawlength = OBJECTS[1].componentHealth[enum.componentThruster]
+        love.graphics.rectangle("fill", 145, 71, drawlength, 10)
+
+        -- weapon bar
+        local drawlength = OBJECTS[1].componentHealth[enum.componentWeapon]
+        love.graphics.rectangle("fill", 145, 95, drawlength, 10)
+
+        -- Steering bar (side thrusters)
+        local drawlength = OBJECTS[1].componentHealth[enum.componentSideThruster]
+        love.graphics.rectangle("fill", 145, 119, drawlength, 10)
+
+        -- throttle bar (componentAccelerator)
+        local drawlength = OBJECTS[1].componentHealth[enum.componentAccelerator]
+        love.graphics.rectangle("fill", 145, 143, drawlength, 10)
+
+    end
+end
+
 function fight.draw()
+
+    drawHUD()       -- do this before the attach
+
     cam:attach()
+
+    -- draw the boundary
+    love.graphics.setColor(1,1,1,0.25)
+    love.graphics.line(0,0, FRIEND_START_X, SCREEN_HEIGHT)
+    love.graphics.line(FOE_START_X, 0, FOE_START_X, SCREEN_HEIGHT)
 
     -- draw each object
     for k, Obj in pairs(OBJECTS) do
@@ -259,11 +300,13 @@ function fight.draw()
     if OBJECTS[1].guid == PLAYER_GUID then
         -- player still alive
         local targetid = OBJECTS[1].targetid        -- OBJECTS index
-        local drawx = OBJECTS[targetid].body:getX()
-        local drawy = OBJECTS[targetid].body:getY()
+        if not OBJECTS[targetid].body:isDestroyed() then
+            local drawx = OBJECTS[targetid].body:getX()
+            local drawy = OBJECTS[targetid].body:getY()
 
-        love.graphics.setColor(1,0,0,1)
-        love.graphics.circle("line", drawx, drawy, 10)
+            love.graphics.setColor(1,0,0,1)
+            love.graphics.circle("line", drawx, drawy, 10)
+        end
     end
 
     -- cf.printAllPhysicsObjects(PHYSICSWORLD, 1)

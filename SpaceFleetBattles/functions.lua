@@ -2,6 +2,7 @@ functions = {}
 
 function functions.loadImages()
     IMAGE[enum.imageExplosion] = love.graphics.newImage("assets/images/SmokeFireQuads.png")
+    IMAGE[enum.imageFightHUD] = love.graphics.newImage("assets/images/fighthud.png")
 end
 
 function functions.loadFonts()
