@@ -28,6 +28,7 @@ require 'constants'
 fun = require 'functions'
 cf = require 'lib.commonfunctions'
 
+require 'mainmenu'
 require 'fight'
 require 'commanderai'
 require 'squadai'
@@ -111,6 +112,7 @@ function love.mousereleased(x, y, button, isTouch)
 		fight.mousereleased(rx, ry, x, y, button)		-- need to send through the res adjusted x/y and the 'real' x/y
 	elseif currentscene == enum.scenePodium then
 	elseif currentscene == enum.sceneMainMenu then
+		mainmenu.mousereleased(rx, ry, x, y, button)
 	end
 end
 
@@ -128,7 +130,7 @@ function love.load()
     fun.loadAudio()
 	fun.loadImages()
 
-	-- mainmenu.loadButtons()
+	mainmenu.loadButtons()
 
 	cam = Camera.new(SCREEN_WIDTH / 2, SCREEN_HEIGHT / 2, 1)
 	cam:setZoom(ZOOMFACTOR)
@@ -138,8 +140,8 @@ function love.load()
 
 	love.keyboard.setKeyRepeat(true)
 
-	-- cf.addScreen("MainMenu", SCREEN_STACK)
-	cf.addScreen(enum.sceneFight, SCREEN_STACK)
+	cf.addScreen(enum.sceneMainMenu, SCREEN_STACK)
+	-- cf.addScreen(enum.sceneFight, SCREEN_STACK)
 
 	lovelyToasts.canvasSize = {SCREEN_WIDTH, SCREEN_HEIGHT}
 	lovelyToasts.options.tapToDismiss = true
@@ -159,8 +161,13 @@ function love.draw()
 	local currentscene = cf.currentScreenName(SCREEN_STACK)
 	if currentscene == enum.sceneFight then
 		fight.draw()
+	elseif currentscene == enum.sceneMainMenu then
+		mainmenu.draw()
+	else
+		error()
 	end
 
+	-- draw animations
 	love.graphics.setColor(1,1,1,1)
 	local scale = love.physics.getMeter( )
 	for _, animation in pairs(ANIMATIONS) do
