@@ -5,6 +5,7 @@ local pause = false
 local snapcamera = true
 local showmenu = false
 local commanderAI = {}
+local score = {}
 local shipspersquadron = 6
 
 local function destroyObjects(dt)
@@ -269,10 +270,6 @@ function fight.draw()
             love.graphics.setColor(1,1,1,1)
             love.graphics.line(drawx, drawy + 36, drawx + menuwidth, drawy + 36)
         end
-
-
-
-
     end
 
     -- cf.printAllPhysicsObjects(PHYSICSWORLD, 1)
@@ -299,6 +296,9 @@ function fight.update(dt)
         squadai.createSquadron(enum.forfEnemy, shipspersquadron)
 
         PLAYER_GUID = OBJECTS[1].fixture:getUserData()
+
+        SCORE.friendsdead = 0
+        SCORE.enemiesdead = 0
     end
 
     if not pause then

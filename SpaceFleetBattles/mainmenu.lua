@@ -14,8 +14,6 @@ function mainmenu.draw()
     buttons.drawButtons()
 end
 
-
-
 function mainmenu.loadButtons()
     -- call this from love.load()
     -- ensure buttons.drawButtons() is added to the scene.draw() function

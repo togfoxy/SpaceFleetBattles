@@ -30,6 +30,7 @@ cf = require 'lib.commonfunctions'
 
 require 'mainmenu'
 require 'fight'
+require 'endbattle'
 require 'commanderai'
 require 'squadai'
 require 'unitai'
@@ -40,7 +41,6 @@ end
 
 function beginContact(a, b, coll)
 	-- a and be are fixtures
-	-- print("Contact")
 	-- get the body that owns the fixture
 	local object1index, object2index
 
@@ -60,6 +60,12 @@ function beginContact(a, b, coll)
 		victim = OBJECTS[object2index]
 		bullet = OBJECTS[object1index]
 		OBJECTS[object1index].lifetime = 0
+
+		if victim.forf == enum.forfFriend then
+			SCORE.friendsdead = SCORE.friendsdead + 1
+		elseif victim.forf == enum.forfEnemy then
+			SCORE.enemiesdead = SCORE.enemiesdead + 1
+		end
 	end
 	if OBJECTS[object2index].body:isBullet() then
 		-- destroy Obj1

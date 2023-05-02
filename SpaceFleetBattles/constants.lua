@@ -42,6 +42,7 @@ function constants.load()
     SQUAD_LIST = {}         -- a list of callsigns and their forf
     squadAI = {}
     SOUNDS = {}             -- sound effects
+    SCORE = {}              -- track casulties in this table
 
     PLAYER_GUID = nil
 

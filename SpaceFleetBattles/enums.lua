@@ -6,9 +6,12 @@ function enums.load()
     enum.sceneMainMenu = 1
     enum.sceneCredits = 2
     enum.sceneFight = 3
+    enum.sceneEndBattle = 4
 
     enum.buttonMainMenuNewGame = 1
     enum.buttonMainMenuContinue = 2
+    enum.buttonEndBattleNewGame = 3
+    enum.buttonEndBattleExitGame = 4
 
     enum.fontDefault = 1
     enum.fontMedium = 2
@@ -19,7 +22,7 @@ function enums.load()
     enum.audioMainMenu = 1
     enum.audioBulletPing = 2
     enum.audioBulletHit = 3
-    
+
     -- add extra items below this line =================================
 
     enum.forfFriend = 1
