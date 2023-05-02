@@ -149,6 +149,8 @@ local function updateUnitTask(Obj, squadorder, dt)
         -- do self-preservation checks firstly. Remember the ordering matters
         if Obj.componentHealth[enum.componentWeapon] <= 0 then
             setTaskRTB(Obj)
+        -- elseif Obj.componentHealth[enum.componentThruster] <= 0 then
+        --     --! eject
         elseif Obj.componentHealth[enum.componentThruster] <= 50 then
             setTaskRTB(Obj)
         elseif Obj.componentHealth[enum.componentSideThruster] <= 25 then

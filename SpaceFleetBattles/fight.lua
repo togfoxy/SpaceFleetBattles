@@ -234,7 +234,7 @@ function fight.draw()
         local drawx, drawy = res.toGame(OBJECTS[1].body:getX(), OBJECTS[1].body:getY()) -- need to convert physical to screen
 
         -- fill the menu box
-        local menuwidth = 100
+        local menuwidth = 150
         love.graphics.setColor(0.5, 0.5, 0.5, 1)
         love.graphics.rectangle("fill", drawx, drawy, menuwidth, 75, 10, 10)
 
@@ -243,21 +243,32 @@ function fight.draw()
         love.graphics.rectangle("line", drawx, drawy, menuwidth, 75, 10, 10)
 
         -- draw squad orders an a line
-        -- local txt = "Hello world"
         local squadcallsign = OBJECTS[1].squadCallsign
-        local txt = squadAI[squadcallsign].orders[1].order
+        local orderenum = squadAI[squadcallsign].orders[1].order
+        if orderenum == enum.squadOrdersEngage then
+            txt = "Squad: engage"
+        elseif orderenum == enum.squadOrdersReturnToBase then
+            txt = "Squad: return to base"
+        end
+
         love.graphics.setColor(0,0,0,1)
         love.graphics.print(txt, drawx + 5, drawy)
         love.graphics.setColor(1,1,1,1)
         love.graphics.line(drawx, drawy + 15, drawx + menuwidth, drawy + 15)
 
         -- draw current action and a line
-        txt = OBJECTS[1].currentAction
-        love.graphics.setColor(0,0,0,1)
-        love.graphics.print(txt, drawx + 5, drawy + 18)
-        love.graphics.setColor(1,1,1,1)
-        love.graphics.line(drawx, drawy + 36, drawx + menuwidth, drawy + 36)
-
+        actionenum = OBJECTS[1].currentAction
+        if actionenum == enum.unitActionEngaging then
+            txt = "Engaging"
+        elseif actionenum == enum.unitActionReturningToBase then
+            txt = "Returning to base"
+        end
+        if txt ~= nil then
+            love.graphics.setColor(0,0,0,1)
+            love.graphics.print(txt, drawx + 5, drawy + 18)
+            love.graphics.setColor(1,1,1,1)
+            love.graphics.line(drawx, drawy + 36, drawx + menuwidth, drawy + 36)
+        end
 
 
 
