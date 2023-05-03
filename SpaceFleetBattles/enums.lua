@@ -10,8 +10,9 @@ function enums.load()
 
     enum.buttonMainMenuNewGame = 1
     enum.buttonMainMenuContinue = 2
-    enum.buttonEndBattleNewGame = 3
-    enum.buttonEndBattleExitGame = 4
+    enum.buttonMainMenuExitGame = 3
+    enum.buttonEndBattleNewGame = 4
+    enum.buttonEndBattleExitGame = 5
 
     enum.fontDefault = 1
     enum.fontMedium = 2

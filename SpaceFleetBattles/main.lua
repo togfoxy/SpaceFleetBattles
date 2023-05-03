@@ -60,12 +60,6 @@ function beginContact(a, b, coll)
 		victim = OBJECTS[object2index]
 		bullet = OBJECTS[object1index]
 		OBJECTS[object1index].lifetime = 0
-
-		if victim.forf == enum.forfFriend then
-			SCORE.friendsdead = SCORE.friendsdead + 1
-		elseif victim.forf == enum.forfEnemy then
-			SCORE.enemiesdead = SCORE.enemiesdead + 1
-		end
 	end
 	if OBJECTS[object2index].body:isBullet() then
 		-- destroy Obj1
@@ -137,6 +131,7 @@ function love.load()
 	fun.loadImages()
 
 	mainmenu.loadButtons()
+	endbattle.loadButtons()
 
 	cam = Camera.new(SCREEN_WIDTH / 2, SCREEN_HEIGHT / 2, 1)
 	cam:setZoom(ZOOMFACTOR)
@@ -161,7 +156,6 @@ function love.load()
 	GRIDS[enum.gridExplosion] = anim8.newGrid(16, 16, IMAGE[enum.imageExplosion]:getWidth(), IMAGE[enum.imageExplosion]:getHeight())
 end
 
-
 function love.draw()
     res.start()
 	local currentscene = cf.currentScreenName(SCREEN_STACK)
@@ -169,6 +163,8 @@ function love.draw()
 		fight.draw()
 	elseif currentscene == enum.sceneMainMenu then
 		mainmenu.draw()
+	elseif currentscene == enum.sceneEndBattle then
+		endbattle.draw()
 	else
 		error()
 	end
@@ -182,7 +178,7 @@ function love.draw()
 			animation:draw(IMAGE[enum.imageExplosion], drawx, drawy, animation.angle, 1, 1, 0, 0)
 		elseif animation.type == enum.animSmoke then
 			-- different offset
-			animation:draw(IMAGE[enum.imageExplosion], drawx, drawy, animation.angle, 1, 1, 10, 10)
+			animation:draw(IMAGE[enum.imageExplosion], drawx, drawy, animation.angle, 1, 1, 10, 5)
 		end
 	end
 

@@ -31,6 +31,25 @@ local function playerIsTargetted()
     return false
 end
 
+local function battleOver()
+    local isFriends = false
+    local isFoes = false
+    for i = 1, #OBJECTS do
+        if OBJECTS[i].forf == enum.forfFriend then
+            isFriends = true
+        end
+        if OBJECTS[i].forf == enum.forfEnemy then
+            isFoes = true
+        end
+    end
+    if isFriends == false or isFoes == false then
+        -- one side is depleted
+        return true
+    else
+        return false
+    end
+end
+
 function fight.keyreleased(key, scancode)
     if key == "space" then pause = not pause end
     if key == "c" then snapcamera = not snapcamera end
@@ -70,6 +89,11 @@ function fight.mousereleased(rx, ry, x, y, button)
                     pause = true
                 else
                     pause = false
+                end
+            else
+                -- if clicking off the menu then turn off menu
+                if showmenu then
+                    sowmenu = false
                 end
             end
         end
@@ -315,6 +339,11 @@ function fight.update(dt)
     if snapcamera then
         TRANSLATEX = OBJECTS[1].body:getX()     -- if 1 == player then this works well
         TRANSLATEY = OBJECTS[1].body:getY()     -- if 1 ~= player then still works well
+    end
+
+    if battleOver() then
+        print(inspect(SCORE))
+        cf.swapScreen(enum.sceneEndBattle, SCREEN_STACK)
     end
 
     cam:setZoom(ZOOMFACTOR)
