@@ -6,7 +6,7 @@ local snapcamera = true
 local showmenu = false
 local commanderAI = {}
 local score = {}
-local shipspersquadron = 6
+
 
 local function destroyObjects(dt)
 
@@ -320,10 +320,10 @@ function fight.update(dt)
         squadai.initialiseSquadList()
 
         -- create squadrons
-        squadai.createSquadron(enum.forfFriend, shipspersquadron)
-        squadai.createSquadron(enum.forfFriend, shipspersquadron)
-        squadai.createSquadron(enum.forfEnemy, shipspersquadron)
-        squadai.createSquadron(enum.forfEnemy, shipspersquadron)
+        squadai.createSquadron(enum.forfFriend)
+        -- squadai.createSquadron(enum.forfFriend)
+        -- squadai.createSquadron(enum.forfEnemy)
+        squadai.createSquadron(enum.forfEnemy)
 
         PLAYER_GUID = OBJECTS[1].fixture:getUserData()
 

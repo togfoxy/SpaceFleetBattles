@@ -70,7 +70,7 @@ function subtractVectors(x1,y1,x2,y2)
 	return (x1-x2),(y1-y2)
 end
 function dotVectors(x1,y1,x2,y2)
-	-- receives two vectors (deltas) and assumes same origin
+	-- receives one vectors and one position. Assumes same origin
 	-- x1/y1 vector is facing/looking
 	-- x2/y2 is the position relative to the object doing the looking
 	-- eg: guard is looking in direction x1/y1. His looking vector is 1,1

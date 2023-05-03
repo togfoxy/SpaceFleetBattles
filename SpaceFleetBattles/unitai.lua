@@ -258,7 +258,7 @@ local function updateUnitTask(Obj, squadorder, dt)
         else
             --! no squad order or unexpected squad order
             Obj.currentAction = nil
-            print("No squad order available")
+            print("No squad order available for this unit")
         end
     end
 end
@@ -340,17 +340,48 @@ local function adjustThrust(Obj, dt)
     assert(Obj.body:isBullet() == false)
 
     local currentangle = Obj.body:getAngle( )
-    if Obj.targetguid ~= nil then
+    if Obj.currentAction == enum.unitActionEngaging then
+        -- don't overtake target
+        local objx, objy = Obj.body:getPosition()
+        local objfacing = Obj.body:getAngle()
+        local targetObj = fun.getObject(Obj.targetguid)
+        if targetObj ~= nil then
+            local targetx, targety = targetObj.body:getPosition()
+
+            if cf.isInFront(objx, objy, objfacing, targetx, targety) then
+                if targetObj.currentForwardThrust < Obj.currentForwardThrust then
+                    local dist = cf.getDistance(objx, objy, targetx, targety)
+                    if dist <= 100 then
+                        if Obj.guid == PLAYER_GUID then
+                            print("Dist = " .. dist .. ". Will try to match speed")
+                        end
+                        -- try to match speed
+                        Obj.currentForwardThrust = Obj.currentForwardThrust - (Obj.maxDeacceleration * dt)
+                        if Obj.currentForwardThrust < targetObj.currentForwardThrust then
+                            Obj.currentForwardThrust = targetObj.currentForwardThrust
+                        end
+                    else
+                        -- max thrust needed
+                        Obj.currentForwardThrust = Obj.currentForwardThrust + (Obj.currentMaxAcceleration * dt)
+                    end
+                else
+                    -- max throttle
+                    Obj.currentForwardThrust = Obj.currentForwardThrust + (Obj.currentMaxAcceleration * dt)
+                end
+            end
+        else
+            print("Engaging but no target. ??")
+        end
+    elseif Obj.currentAction == enum.unitActionReturningToBase then
         Obj.currentForwardThrust = Obj.currentForwardThrust + (Obj.currentMaxAcceleration * dt)
-        if Obj.currentForwardThrust > Obj.currentMaxForwardThrust then Obj.currentForwardThrust = Obj.currentMaxForwardThrust end
-    elseif Obj.destx ~= nil then
-        Obj.currentForwardThrust = Obj.currentForwardThrust + (Obj.currentMaxAcceleration * dt)
-        if Obj.currentForwardThrust > Obj.currentMaxForwardThrust then Obj.currentForwardThrust = Obj.currentMaxForwardThrust end
     else
-        -- no target. Slow down and stop
+        -- no orders. Slow down and stop
+        print("No task for this unit. Will slow and stop")
         Obj.currentForwardThrust = Obj.currentForwardThrust - (Obj.maxDeacceleration * dt)  -- might be zero for bullets
-        if Obj.currentForwardThrust < 0 then Obj.currentForwardThrust = 0 end
     end
+
+    if Obj.currentForwardThrust > Obj.currentMaxForwardThrust then Obj.currentForwardThrust = Obj.currentMaxForwardThrust end
+    if Obj.currentForwardThrust < 0 then Obj.currentForwardThrust = 0 end
 
     Obj.body:setLinearVelocity(math.cos(currentangle) * Obj.currentForwardThrust, math.sin(currentangle) * Obj.currentForwardThrust)
     -- print("Velocity for " .. Obj.fixture:getUserData() .. " is now " .. Obj.body:getLinearVelocity() .. " and thrust is " .. Obj.currentForwardThrust)
@@ -457,29 +488,24 @@ function unitai.update(squadAI, dt)
     for k = #OBJECTS, 1, -1 do
         Obj = OBJECTS[k]
         local callsign = Obj.squadCallsign
+        local objcategory = Obj.fixture:getCategory()
 
-        -- print(callsign)
-        -- print(inspect(squadAI[callsign]))
-        -- print(inspect(squadAI[callsign].orders))
-
-        if callsign ~= nil then                     -- bullets won't have a callsign
+        if objcategory == enum.categoryEnemyFighter or objcategory == enum.categoryFriendlyFighter then
             assert(Obj.body:isBullet() == false)
             if #squadAI[callsign].orders == 0 then
                 squadorder = nil
+                print("Unit detecting squad has no order")
             else
                 squadorder = squadAI[callsign].orders[1].order
             end
-
             updateUnitTask(Obj, squadorder, dt)     -- choose targets etc based on the current squad order
             adjustAngle(Obj, dt)         -- send the object and the order for its squad
             adjustThrust(Obj, dt)
             fireWeapons(Obj, dt)
-        else
-            -- bullet or pod
-            local objcategory = Obj.fixture:getCategory()
-            if objcategory == enum.categoryEnemyPod or objcategory == enum.categoryFriendlyPod then
+        elseif objcategory == enum.categoryEnemyPod or objcategory == enum.categoryFriendlyPod then
                 updatePod(Obj)
-            end
+        else
+            -- must be a bullet. Do nothing
         end
     end
 end
