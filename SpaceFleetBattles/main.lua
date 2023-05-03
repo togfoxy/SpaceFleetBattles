@@ -28,7 +28,9 @@ require 'constants'
 fun = require 'functions'
 cf = require 'lib.commonfunctions'
 
+require 'mainmenu'
 require 'fight'
+require 'endbattle'
 require 'commanderai'
 require 'squadai'
 require 'unitai'
@@ -39,7 +41,6 @@ end
 
 function beginContact(a, b, coll)
 	-- a and be are fixtures
-	-- print("Contact")
 	-- get the body that owns the fixture
 	local object1index, object2index
 
@@ -111,6 +112,7 @@ function love.mousereleased(x, y, button, isTouch)
 		fight.mousereleased(rx, ry, x, y, button)		-- need to send through the res adjusted x/y and the 'real' x/y
 	elseif currentscene == enum.scenePodium then
 	elseif currentscene == enum.sceneMainMenu then
+		mainmenu.mousereleased(rx, ry, x, y, button)
 	end
 end
 
@@ -128,7 +130,8 @@ function love.load()
     fun.loadAudio()
 	fun.loadImages()
 
-	-- mainmenu.loadButtons()
+	mainmenu.loadButtons()
+	endbattle.loadButtons()
 
 	cam = Camera.new(SCREEN_WIDTH / 2, SCREEN_HEIGHT / 2, 1)
 	cam:setZoom(ZOOMFACTOR)
@@ -138,8 +141,8 @@ function love.load()
 
 	love.keyboard.setKeyRepeat(true)
 
-	-- cf.addScreen("MainMenu", SCREEN_STACK)
-	cf.addScreen(enum.sceneFight, SCREEN_STACK)
+	cf.addScreen(enum.sceneMainMenu, SCREEN_STACK)
+	-- cf.addScreen(enum.sceneFight, SCREEN_STACK)
 
 	lovelyToasts.canvasSize = {SCREEN_WIDTH, SCREEN_HEIGHT}
 	lovelyToasts.options.tapToDismiss = true
@@ -153,14 +156,20 @@ function love.load()
 	GRIDS[enum.gridExplosion] = anim8.newGrid(16, 16, IMAGE[enum.imageExplosion]:getWidth(), IMAGE[enum.imageExplosion]:getHeight())
 end
 
-
 function love.draw()
     res.start()
 	local currentscene = cf.currentScreenName(SCREEN_STACK)
 	if currentscene == enum.sceneFight then
 		fight.draw()
+	elseif currentscene == enum.sceneMainMenu then
+		mainmenu.draw()
+	elseif currentscene == enum.sceneEndBattle then
+		endbattle.draw()
+	else
+		error()
 	end
 
+	-- draw animations
 	love.graphics.setColor(1,1,1,1)
 	local scale = love.physics.getMeter( )
 	for _, animation in pairs(ANIMATIONS) do
@@ -169,7 +178,7 @@ function love.draw()
 			animation:draw(IMAGE[enum.imageExplosion], drawx, drawy, animation.angle, 1, 1, 0, 0)
 		elseif animation.type == enum.animSmoke then
 			-- different offset
-			animation:draw(IMAGE[enum.imageExplosion], drawx, drawy, animation.angle, 1, 1, 10, 10)
+			animation:draw(IMAGE[enum.imageExplosion], drawx, drawy, animation.angle, 1, 1, 10, 5)
 		end
 	end
 

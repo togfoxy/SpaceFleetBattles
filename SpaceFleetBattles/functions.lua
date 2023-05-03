@@ -103,6 +103,11 @@ function functions.applyDamage(victim, bullet)
 	if victim.componentHealth[enum.componentStructure] <= 0 then
 		-- boom. Victim is dead
 		fun.createAnimation(victim, enum.animExplosion)
+        if victim.forf == enum.forfFriend then
+            SCORE.friendsdead = SCORE.friendsdead + 1
+        elseif victim.forf == enum.forfEnemy then
+            SCORE.enemiesdead = SCORE.enemiesdead + 1
+        end
         victim.lifetime = 0
         unitai.clearTarget(hitindex)		-- anyone that is targetting this needs a new target
     else

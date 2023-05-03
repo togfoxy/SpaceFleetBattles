@@ -36,9 +36,13 @@ function constants.load()
     NUM_OF_OBJECTS = 10
     FRIEND_START_X = 0      -- left side of screen
     FOE_START_X = SCREEN_WIDTH * 2
-    PHYS_OBJECTS = {}       -- table of box2d
+
     OBJECTS = {}            -- table of items
+    SQUADS = {}             -- a list of squad guids
+    SQUAD_LIST = {}         -- a list of callsigns and their forf
+    squadAI = {}
     SOUNDS = {}             -- sound effects
+    SCORE = {}              -- track casulties in this table
 
     PLAYER_GUID = nil
 

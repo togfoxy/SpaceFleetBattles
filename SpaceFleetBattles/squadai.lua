@@ -1,9 +1,47 @@
 squadai = {}
 
+function squadai.initialiseSquadList()
+    for i = 65, 90 do
+        for j = 1, 9 do
+            local str = string.char(i) .. tostring(j)
+            SQUAD_LIST[str] = nil            -- setting to nil makes it available for selection
+        end
+    end
+end
 
-function squadai.update(commanderAI, squadAI, squadlist, dt)
+function squadai.createSquadron(forf, shipspersquadron)
+    -- create a wing of 6 units
+    -- the squadron is a concept only and is created by giving x fighters the same squad id
+    -- input: forf = friend or foe. example: enum.forfFriend
 
-    for callsign, squadforf in pairs(squadlist) do
+    -- get a random and empty callsign from the squadlist
+    -- the squad callsign is a two character code. the squadlist ensures it is unique
+    local squadcallsign = nil
+    while squadcallsign == nil do
+        local txt = string.char(love.math.random(65, 90))
+        local txt = txt .. tostring(love.math.random(1,9))
+        squadcallsign = txt
+        if SQUAD_LIST[squadcallsign] == nil then
+
+            SQUAD_LIST[squadcallsign] = forf       -- mark this squad as friend or enemy
+
+            squadAI[squadcallsign] = {}
+            squadAI[squadcallsign].orders = {}
+        end
+    end
+
+    print("Created squad callsign: " .. squadcallsign)
+
+    table.insert(SQUADS, squadcallsign)
+
+    for i = 1, shipspersquadron do
+        unitai.createFighter(forf, squadcallsign)
+    end
+end
+
+function squadai.update(commanderAI, squadAI, dt)
+
+    for callsign, squadforf in pairs(SQUAD_LIST) do
 
         if squadAI[callsign].orders == nil then squadAI[callsign].orders = {} end
 
