@@ -4,6 +4,7 @@ function functions.loadImages()
     IMAGE[enum.imageExplosion] = love.graphics.newImage("assets/images/SmokeFireQuads.png")
     IMAGE[enum.imageFightHUD] = love.graphics.newImage("assets/images/fighthud.png")
     IMAGE[enum.imageFightBG] = love.graphics.newImage("assets/images/background1.png")
+    IMAGE[enum.imageEscapePod] = love.graphics.newImage("assets/images/pod.png")
 end
 
 function functions.loadFonts()
@@ -144,19 +145,33 @@ end
 
 function functions.getObject(guid)
     -- cycle through OBJECTS until found GUID
+    -- returns that object or nil
     for i = 1, #OBJECTS do
         if OBJECTS[i].guid == guid then
             return OBJECTS[i]
         end
     end
+    return nil
 end
 
 function functions.isPlayerAlive()
-    if OBJECTS[1].guid == PLAYER_GUID then
-        return true
-    else
-        return false
+
+    for i = 1, #OBJECTS do
+        if OBJECTS[i].guid == PLAYER_GUID then
+            return true
+        end
     end
+    return false
+end
+
+function functions.unitIsTargeted(guid)
+    -- return true if any object has this guid as a target
+    for i = 1, #OBJECTS do
+        if OBJECTS[i].targetguid == guid then
+            return true
+        end
+    end
+    return false
 end
 
 return functions

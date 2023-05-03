@@ -4,7 +4,6 @@ function unitai.createFighter(forf, squadcallsign)
     -- forf = friend or foe.  See enums
     -- callsign is plain text eg "Rogue One". It is also the unique identifier for the squad
 
-
     local rndx, rndy
     if forf == enum.forfFriend then
         -- rndx = love.math.random(50, SCREEN_WIDTH /3)
@@ -20,9 +19,6 @@ function unitai.createFighter(forf, squadcallsign)
     else
         error()
     end
-
-    rndx = rndx
-    rndy = rndy
 
     local thisobject = {}
     thisobject.body = love.physics.newBody(PHYSICSWORLD, rndx, rndy, "dynamic")
@@ -84,6 +80,79 @@ function unitai.createFighter(forf, squadcallsign)
     table.insert(OBJECTS, thisobject)
 end
 
+local function createEscapePod(Obj)
+    -- Obj is the obj that is spawning/creating the pod. It assumed this Obj will soon be destroyed
+
+    local podx, pody = Obj.body:getPosition()
+
+    local thisobject = {}
+    thisobject.body = love.physics.newBody(PHYSICSWORLD, podx, pody, "dynamic")
+	thisobject.body:setLinearDamping(0)
+
+    if forf == enum.forfFriend then
+        thisobject.body:setAngle(math.pi)   -- towards base
+    else
+        thisobject.body:setAngle(0)
+    end
+
+    thisobject.shape = love.physics.newRectangleShape(4, 3)
+	thisobject.fixture = love.physics.newFixture(thisobject.body, thisobject.shape, 1)		-- the 1 is the density
+	thisobject.fixture:setRestitution(0.25)
+	thisobject.fixture:setSensor(false)
+
+    if Obj.forf == enum.forfFriend then
+        thisobject.fixture:setCategory(enum.categoryFriendlyPod)
+        thisobject.fixture:setMask(enum.categoryFriendlyFighter, enum.categoryFriendlyBullet, enum.categoryEnemyFighter, enum.categoryFriendlyPod)
+        thisobject.body:applyLinearImpulse(-0.75, 0)
+    elseif Obj.forf == enum.forfEnemy then
+        thisobject.fixture:setCategory(enum.categoryEnemyPod)
+        thisobject.fixture:setMask(enum.categoryEnemyFighter, enum.categoryEnemyBullet, enum.categoryFriendlyFighter, enum.categoryEnemyPod)   -- these are the things that will not trigger a collision
+        thisobject.body:applyLinearImpulse(0.75, 0)
+    end
+
+    if Obj.guid == PLAYER_GUID then
+        guid = PLAYER_GUID      -- POD inherits player guid
+    else
+        local guid = cf.getGUID()
+    end
+	thisobject.fixture:setUserData(guid)
+    thisobject.guid = guid
+
+    thisobject.forf = Obj.forf
+    thisobject.squadCallsign = Obj.squadcallsign
+    thisobject.currentAction = nil              -- this will be influenced by squad orders + player choices
+    thisobject.taskCooldown = 0
+    thisobject.weaponcooldown = 0           --! might be more than one weapon in the future
+
+    thisobject.currentMaxForwardThrust = 50    -- can be less than max if battle damaged
+    thisobject.maxForwardThrust = 50
+    thisobject.currentForwardThrust = 0
+    thisobject.maxAcceleration = 25
+    thisobject.maxDeacceleration = 25       -- set to 0 for bullets
+    thisobject.currentMaxAcceleration = 25 -- this can be less than maxAcceleration if battle damaged
+    thisobject.maxSideThrust = 0
+    thisobject.currentSideThrust = 0
+
+    thisobject.componentSize = {}
+    thisobject.componentSize[enum.componentStructure] = 3
+    thisobject.componentSize[enum.componentThruster] = 0
+    thisobject.componentSize[enum.componentAccelerator] = 0
+    thisobject.componentSize[enum.componentWeapon] = 0
+    thisobject.componentSize[enum.componentSideThruster] = 0
+
+    thisobject.componentHealth = {}
+    thisobject.componentHealth[enum.componentStructure] = 100
+    thisobject.componentHealth[enum.componentThruster] = 0
+    thisobject.componentHealth[enum.componentAccelerator] = 0
+    thisobject.componentHealth[enum.componentWeapon] = 0
+    thisobject.componentHealth[enum.componentSideThruster] = 0
+
+    thisobject.destx = nil
+    thisobject.desty = nil
+
+    table.insert(OBJECTS, thisobject)
+end
+
 function unitai.clearTarget(deadtargetguid)
     -- move through all objects and clear target guid if target guid = input parameter
     -- use this to remove targets from other craft if a target is destroyed
@@ -109,12 +178,14 @@ local function getClosestFighter(thisObj, desiredforf)
     for k, Obj in pairs(OBJECTS) do
         -- get distance to this obj
         if Obj.forf == desiredforf and not Obj.body:isBullet() then
-            local objx, objy = Obj.body:getPosition()
-            local dist = cf.getDistance(thisobjx, thisobjy, objx, objy)
-            if closestid == 0 or dist < closestdist then
-                -- got a new candidate
-                closestid = k
-                closestdist = dist
+            if Obj.fixture:getCategory() == enum.categoryEnemyFighter or Obj.fixture:getCategory() == enum.categoryFriendlyFighter then
+                local objx, objy = Obj.body:getPosition()
+                local dist = cf.getDistance(thisobjx, thisobjy, objx, objy)
+                if closestid == 0 or dist < closestdist then
+                    -- got a new candidate
+                    closestid = k
+                    closestdist = dist
+                end
             end
         end
     end
@@ -138,6 +209,11 @@ local function setTaskRTB(Obj)
     end
 end
 
+local function setTaskEject(Obj)
+    Obj.lifetime = 0
+    createEscapePod(Obj)
+end
+
 local function updateUnitTask(Obj, squadorder, dt)
     -- this adjusts targets or other goals based on the squad order
 
@@ -147,10 +223,11 @@ local function updateUnitTask(Obj, squadorder, dt)
         Obj.taskCooldown = 5
 
         -- do self-preservation checks firstly. Remember the ordering matters
-        if Obj.componentHealth[enum.componentWeapon] <= 0 then
+        if (Obj.componentHealth[enum.componentStructure] <= 35 and fun.unitIsTargeted(Obj.guid))
+            or (Obj.componentHealth[enum.componentStructure] <= 35 and Obj.componentHealth[enum.componentThruster] <= 0) then
+            setTaskEject(Obj)
+        elseif Obj.componentHealth[enum.componentWeapon] <= 0 then
             setTaskRTB(Obj)
-        -- elseif Obj.componentHealth[enum.componentThruster] <= 0 then
-        --     --! eject
         elseif Obj.componentHealth[enum.componentThruster] <= 50 then
             setTaskRTB(Obj)
         elseif Obj.componentHealth[enum.componentSideThruster] <= 25 then
@@ -227,15 +304,14 @@ local function adjustAngle(Obj, dt)
     end
 
     local bearingrad
-    if Obj.targetguid == nil or Obj.targetguid == 0 then
+    if Obj.targetguid == nil or Obj.targetguid == 0 then        --! should probably check for RTB or something like that and not a nil targetguid
         if Obj.destx ~= nil then
             -- move to destination
             local objx, objy = Obj.body:getPosition()
             local destx, desty = Obj.destx, Obj.desty
             local disttodest = cf.getDistance(objx, objy, destx, desty)
-            if disttodest < 10 then
-                -- print("Arrived at destination")      --! need to remove the fighter from play
-                Obj.currentForwardThrust = 0                --! this is for testing only
+            if disttodest < 10 then     -- not sure why this code is here in this function
+                -- arrived at destination
                 Obj.lifetime = 0                        -- destroy the object
             else
                 turnToObjective(Obj, destx, desty, dt)
@@ -354,6 +430,25 @@ local function fireWeapons(Obj, dt)
     end
 end
 
+local function updatePod(Pod)
+    -- Pod is an object. Check if it reaches safetly
+    if Pod.forf == enum.forfFriend then
+        if Pod.body:getX() <= FRIEND_START_X then
+            -- safe
+            Pod.lifetime = 0
+        end
+
+    elseif Pod.forf == enum.forfEnemy then
+        if Pod.body:getX() >= FOE_START_X then
+            -- safe
+            Pod.lifetime = 0
+        end
+    else
+        error()
+    end
+
+end
+
 function unitai.update(squadAI, dt)
     -- update all units in OBJECTS based on the AI above them
     -- update the unit based on orders broadcasted in squadAI
@@ -380,9 +475,11 @@ function unitai.update(squadAI, dt)
             adjustThrust(Obj, dt)
             fireWeapons(Obj, dt)
         else
-            local guid = Obj.fixture:getUserData()
-            local x, y = Obj.body:getLinearVelocity()
-            -- print("This is a bullet: " .. guid, x, y )
+            -- bullet or pod
+            local objcategory = Obj.fixture:getCategory()
+            if objcategory == enum.categoryEnemyPod or objcategory == enum.categoryFriendlyPod then
+                updatePod(Obj)
+            end
         end
     end
 end

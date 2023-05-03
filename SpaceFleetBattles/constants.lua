@@ -37,12 +37,17 @@ function constants.load()
     FRIEND_START_X = 0      -- left side of screen
     FOE_START_X = SCREEN_WIDTH * 2
 
+    FRIEND_SHIP_COUNT = 24
+    FRIEND_PILOT_COUNT = 24
+
     OBJECTS = {}            -- table of items
     SQUADS = {}             -- a list of squad guids
     SQUAD_LIST = {}         -- a list of callsigns and their forf
     squadAI = {}
     SOUNDS = {}             -- sound effects
     SCORE = {}              -- track casulties in this table
+    SCORE.friendsdead = 0       -- put here for documentation and to help me remember
+    SCORE.enemiesdead = 0
 
     PLAYER_GUID = nil
 

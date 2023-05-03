@@ -21,16 +21,6 @@ local function destroyObjects(dt)
     end
 end
 
-local function playerIsTargetted()
-
-    for i = 1, #OBJECTS do
-        if OBJECTS[i].targetguid == PLAYER_GUID then
-            return true
-        end
-    end
-    return false
-end
-
 local function battleOver()
     local isFriends = false
     local isFoes = false
@@ -65,7 +55,7 @@ function fight.wheelmoved(x, y)
 		ZOOMFACTOR = ZOOMFACTOR - 0.05
 	end
 	if ZOOMFACTOR > 3 then ZOOMFACTOR = 3 end
-	print("Zoom factor = " .. ZOOMFACTOR)
+	-- print("Zoom factor = " .. ZOOMFACTOR)
 end
 
 function fight.mousemoved(x, y, dx, dy)
@@ -93,7 +83,8 @@ function fight.mousereleased(rx, ry, x, y, button)
             else
                 -- if clicking off the menu then turn off menu
                 if showmenu then
-                    sowmenu = false
+                    showmenu = false
+                    pause = false
                 end
             end
         end
@@ -105,30 +96,36 @@ local function drawHUD()
     love.graphics.setColor(1,1,1,1)
     love.graphics.draw(IMAGE[enum.imageFightHUD], 0, 0)
 
-    if OBJECTS[1].guid == PLAYER_GUID then
+    if fun.isPlayerAlive() then
+        local Obj = fun.getObject(PLAYER_GUID)
+
+        -- print(PLAYER_GUID)
+        -- print(inspect(Obj))
+        --
+        -- error()
 
         local barlength = 100       -- unnecessary but a reminder that the barlength is a convenient 100 pixels
         local barheight = 10
         love.graphics.setColor(0,1,0,0.3)
 
         -- structure bar
-        local drawlength = OBJECTS[1].componentHealth[enum.componentStructure]
+        local drawlength = Obj.componentHealth[enum.componentStructure]
         love.graphics.rectangle("fill", 145, 47, drawlength, 10)
 
         -- thrusters bar
-        local drawlength = OBJECTS[1].componentHealth[enum.componentThruster]
+        local drawlength = Obj.componentHealth[enum.componentThruster]
         love.graphics.rectangle("fill", 145, 71, drawlength, 10)
 
         -- weapon bar
-        local drawlength = OBJECTS[1].componentHealth[enum.componentWeapon]
+        local drawlength = Obj.componentHealth[enum.componentWeapon]
         love.graphics.rectangle("fill", 145, 95, drawlength, 10)
 
         -- Steering bar (side thrusters)
-        local drawlength = OBJECTS[1].componentHealth[enum.componentSideThruster]
+        local drawlength = Obj.componentHealth[enum.componentSideThruster]
         love.graphics.rectangle("fill", 145, 119, drawlength, 10)
 
         -- throttle bar (componentAccelerator)
-        local drawlength = OBJECTS[1].componentHealth[enum.componentAccelerator]
+        local drawlength = Obj.componentHealth[enum.componentAccelerator]
         love.graphics.rectangle("fill", 145, 143, drawlength, 10)
 
     end
@@ -171,40 +168,46 @@ function fight.draw()
 
         -- draw the physics object
         for _, fixture in pairs(Obj.body:getFixtures()) do
-            local shape = fixture:getShape()
-            if shape:typeOf("PolygonShape") then
-                --
-    			local points = {Obj.body:getWorldPoints(shape:getPoints())}
-                if Obj.forf == enum.forfFriend then
-                    love.graphics.setColor(0,1,0,1)
-                elseif Obj.forf == enum.forfEnemy then
-                    love.graphics.setColor(0,0,1,1)
-                elseif Obj.forf == enum.forfNeutral then
-                    love.graphics.setColor(0.5,0.5,0.5,1)
+            local objtype = fixture:getCategory()           -- an enum
+            if objtype == enum.categoryFriendlyPod or objtype == enum.categoryEnemyPod then
+                love.graphics.setColor(1,1,1,1)
+                love.graphics.draw(IMAGE[enum.imageEscapePod], drawx, drawy, 1.5707, 0.35, 0.35)      -- 1.57 radians = 90 degrees
+            else
+                local shape = fixture:getShape()
+                if shape:typeOf("PolygonShape") then
+                    --
+                    local points = {Obj.body:getWorldPoints(shape:getPoints())}
+                    if Obj.forf == enum.forfFriend then
+                        love.graphics.setColor(0,1,0,1)
+                    elseif Obj.forf == enum.forfEnemy then
+                        love.graphics.setColor(0,0,1,1)
+                    elseif Obj.forf == enum.forfNeutral then
+                        love.graphics.setColor(0.5,0.5,0.5,1)
+                    else
+                        error()
+                    end
+
+                    if Obj.guid == PLAYER_GUID then
+                        love.graphics.setColor(1,1,0,1)
+                    end
+
+                    love.graphics.polygon("fill", points)
+                elseif shape:typeOf("CircleShape") then
+                    --
+                    local drawx, drawy = Obj.body:getWorldPoints(shape:getPoint())
+                    drawx = drawx
+                    drawy = drawy
+                    local radius = shape:getRadius()
+                    radius = radius
+                    love.graphics.setColor(1, 0, 0, 1)
+                    love.graphics.circle("line", drawx, drawy, radius)
                 else
                     error()
                 end
-
-                if Obj.guid == PLAYER_GUID then
-                    love.graphics.setColor(1,1,0,1)
-                end
-
-    			love.graphics.polygon("fill", points)
-            elseif shape:typeOf("CircleShape") then
-                --
-                local drawx, drawy = Obj.body:getWorldPoints(shape:getPoint())
-				drawx = drawx
-				drawy = drawy
-				local radius = shape:getRadius()
-				radius = radius
-				love.graphics.setColor(1, 0, 0, 1)
-				love.graphics.circle("line", drawx, drawy, radius)
-			else
-                error()
             end
 		end
 
-        -- draw velocity
+        -- draw velocity as text
         -- if not Obj.body:isBullet() then
         --     local vx, vy = Obj.body:getLinearVelocity()
         --     local vel = cf.getDistance(0, 0, vx, vy)    -- get distance of velocity vector
@@ -227,9 +230,10 @@ function fight.draw()
     end
 
     -- draw target recticle for player 1
-    if OBJECTS[1].guid == PLAYER_GUID then
+    if fun.isPlayerAlive() then
+        local Obj = fun.getObject(PLAYER_GUID)
         -- player still alive
-        local guid = OBJECTS[1].targetguid
+        local guid = Obj.targetguid
         local enemy = fun.getObject(guid)
 
         -- print(inspect(enemy))
@@ -243,20 +247,22 @@ function fight.draw()
     end
 
     -- draw yellow recticle if player is targeted
-    if playerIsTargetted() then
+    if fun.unitIsTargeted(PLAYER_GUID) then
         -- draw yellow recticle on player craft
-        local objx = OBJECTS[1].body:getX()
-        local objy = OBJECTS[1].body:getY()
-
-        local linelength = 12
-        love.graphics.setColor(1, 0.5, 0, 1)
-        love.graphics.line(objx, objy - linelength, objx + linelength, objy + linelength, objx - linelength, objy + linelength, objx, objy - linelength)
+        local Obj = fun.getObject(PLAYER_GUID)
+        if Obj ~= nil and Obj.fixture:getCategory() ~= enum.categoryFriendlyPod then
+            local objx = Obj.body:getX()
+            local objy = Obj.body:getY()
+            local linelength = 12
+            love.graphics.setColor(1, 0.5, 0, 1)
+            love.graphics.line(objx, objy - linelength, objx + linelength, objy + linelength, objx - linelength, objy + linelength, objx, objy - linelength)
+        end
     end
 
     -- draw the menu if menu is open
     if showmenu and fun.isPlayerAlive() then
-        -- local drawx, drawy = cam:toScreen(OBJECTS[1].body:getX(), OBJECTS[1].body:getY()) -- need to convert physical to screen
-        local drawx, drawy = res.toGame(OBJECTS[1].body:getX(), OBJECTS[1].body:getY()) -- need to convert physical to screen
+        local Obj = fun.getObject(PLAYER_GUID)
+        local drawx, drawy = res.toGame(Obj.body:getX(), Obj.body:getY()) -- need to convert physical to screen
 
         -- fill the menu box
         local menuwidth = 150
@@ -268,7 +274,7 @@ function fight.draw()
         love.graphics.rectangle("line", drawx, drawy, menuwidth, 75, 10, 10)
 
         -- draw squad orders an a line
-        local squadcallsign = OBJECTS[1].squadCallsign
+        local squadcallsign = Obj.squadCallsign
         local orderenum = squadAI[squadcallsign].orders[1].order
         if orderenum == enum.squadOrdersEngage then
             txt = "Squad: engage"
@@ -282,7 +288,7 @@ function fight.draw()
         love.graphics.line(drawx, drawy + 15, drawx + menuwidth, drawy + 15)
 
         -- draw current action and a line
-        actionenum = OBJECTS[1].currentAction
+        actionenum = Obj.currentAction
         if actionenum == enum.unitActionEngaging then
             txt = "Engaging"
         elseif actionenum == enum.unitActionReturningToBase then
@@ -337,8 +343,9 @@ function fight.update(dt)
     lovelyToasts.update(dt)
 
     if snapcamera then
-        TRANSLATEX = OBJECTS[1].body:getX()     -- if 1 == player then this works well
-        TRANSLATEY = OBJECTS[1].body:getY()     -- if 1 ~= player then still works well
+        local Obj = fun.getObject(PLAYER_GUID)
+        TRANSLATEX = Obj.body:getX()
+        TRANSLATEY = Obj.body:getY()
     end
 
     if battleOver() then

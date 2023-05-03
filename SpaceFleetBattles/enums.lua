@@ -34,6 +34,8 @@ function enums.load()
     enum.categoryEnemyFighter = 2
     enum.categoryFriendlyBullet = 3             -- includes missiles and bombs
     enum.categoryEnemyBullet = 4                -- includes missiles and bombs
+    enum.categoryFriendlyPod = 5
+    enum.categoryEnemyPod = 6
 
     enum.commanderOrdersEngage = 1
     enum.commanderOrdersReturnToBase = 2
@@ -43,10 +45,12 @@ function enums.load()
 
     enum.unitActionEngaging = 1
     enum.unitActionReturningToBase = 2
+    enum.unitActionEject = 3
 
     enum.imageExplosion = 1
     enum.imageFightHUD = 2
     enum.imageFightBG = 3
+    enum.imageEscapePod = 4
 
     enum.gridExplosion = 1
 
