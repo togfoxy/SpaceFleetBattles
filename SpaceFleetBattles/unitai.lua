@@ -245,10 +245,17 @@ local function updateUnitTask(Obj, squadorder, dt)
             Obj.destx = nil         -- clear previous destinations if any
             Obj.desty = nil
             if Obj.forf == enum.forfFriend then
-                Obj.targetguid = getClosestFighter(Obj, enum.forfEnemy)        -- this OBJECTS guid
+                Obj.targetguid = getClosestFighter(Obj, enum.forfEnemy)        -- this OBJECTS guid or nil
             end
             if Obj.forf == enum.forfEnemy then
-                Obj.targetguid = getClosestFighter(Obj, enum.forfFriend)       -- this OBJECTS guid
+                Obj.targetguid = getClosestFighter(Obj, enum.forfFriend)       -- this OBJECTS guid or nil
+            end
+
+            -- do an assert here
+            if Obj.targetguid ~= nil then
+                local targetobj = fun.getObject(Obj.targetguid)
+                local targetcategory = targetobj.fixture:getCategory()
+                assert(targetcategory == enum.categoryEnemyFighter or targetcategory == enum.categoryFriendlyFighter)
             end
 
             -- print("Unit task: setting target id")
@@ -295,6 +302,7 @@ local function adjustAngle(Obj, dt)
     -- if there is a nominated target then find the preferred angle and turn towards it
 
     assert(Obj.body:isBullet() == false)
+    local action = Obj.currentAction
 
     while Obj.body:getAngle() > (math.pi * 1) do
         Obj.body:setAngle(Obj.body:getAngle() - (math.pi * 2))
@@ -304,7 +312,7 @@ local function adjustAngle(Obj, dt)
     end
 
     local bearingrad
-    if Obj.targetguid == nil or Obj.targetguid == 0 then        --! should probably check for RTB or something like that and not a nil targetguid
+    if action == enum.unitActionReturningToBase then        --! should probably check for RTB or something like that and not a nil targetguid
         if Obj.destx ~= nil then
             -- move to destination
             local objx, objy = Obj.body:getPosition()
@@ -316,12 +324,13 @@ local function adjustAngle(Obj, dt)
             else
                 turnToObjective(Obj, destx, desty, dt)
             end
+        else
+            --! should throw error or set a new destination?
         end
 
-    elseif Obj.targetguid ~= nil then
-        local x1, y1 = Obj.body:getPosition()
+    elseif action == enum.unitActionEngaging then
+        local x1, y1 = Obj.body:getPosition()           --! can refactor this code
         local enemyobject = fun.getObject(Obj.targetguid)
-        --! this throws an error
         if enemyobject ~= nil and not enemyobject.body:isDestroyed() then        -- check if target is dead
             local x2, y2 = enemyobject.body:getPosition()
             turnToObjective(Obj, x2, y2, dt)
@@ -330,6 +339,7 @@ local function adjustAngle(Obj, dt)
         end
     else
         -- nothing. Is this an error?
+        error("No order so can't set angle", 335)
     end
 end
 
@@ -341,33 +351,44 @@ local function adjustThrust(Obj, dt)
 
     local currentangle = Obj.body:getAngle( )
     if Obj.currentAction == enum.unitActionEngaging then
+        -- print("zulu")
         -- don't overtake target
         local objx, objy = Obj.body:getPosition()
         local objfacing = Obj.body:getAngle()
         local targetObj = fun.getObject(Obj.targetguid)
         if targetObj ~= nil then
+            -- print("alpha")
             local targetx, targety = targetObj.body:getPosition()
 
             if cf.isInFront(objx, objy, objfacing, targetx, targety) then
+                -- print("beta")
                 if targetObj.currentForwardThrust < Obj.currentForwardThrust then
+                    -- print("charlie")
                     local dist = cf.getDistance(objx, objy, targetx, targety)
-                    if dist <= 100 then
+                    if dist <= 125 then
+                        -- print("delta")
                         if Obj.guid == PLAYER_GUID then
                             print("Dist = " .. dist .. ". Will try to match speed")
                         end
                         -- try to match speed
                         Obj.currentForwardThrust = Obj.currentForwardThrust - (Obj.maxDeacceleration * dt)
                         if Obj.currentForwardThrust < targetObj.currentForwardThrust then
+                            -- print("echo")
                             Obj.currentForwardThrust = targetObj.currentForwardThrust
                         end
                     else
+                        -- print("foxtrot")
                         -- max thrust needed
                         Obj.currentForwardThrust = Obj.currentForwardThrust + (Obj.currentMaxAcceleration * dt)
                     end
                 else
+                    -- print("golf")
                     -- max throttle
                     Obj.currentForwardThrust = Obj.currentForwardThrust + (Obj.currentMaxAcceleration * dt)
                 end
+            else
+                -- target is not in front. Full thrust needed
+                Obj.currentForwardThrust = Obj.currentForwardThrust + (Obj.currentMaxAcceleration * dt)
             end
         else
             print("Engaging but no target. ??")
