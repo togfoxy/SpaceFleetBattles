@@ -270,6 +270,16 @@ local function updateUnitTask(Obj, squadorder, dt)
     end
 end
 
+local function isFighter(Obj)
+
+    local category = Obj.fixture:getCategory()
+    if category == enum.categoryEnemyFighter or category == enum.categoryFriendlyFighter then
+        return true
+    else
+        return false
+    end
+end
+
 local function turnToObjective(Obj, destx, desty, dt)
     -- turn the object towards the destx/desty
 
@@ -356,7 +366,7 @@ local function adjustThrust(Obj, dt)
         local objx, objy = Obj.body:getPosition()
         local objfacing = Obj.body:getAngle()
         local targetObj = fun.getObject(Obj.targetguid)
-        if targetObj ~= nil then
+        if targetObj ~= nil and isFighter(targetObj) then
             -- print("alpha")
             local targetx, targety = targetObj.body:getPosition()
 
@@ -387,7 +397,7 @@ local function adjustThrust(Obj, dt)
                     Obj.currentForwardThrust = Obj.currentForwardThrust + (Obj.currentMaxAcceleration * dt)
                 end
             else
-                -- target is not in front. Full thrust needed
+                -- target is not in front or target is not a fighter. Assume full thrust is needed
                 Obj.currentForwardThrust = Obj.currentForwardThrust + (Obj.currentMaxAcceleration * dt)
             end
         else

@@ -38,7 +38,7 @@ function constants.load()
 
     FRIEND_SHIP_COUNT = 24
     FRIEND_PILOT_COUNT = 24
-    SHIPS_PER_SQUADRON = 1
+    SHIPS_PER_SQUADRON = 6
 
     OBJECTS = {}            -- table of items
     SQUADS = {}             -- a list of squad guids
