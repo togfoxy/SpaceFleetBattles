@@ -33,9 +33,12 @@ function constants.load()
     enums.load()
     -- add extra items below this line ======================================================
 
-    NUM_OF_OBJECTS = 10
     FRIEND_START_X = 0      -- left side of screen
     FOE_START_X = SCREEN_WIDTH * 2
+
+    FRIEND_SHIP_COUNT = 24
+    FRIEND_PILOT_COUNT = 24
+    SHIPS_PER_SQUADRON = 6
 
     OBJECTS = {}            -- table of items
     SQUADS = {}             -- a list of squad guids
@@ -43,6 +46,8 @@ function constants.load()
     squadAI = {}
     SOUNDS = {}             -- sound effects
     SCORE = {}              -- track casulties in this table
+    SCORE.friendsdead = 0       -- put here for documentation and to help me remember
+    SCORE.enemiesdead = 0
 
     PLAYER_GUID = nil
 
