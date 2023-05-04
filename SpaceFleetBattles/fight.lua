@@ -14,6 +14,11 @@ local function destroyObjects(dt)
         if OBJECTS[i].lifetime ~= nil then
             OBJECTS[i].lifetime = OBJECTS[i].lifetime - dt
             if OBJECTS[i].lifetime <= 0 then
+                --! debugging
+                if OBJECTS[i].fixture:getCategory() == enum.categoryEnemyFighter or OBJECTS[i].fixture:getCategory() == enum.categoryFriendlyFighter then
+                    print("Fighter object destroyed:")
+                    -- print(inspect(OBJECTS[1]))
+                end
                 OBJECTS[i].body:destroy()
                 table.remove(OBJECTS, i)
             end

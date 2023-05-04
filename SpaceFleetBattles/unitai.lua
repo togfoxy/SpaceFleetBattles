@@ -121,7 +121,7 @@ local function createEscapePod(Obj)
 
     thisobject.forf = Obj.forf
     thisobject.squadCallsign = Obj.squadcallsign
-    thisobject.actions = {}         -- this will be influenced by squad orders + player choices
+
     thisobject.weaponcooldown = 0           --! might be more than one weapon in the future
 
     thisobject.currentMaxForwardThrust = 50    -- can be less than max if battle damaged
@@ -147,10 +147,19 @@ local function createEscapePod(Obj)
     thisobject.componentHealth[enum.componentWeapon] = 0
     thisobject.componentHealth[enum.componentSideThruster] = 0
 
-    -- thisobject.destx = nil
-    -- thisobject.desty = nil
+    thisobject.actions = {}         -- this will be influenced by squad orders + player choices
+    thisobject.actions[1] = {}
+    thisobject.actions[1].action = enum.unitActionReturningToBase
+    thisobject.actions[1].targetguid = nil
+    if thisobject.forf == enum.forfFriend then
+        thisobject.actions[1].destx = FRIEND_START_X
+    elseif thisobject.forf == enum.forfEnemy then
+        thisobject.actions[1].destx = FOE_START_X
+    end
+    thisobject.actions[1].desty = Obj.body:getY()
 
     table.insert(OBJECTS, thisobject)
+    print("Pod created: " .. thisobject.body:getX(), thisobject.body:getY())
 end
 
 function unitai.clearTarget(deadtargetguid)
@@ -158,9 +167,11 @@ function unitai.clearTarget(deadtargetguid)
     -- use this to remove targets from other craft if a target is destroyed
     -- input: deadtargetguid = guid of the target that is dead
     for k, Obj in pairs(OBJECTS) do
-        for j, action in pairs(Obj.orders) do
-            if action.targetguid == deadtargetguid then
-                action.cooldown = 0
+        if Obj.actions ~= nil then
+            for j, action in pairs(Obj.actions) do
+                if action.targetguid == deadtargetguid then
+                    action.cooldown = 0
+                end
             end
         end
     end
@@ -225,7 +236,6 @@ local function setTaskEject(Obj)
     createEscapePod(Obj)
 end
 
-
 local function isFighter(Obj)
 
     local category = Obj.fixture:getCategory()
@@ -280,13 +290,17 @@ local function adjustAngle(Obj, dt)
     if Obj.actions[1] ~= nil and Obj.actions[1].destx ~= nil then
         -- move to destination
         local objx, objy = Obj.body:getPosition()
-        local destx, desty = Obj.destx, Obj.desty
+        local destx = Obj.actions[1].destx
+        local desty = Obj.actions[1].desty
         local disttodest = cf.getDistance(objx, objy, destx, desty)
         if disttodest < 10 then
             -- arrived at destination
             if Obj.actions[1].action == enum.unitActionReturningToBase then
                 -- RTB successful. Destroy this object
+                print("RTB succeed. Destroying object")
                 Obj.lifetime = 0                        -- destroy the object
+                -- print(disttodest)
+                -- print(inspect(Obj))
             end
         else
             turnToObjective(Obj, destx, desty, dt)
@@ -498,6 +512,7 @@ local function updateUnitTask(Obj, squadorder, dt)
         if (Obj.componentHealth[enum.componentStructure] <= 35 and fun.unitIsTargeted(Obj.guid))
             or (Obj.componentHealth[enum.componentStructure] <= 35 and Obj.componentHealth[enum.componentThruster] <= 0) then
             setTaskEject(Obj)
+            print("Ho")
         elseif Obj.componentHealth[enum.componentWeapon] <= 0 then
             setTaskRTB(Obj)
         elseif Obj.componentHealth[enum.componentThruster] <= 50 then
