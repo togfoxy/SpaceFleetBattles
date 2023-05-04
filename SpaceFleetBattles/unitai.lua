@@ -225,65 +225,6 @@ local function setTaskEject(Obj)
     createEscapePod(Obj)
 end
 
-local function updateUnitTask(Obj, squadorder, dt)
-    -- this adjusts targets or other goals based on the squad order
-
-    if Obj.actions[1] ~= nil then
-        Obj.actions[1].cooldown = Obj.actions[1].cooldown - dt
-        if Obj.actions[1].cooldown <= 0 then
-            table.remove(Obj.actions, 1)
-        end
-    end
-
-    if #Obj.actions <= 0 then
-        -- try to find a new action
-
-        -- do self-preservation checks firstly. Remember the ordering matters
-        if (Obj.componentHealth[enum.componentStructure] <= 35 and fun.unitIsTargeted(Obj.guid))
-            or (Obj.componentHealth[enum.componentStructure] <= 35 and Obj.componentHealth[enum.componentThruster] <= 0) then
-            setTaskEject(Obj)
-        elseif Obj.componentHealth[enum.componentWeapon] <= 0 then
-            setTaskRTB(Obj)
-        elseif Obj.componentHealth[enum.componentThruster] <= 50 then
-            setTaskRTB(Obj)
-        elseif Obj.componentHealth[enum.componentSideThruster] <= 25 then
-            setTaskRTB(Obj)
-        elseif Obj.componentHealth[enum.componentAccelerator] <= 25 then
-            setTaskRTB(Obj)
-        elseif Obj.componentHealth[enum.componentStructure] <= 50 then
-            setTaskRTB(Obj)
-        elseif not fun.unitIsTargeted(Obj.guid) and Obj.body:getY() < 0 then
-			-- move back inside the battle map
-			setTaskDestination(Obj, Obj.body:getX(), 100)		--! check that this 100 value is correct
-		elseif not fun.unitIsTargeted(Obj.guid) and Obj.body:getY() > SCREEN_HEIGHT then
-			-- move back inside the battle map
-			setTaskDestination(Obj, Obj.body:getX(), SCREEN_HEIGHT - 100)		--! check that this 100 value is correct
-
-		-- after the self-preservation bits, take direction from current squad orders
-        elseif squadorder == enum.squadOrdersEngage then
-            local targetguid
-            if Obj.forf == enum.forfFriend then
-                targetguid = getClosestFighter(Obj, enum.forfEnemy)        -- this OBJECTS guid or nil
-            end
-            if Obj.forf == enum.forfEnemy then
-                targetguid = getClosestFighter(Obj, enum.forfFriend)       -- this OBJECTS guid or nil
-            end
-            local thisorder = {}
-            thisorder.action = enum.unitActionEngaging
-            thisorder.destx = nil
-            thisorder.desty = nil
-            thisorder.targetguid = targetguid
-            -- print("Unit task: setting target id")
-        elseif squadorder == enum.squadOrdersReturnToBase then
-                setTaskRTB(Obj)
-            -- print("Unit task: RTB")
-        else
-            --! no squad order or unexpected squad order
-            Obj.currentAction = nil
-            print("No squad order available for this unit")
-        end
-    end
-end
 
 local function isFighter(Obj)
 
@@ -539,6 +480,67 @@ local function updatePod(Pod)
     end
 end
 
+local function updateUnitTask(Obj, squadorder, dt)
+    -- this adjusts targets or other goals based on the squad order
+
+    if Obj.actions[1] ~= nil then
+        Obj.actions[1].cooldown = Obj.actions[1].cooldown - dt
+        if Obj.actions[1].cooldown <= 0 then
+            table.remove(Obj.actions, 1)
+        end
+    end
+
+    if #Obj.actions <= 0 then
+        -- try to find a new action
+
+        -- do self-preservation checks firstly. Remember the ordering matters
+        if (Obj.componentHealth[enum.componentStructure] <= 35 and fun.unitIsTargeted(Obj.guid))
+            or (Obj.componentHealth[enum.componentStructure] <= 35 and Obj.componentHealth[enum.componentThruster] <= 0) then
+            setTaskEject(Obj)
+        elseif Obj.componentHealth[enum.componentWeapon] <= 0 then
+            setTaskRTB(Obj)
+        elseif Obj.componentHealth[enum.componentThruster] <= 50 then
+            setTaskRTB(Obj)
+        elseif Obj.componentHealth[enum.componentSideThruster] <= 25 then
+            setTaskRTB(Obj)
+        elseif Obj.componentHealth[enum.componentAccelerator] <= 25 then
+            setTaskRTB(Obj)
+        elseif Obj.componentHealth[enum.componentStructure] <= 50 then
+            setTaskRTB(Obj)
+        elseif not fun.unitIsTargeted(Obj.guid) and Obj.body:getY() < 0 then
+			-- move back inside the battle map
+			setTaskDestination(Obj, Obj.body:getX(), 100)		--! check that this 100 value is correct
+		elseif not fun.unitIsTargeted(Obj.guid) and Obj.body:getY() > SCREEN_HEIGHT then
+			-- move back inside the battle map
+			setTaskDestination(Obj, Obj.body:getX(), SCREEN_HEIGHT - 100)		--! check that this 100 value is correct
+
+		-- after the self-preservation bits, take direction from current squad orders
+        elseif squadorder == enum.squadOrdersEngage then
+            local targetguid
+            if Obj.forf == enum.forfFriend then
+                targetguid = getClosestFighter(Obj, enum.forfEnemy)        -- this OBJECTS guid or nil
+            end
+            if Obj.forf == enum.forfEnemy then
+                targetguid = getClosestFighter(Obj, enum.forfFriend)       -- this OBJECTS guid or nil
+            end
+            local thisorder = {}
+            thisorder.action = enum.unitActionEngaging
+            thisorder.cooldown = 5
+            thisorder.destx = nil
+            thisorder.desty = nil
+            thisorder.targetguid = targetguid
+            table.insert(Obj.actions, thisorder)
+        elseif squadorder == enum.squadOrdersReturnToBase then
+                setTaskRTB(Obj)
+            -- print("Unit task: RTB")
+        else
+            --! no squad order or unexpected squad order
+            Obj.currentAction = nil
+            print("No squad order available for this unit")
+        end
+    end
+end
+
 function unitai.update(squadAI, dt)
     -- update all units in OBJECTS based on the AI above them
     -- update the unit based on orders broadcasted in squadAI
@@ -566,6 +568,12 @@ function unitai.update(squadAI, dt)
         else
             -- must be a bullet. Do nothing
         end
+    end
+    if OBJECTS[1].actions[1].targetguid ~= nil then
+        local targetguid = OBJECTS[1].actions[1].targetguid
+        local targetObj = fun.getObject(targetguid)
+        local cat = targetObj.fixture:getCategory()
+        print("Object 1 target type = " .. cat)
     end
 end
 
