@@ -200,11 +200,11 @@ local function setTaskRTB(Obj)
 	thisaction.action = enum.unitActionReturningToBase
 	thisaction.targetguid = nil
     if Obj.forf == enum.forfFriend then
-        Obj.destx = FRIEND_START_X
+        thisaction.destx = FRIEND_START_X
     elseif Obj.forf == enum.forfEnemy then
-        Obj.destx = FOE_START_X
+        thisaction.destx = FOE_START_X
     end
-    Obj.desty = Obj.body:getY()
+    thisaction.desty = Obj.body:getY()
 	table.insert(Obj.actions, thisaction)
 end
 
@@ -277,7 +277,6 @@ local function adjustAngle(Obj, dt)
     end
 
     local bearingrad
-
     if Obj.actions[1] ~= nil and Obj.actions[1].destx ~= nil then
         -- move to destination
         local objx, objy = Obj.body:getPosition()
@@ -294,12 +293,13 @@ local function adjustAngle(Obj, dt)
         end
     elseif Obj.actions[1] ~= nil and Obj.actions[1].targetguid ~= nil then
         local x1, y1 = Obj.body:getPosition()           --! can refactor this code
-        local enemyobject = fun.getObject(Obj.targetguid)
-        if enemyobject ~= nil and not enemyobject.body:isDestroyed() then        -- check if target is dead
+        local enemyobject = fun.getObject(Obj.actions[1].targetguid)
+        if enemyobject == nil or enemyobject.body:isDestroyed() then
+            -- somehow, the target is no longer legitimate
+            Obj.actions[1].cooldown = 0
+        else
             local x2, y2 = enemyobject.body:getPosition()
             turnToObjective(Obj, x2, y2, dt)
-        else
-            --! is this an error?
         end
     else
         --! actions[1] == nil or some other condition. Error?
@@ -376,7 +376,8 @@ local function adjustThrust(Obj, dt)
                 Obj.actions[1].cooldown = 0
     		end
         else
-            error()
+            print(inspect(Obj))
+            error("Seems to have no orders. Might be okay.")
         end
     else
         -- no orders. Slow down and stop
@@ -569,11 +570,16 @@ function unitai.update(squadAI, dt)
             -- must be a bullet. Do nothing
         end
     end
+    --! debugging only
     if OBJECTS[1].actions[1].targetguid ~= nil then
         local targetguid = OBJECTS[1].actions[1].targetguid
         local targetObj = fun.getObject(targetguid)
-        local cat = targetObj.fixture:getCategory()
-        print("Object 1 target type = " .. cat)
+        if targetObj == nil then
+            OBJECTS[1].actions[1].cooldown = 0
+        else
+            local cat = targetObj.fixture:getCategory()
+            -- print("Object 1 target type = " .. cat)
+        end
     end
 end
 
