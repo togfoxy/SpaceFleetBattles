@@ -98,9 +98,10 @@ function functions.applyDamage(victim, bullet)
 
 	--! debugging
 	if victim.guid == PLAYER_GUID then
-		print(inspect(victim.componentHealth))
+		-- print(inspect(victim.componentHealth))
 	end
 
+    print(victim.componentHealth[enum.componentStructure])
 	if victim.componentHealth[enum.componentStructure] <= 0 then
 		-- boom. Victim is dead
 		fun.createAnimation(victim, enum.animExplosion)
@@ -110,7 +111,8 @@ function functions.applyDamage(victim, bullet)
             SCORE.enemiesdead = SCORE.enemiesdead + 1
         end
         victim.lifetime = 0
-        unitai.clearTarget(hitindex)		-- anyone that is targetting this needs a new target
+        unitai.clearTarget(victim.guid)		-- remove this guid from everyone's target
+        print("Unit exploded")
     else
         -- victim not dead so attach a smoke animation to the object
         fun.createAnimation(victim, enum.animSmoke)
@@ -126,21 +128,20 @@ function functions.applyDamage(victim, bullet)
     victim.currentSideThrust = victim.maxSideThrust * (victim.componentHealth[enum.componentSideThruster] / 100)
 
     if victim.componentHealth[enum.componentWeapon] <= 0 then
-        Obj.taskCooldown = 0        -- get a new task
+        victim.actions = {}         -- significant trauma. get a new task
     end
     if victim.componentHealth[enum.componentThruster] <= 50 then
-        Obj.taskCooldown = 0        -- get a new task
+        victim.actions = {}         -- significant trauma. get a new task
     end
     if victim.componentHealth[enum.componentSideThruster] <= 50 then
-        Obj.taskCooldown = 0        -- get a new task
+        victim.actions = {}         -- significant trauma. get a new task
     end
     if victim.componentHealth[enum.componentAccelerator] <= 25 then
-        Obj.taskCooldown = 0        -- get a new task
+        victim.actions = {}         -- significant trauma. get a new task
     end
     if victim.componentHealth[enum.componentStructure] <= 33 then
-        Obj.taskCooldown = 0        -- get a new task
+        victim.actions = {}         -- significant trauma. get a new task
     end
-
 end
 
 function functions.getObject(guid)

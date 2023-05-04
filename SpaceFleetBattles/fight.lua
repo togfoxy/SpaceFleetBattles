@@ -14,6 +14,11 @@ local function destroyObjects(dt)
         if OBJECTS[i].lifetime ~= nil then
             OBJECTS[i].lifetime = OBJECTS[i].lifetime - dt
             if OBJECTS[i].lifetime <= 0 then
+                --! debugging
+                if OBJECTS[i].fixture:getCategory() == enum.categoryEnemyFighter or OBJECTS[i].fixture:getCategory() == enum.categoryFriendlyFighter then
+                    print("Fighter object destroyed:")
+                    -- print(inspect(OBJECTS[1]))
+                end
                 OBJECTS[i].body:destroy()
                 table.remove(OBJECTS, i)
             end
@@ -233,16 +238,18 @@ function fight.draw()
     if fun.isPlayerAlive() then
         local Obj = fun.getObject(PLAYER_GUID)
         -- player still alive
-        local guid = Obj.targetguid
-        local enemy = fun.getObject(guid)
+        if Obj.actions ~= nil and Obj.actions[1] ~= nil then
+            if Obj.actions[1].targetguid ~= nil then
+                local guid = Obj.actions[1].targetguid
+                local enemy = fun.getObject(guid)
+                if enemy ~= nil and not enemy.body:isDestroyed() then
+                    local drawx = enemy.body:getX()
+                    local drawy = enemy.body:getY()
 
-        -- print(inspect(enemy))
-        if enemy ~= nil and not enemy.body:isDestroyed() then
-            local drawx = enemy.body:getX()
-            local drawy = enemy.body:getY()
-
-            love.graphics.setColor(1,0,0,1)
-            love.graphics.circle("line", drawx, drawy, 10)
+                    love.graphics.setColor(1,0,0,1)
+                    love.graphics.circle("line", drawx, drawy, 10)
+                end
+            end
         end
     end
 
