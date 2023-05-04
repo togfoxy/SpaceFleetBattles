@@ -209,6 +209,23 @@ local function setTaskRTB(Obj)
     end
 end
 
+local function setTaskDestination(Obj, x, y)
+	-- set Obj's task to move to the given x/y location
+    Obj.targetguid = nil
+    Obj.currentAction = enum.unitActionMoveToDest
+	Obj.destx = x
+	Obj.desty = y
+
+    -- use this code when the new action queue is introduced
+	-- local thisaction = {}
+	-- thisaction.cooldown = 5
+	-- thisaction.action = enum.unitActionMoveToDest
+	-- thisaction.targetguid = nil
+	-- thisaction.destx = x
+	-- thisaction.desty = y
+	-- table.insert(Obj.actions, thisaction)
+end
+
 local function setTaskEject(Obj)
     Obj.lifetime = 0
     createEscapePod(Obj)
@@ -236,8 +253,14 @@ local function updateUnitTask(Obj, squadorder, dt)
             setTaskRTB(Obj)
         elseif Obj.componentHealth[enum.componentStructure] <= 50 then
             setTaskRTB(Obj)
+        elseif not fun.unitIsTargeted(Obj.guid) and Obj.body:getY() < 0 then
+			-- move back inside the battle map
+			setTaskDestination(Obj, Obj.body:getX(), 100)		--! check that this 100 value is correct
+		elseif not fun.unitIsTargeted(Obj.guid) and Obj.body:getY() > SCREEN_HEIGHT then
+			-- move back inside the battle map
+			setTaskDestination(Obj, Obj.body:getX(), SCREEN_HEIGHT - 100)		--! check that this 100 value is correct
 
-        -- task has cooled. Get a new task
+		-- after the self-preservation bits, take direction from current squad orders
         elseif squadorder == enum.squadOrdersEngage then
 
             -- get closest target
@@ -348,8 +371,7 @@ local function adjustAngle(Obj, dt)
             --! is this an error?
         end
     else
-        -- nothing. Is this an error?
-        error("No order so can't set angle", 335)
+        --! nothing. Is this an error? Maybe not
     end
 end
 
@@ -358,6 +380,8 @@ local function adjustThrust(Obj, dt)
     -- this shouldn't be called for bullets
     assert(Obj.squadCallsign ~= nil)        -- bullets should not be sent to this function
     assert(Obj.body:isBullet() == false)
+    local destx = Obj.destx
+    local desty = Obj.desty
 
     local currentangle = Obj.body:getAngle( )
     if Obj.currentAction == enum.unitActionEngaging then
@@ -377,15 +401,22 @@ local function adjustThrust(Obj, dt)
                     local dist = cf.getDistance(objx, objy, targetx, targety)
                     if dist <= 125 then
                         -- print("delta")
-                        if Obj.guid == PLAYER_GUID then
-                            print("Dist = " .. dist .. ". Will try to match speed")
-                        end
-                        -- try to match speed
-                        Obj.currentForwardThrust = Obj.currentForwardThrust - (Obj.maxDeacceleration * dt)
-                        if Obj.currentForwardThrust < targetObj.currentForwardThrust then
-                            -- print("echo")
-                            Obj.currentForwardThrust = targetObj.currentForwardThrust
-                        end
+                        -- try to match speed if unit is behind target
+						local minheading = objfacing - 0.7853			-- 0.7 rads = 45 deg		-- should probably make these constants
+						local maxheading = objfacing + 0.7853
+						local targetfacing = targetObj.body:getAngle()
+
+						if targetfacing >= minheading and targetfacing <= maxheading then		--! check that the min/max thing converts to radians properly
+							-- unit is behind the target. Try to match speed
+							Obj.currentForwardThrust = Obj.currentForwardThrust - (Obj.maxDeacceleration * dt)
+							if Obj.currentForwardThrust < targetObj.currentForwardThrust then
+								-- print("echo")
+								Obj.currentForwardThrust = targetObj.currentForwardThrust
+							end
+						else
+							-- unit is not behind target so max thrust
+							Obj.currentForwardThrust = Obj.currentForwardThrust + (Obj.currentMaxAcceleration * dt)
+						end
                     else
                         -- print("foxtrot")
                         -- max thrust needed
@@ -403,8 +434,14 @@ local function adjustThrust(Obj, dt)
         else
             print("Engaging but no target. ??")
         end
-    elseif Obj.currentAction == enum.unitActionReturningToBase then
-        Obj.currentForwardThrust = Obj.currentForwardThrust + (Obj.currentMaxAcceleration * dt)
+    elseif destx ~= nil then
+		local objx, objy = Obj.body:getPosition()
+		local disttodest = cf.getDistance(objx, objy, destx, desty)
+		if disttodest > 10 then
+			Obj.currentForwardThrust = Obj.currentForwardThrust + (Obj.currentMaxAcceleration * dt)
+		else
+			Obj.taskCooldown = 0		-- effectively delete the current task
+		end
     else
         -- no orders. Slow down and stop
         print("No task for this unit. Will slow and stop")
@@ -482,7 +519,7 @@ local function fireWeapons(Obj, dt)
                     local angletotarget = bearingtotarget - currentangle
                     -- print(currentangle, bearingtotarget, angletotarget)
 
-                    if angletotarget > -0.10 and angletotarget < 0.10 then
+                    if angletotarget > -0.08 and angletotarget < 0.08 then
                         Obj.weaponcooldown = 4
                         createNewBullet(Obj, true)       -- includes missiles and bombs. Use TRUE for fast moving bullets
                     end
