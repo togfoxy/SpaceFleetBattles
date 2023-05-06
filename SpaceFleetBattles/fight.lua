@@ -1,12 +1,9 @@
 fight = {}
 
-local sceneHasLoaded = false
+fightsceneHasLoaded = false
 local pause = false
 local snapcamera = true
 local showmenu = false
-local commanderAI = {}
-local score = {}
-
 
 local function destroyObjects(dt)
 
@@ -19,6 +16,7 @@ local function destroyObjects(dt)
                     print("Fighter object destroyed:")
                     -- print(inspect(OBJECTS[1]))
                 end
+                OBJECTS[i].fixture:destroy()                --! check if mass changes
                 OBJECTS[i].body:destroy()
                 table.remove(OBJECTS, i)
             end
@@ -27,7 +25,7 @@ local function destroyObjects(dt)
 end
 
 local function battleOver()
-    local isFriends = false
+       local isFriends = false
     local isFoes = false
     for i = 1, #OBJECTS do
         if OBJECTS[i].forf == enum.forfFriend then
@@ -173,6 +171,13 @@ function fight.draw()
 
         -- draw the physics object
         for _, fixture in pairs(Obj.body:getFixtures()) do
+
+-- validate every physical object
+local fixguid = fixture:getUserData()
+if fun.getObject(fixguid) == nil then
+    error()
+end
+
             local objtype = fixture:getCategory()           -- an enum
             if objtype == enum.categoryFriendlyPod or objtype == enum.categoryEnemyPod then
                 love.graphics.setColor(1,1,1,1)
@@ -314,8 +319,8 @@ function fight.draw()
 end
 
 function fight.update(dt)
-    if not sceneHasLoaded then
-        sceneHasLoaded = true
+    if not fightsceneHasLoaded then
+        fightsceneHasLoaded = true
 
         commanderAI[1] = {}
         commanderAI[1].forf = enum.forfFriend
@@ -323,31 +328,22 @@ function fight.update(dt)
         commanderAI[2].forf = enum.forfEnemy
         --! neutral commander?
 
-        -- initialise squad callsigns
-        squadai.initialiseSquadList()
-
-        -- create squadrons
-        squadai.createSquadron(enum.forfFriend)
-        -- squadai.createSquadron(enum.forfFriend)
-        -- squadai.createSquadron(enum.forfEnemy)
-        squadai.createSquadron(enum.forfEnemy)
-
-        PLAYER_GUID = OBJECTS[1].fixture:getUserData()
+		local playerfighter = fun.getPlayerPilot()
 
         SCORE.friendsdead = 0
         SCORE.enemiesdead = 0
     end
 
     if not pause then
-        commanderai.update(commanderAI, dt)
-        squadai.update(commanderAI, squadAI, dt)
-        unitai.update(squadAI, dt)
+        commanderai.update(dt)
+
+        squadai.update(dt)
+        unitai.update(dt)
 
         destroyObjects(dt)
 
         PHYSICSWORLD:update(dt) --this puts the world into motion
     end
-    lovelyToasts.update(dt)
 
     if snapcamera then
         local Obj = fun.getObject(PLAYER_GUID)
@@ -358,9 +354,10 @@ function fight.update(dt)
     end
 
     if battleOver() then
-        print(inspect(SCORE))
         cf.swapScreen(enum.sceneEndBattle, SCREEN_STACK)
     end
+
+	lovelyToasts.update(dt)
 
     cam:setZoom(ZOOMFACTOR)
     cam:setPos(TRANSLATEX,	TRANSLATEY)

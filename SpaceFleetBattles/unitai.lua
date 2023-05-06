@@ -436,6 +436,7 @@ local function createNewBullet(Obj, bullet)
     end
     local guid = cf.getGUID()
     thisobject.fixture:setUserData(guid)
+    thisobject.guid = guid
 
     thisobject.squadCallsign = nil
     thisobject.lifetime = 10            -- seconds
@@ -498,6 +499,8 @@ end
 local function updateUnitTask(Obj, squadorder, dt)
     -- this adjusts targets or other goals based on the squad order
 
+    assert(Obj ~= nil)
+
     if Obj.actions[1] ~= nil then
         Obj.actions[1].cooldown = Obj.actions[1].cooldown - dt
         if Obj.actions[1].cooldown <= 0 then
@@ -551,25 +554,25 @@ local function updateUnitTask(Obj, squadorder, dt)
             -- print("Unit task: RTB")
         else
             --! no squad order or unexpected squad order
-            Obj.currentAction = nil
+            Obj.actions[1] = nil
             print("No squad order available for this unit")
         end
     end
 end
 
-function unitai.update(squadAI, dt)
+function unitai.update(dt)
     -- update all units in OBJECTS based on the AI above them
     -- update the unit based on orders broadcasted in squadAI
 
     local squadorder
-    for k = #OBJECTS, 1, -1 do
+    for k = #OBJECTS, 1, -1 do          --! this backwards thing is unnecessary
         Obj = OBJECTS[k]
         local callsign = Obj.squadCallsign
         local objcategory = Obj.fixture:getCategory()
 
         if objcategory == enum.categoryEnemyFighter or objcategory == enum.categoryFriendlyFighter then
             assert(Obj.body:isBullet() == false)
-            if #squadAI[callsign].orders == 0 then
+            if squadAI[callsign] == nil or #squadAI[callsign].orders == 0 then
                 squadorder = nil
                 print("Unit detecting squad has no order")
             else
@@ -586,16 +589,18 @@ function unitai.update(squadAI, dt)
         end
     end
     --! debugging only
-    if OBJECTS[1].actions[1].targetguid ~= nil then
-        local targetguid = OBJECTS[1].actions[1].targetguid
-        local targetObj = fun.getObject(targetguid)
-        if targetObj == nil then
-            OBJECTS[1].actions[1].cooldown = 0
-        else
-            local cat = targetObj.fixture:getCategory()
-            -- print("Object 1 target type = " .. cat)
-        end
-    end
+    -- if OBJECTS[1].actions ~= nil then
+    --     if OBJECTS[1].actions[1].targetguid ~= nil then
+    --         local targetguid = OBJECTS[1].actions[1].targetguid
+    --         local targetObj = fun.getObject(targetguid)
+    --         if targetObj == nil then
+    --             OBJECTS[1].actions[1].cooldown = 0
+    --         else
+    --             local cat = targetObj.fixture:getCategory()
+    --             -- print("Object 1 target type = " .. cat)
+    --         end
+    --     end
+    -- end
 end
 
 return unitai

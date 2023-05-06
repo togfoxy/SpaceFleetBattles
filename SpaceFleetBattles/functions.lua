@@ -175,4 +175,44 @@ function functions.unitIsTargeted(guid)
     return false
 end
 
+function functions.initialiseRoster()
+	ROSTER = {}
+	for i = 1, FRIEND_PILOT_COUNT do
+		local thispilot = {}
+		thispilot.guid = cf.getGUID()
+		thispilot.firstname = "Bob"
+		thispilot.lastname = "Starbuck"
+		thispilot.health = 100
+		thispilot.vesselguid = nil
+		thispilot.kills = 0
+		thispilot.missions = 0
+		thispilot.ejections = 0
+		table.insert(ROSTER, thispilot)
+	end
+	ROSTER[1].isPlayer = true
+end
+
+function functions.initialiseHanger()
+	-- creates fighters and 'stores' them in the hanger table. Friendly only
+	for i = 1, FRIEND_FIGHTER_COUNT do
+		local fighter = fighter.createFighter(enum.forfFriend)
+		table.insert(HANGER, fighter)
+	end
+end
+
+function functions.initialiseSector()
+	--!
+
+end
+
+function functions.getPlayerPilot()
+	-- scans ROSTER and returns the pilot object that is the player object or returns nil
+	for i = 1, #ROSTER do
+		if ROSTER[i].isPlayer then
+			return ROSTER[i]
+		end
+	end
+	return nil
+end
+
 return functions

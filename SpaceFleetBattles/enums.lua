@@ -7,12 +7,14 @@ function enums.load()
     enum.sceneCredits = 2
     enum.sceneFight = 3
     enum.sceneEndBattle = 4
+	enum.sceneBattleRoster = 5 
 
     enum.buttonMainMenuNewGame = 1
-    enum.buttonMainMenuContinue = 2
-    enum.buttonMainMenuExitGame = 3
+    enum.buttonMainMenuContinueGame = 2
+	enum.buttonMainMenuExitGame = 3
     enum.buttonEndBattleNewGame = 4
     enum.buttonEndBattleExitGame = 5
+	enum.buttonBattleRosterLaunch = 6
 
     enum.fontDefault = 1
     enum.fontMedium = 2

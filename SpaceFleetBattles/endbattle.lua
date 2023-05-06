@@ -1,5 +1,9 @@
 endbattle = {}
 
+--! be sure to clear the squad_list and OBJECTS at the end of eacy battle
+--! be sure to take pilots out of fighters
+--!fightsceneHasLoaded = false
+
 function endbattle.draw()
     love.graphics.setColor(1,1,1,1)
     local txt = "Friendly ships lost: " .. SCORE.friendsdead
