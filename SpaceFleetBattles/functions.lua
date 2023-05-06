@@ -166,9 +166,13 @@ end
 
 function functions.unitIsTargeted(guid)
     -- return true if any object has this guid as a target
-    for i = 1, #OBJECTS do
-        if OBJECTS[i].targetguid == guid then
-            return true
+    for _, Obj in pairs(OBJECTS) do
+        if Obj.orders ~= nil then
+            if Obj.orders[1].order ~= nil then
+                if Obj.orders[1].targetguid == guid then
+                    return true
+                end
+            end
         end
     end
     return false
