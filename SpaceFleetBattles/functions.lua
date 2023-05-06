@@ -166,9 +166,13 @@ end
 
 function functions.unitIsTargeted(guid)
     -- return true if any object has this guid as a target
-    for i = 1, #OBJECTS do
-        if OBJECTS[i].targetguid == guid then
-            return true
+    for _, Obj in pairs(OBJECTS) do
+        if Obj.orders ~= nil then
+            if Obj.orders[1].order ~= nil then
+                if Obj.orders[1].targetguid == guid then
+                    return true
+                end
+            end
         end
     end
     return false
@@ -193,8 +197,12 @@ end
 
 function functions.initialiseHanger()
 	-- creates fighters and 'stores' them in the hanger table. Friendly only
+    -- NOTE: this puts the object in HANGER but not in OBJECTS
 	for i = 1, FRIEND_FIGHTER_COUNT do
 		local fighter = fighter.createFighter(enum.forfFriend)
+        fighter.isLaunched = false
+        -- asign a stupid x/y value for now because it's not launched
+        fighter.body:setPosition(-3000, 500)
 		table.insert(HANGER, fighter)
 	end
 end
@@ -212,6 +220,26 @@ function functions.getPlayerPilot()
 		end
 	end
 	return nil
+end
+
+function functions.getLaunchXY(forf)
+    -- returns an x and y depending on forf
+    local rndx, rndy
+    if forf == enum.forfFriend then
+        -- rndx = love.math.random(50, SCREEN_WIDTH /3)
+        rndx = FRIEND_START_X + love.math.random(-10, 10)
+        rndy = love.math.random(50, SCREEN_HEIGHT - 50)
+    elseif forf == enum.forfEnemy then
+        -- rndx = love.math.random(SCREEN_WIDTH * 0.66, SCREEN_WIDTH - 50)
+        rndx = FOE_START_X + love.math.random(-10, 10)
+        rndy = love.math.random(50, SCREEN_HEIGHT - 50)
+    elseif forf == enum.forfNeutral then
+        rndx = love.math.random(50, SCREEN_WIDTH - 50)
+        rndy = love.math.random(50, SCREEN_HEIGHT - 50)
+    else
+        error()
+    end
+    return rndx, rndy
 end
 
 return functions

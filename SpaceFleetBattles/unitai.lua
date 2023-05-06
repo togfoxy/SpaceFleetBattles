@@ -111,10 +111,11 @@ local function createEscapePod(Obj)
         thisobject.body:applyLinearImpulse(0.75, 0)
     end
 
+    local guid
     if Obj.guid == PLAYER_GUID then
         guid = PLAYER_GUID      -- POD inherits player guid
     else
-        local guid = cf.getGUID()
+        guid = cf.getGUID()
     end
 	thisobject.fixture:setUserData(guid)
     thisobject.guid = guid

@@ -5,22 +5,8 @@ function fighter.createFighter(forf)
     -- returns an object that is a fighter
 
     assert(forf ~= nil)
-    
-    local rndx, rndy
-    if forf == enum.forfFriend then
-        -- rndx = love.math.random(50, SCREEN_WIDTH /3)
-        rndx = FRIEND_START_X + love.math.random(-10, 10)
-        rndy = love.math.random(50, SCREEN_HEIGHT - 50)
-    elseif forf == enum.forfEnemy then
-        -- rndx = love.math.random(SCREEN_WIDTH * 0.66, SCREEN_WIDTH - 50)
-        rndx = FOE_START_X + love.math.random(-10, 10)
-        rndy = love.math.random(50, SCREEN_HEIGHT - 50)
-    elseif forf == enum.forfNeutral then
-        rndx = love.math.random(50, SCREEN_WIDTH - 50)
-        rndy = love.math.random(50, SCREEN_HEIGHT - 50)
-    else
-        error()
-    end
+
+    local rndx, rndy = fun.getLaunchXY(forf)
 
     local thisobject = {}
     thisobject.body = love.physics.newBody(PHYSICSWORLD, rndx, rndy, "dynamic")

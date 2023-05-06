@@ -91,6 +91,10 @@ local function loadBattleObjects()
 				-- assign pilot to fighter and assign fighter to pilot
 				thisfighter.pilotguid = pilot.guid
 				thisfighter.squadCallsign = thiscallsign
+                thisfighter.isLaunched = true                   -- puts it into the batlespace
+                local x, y = functions.getLaunchXY(enum.forfFriend)
+                thisfighter.body:setPosition(x, y)
+
                 assert(thisfighter.guid ~= nil)
 
 				pilot.vesselguid = thisfighter.guid
