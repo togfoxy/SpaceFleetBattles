@@ -156,6 +156,7 @@ function fight.draw()
         local objy = Obj.body:getY()
         local drawx = objx
         local drawy = objy
+        local cat = Obj.fixture:getCategory()               --! probably not used
 
         -- draw callsign first
         -- if Obj.squadCallsign ~= nil then
@@ -172,13 +173,6 @@ function fight.draw()
 
         -- draw the physics object
         for _, fixture in pairs(Obj.body:getFixtures()) do
-
--- validate every physical object
-local fixguid = fixture:getUserData()
-if fun.getObject(fixguid) == nil then
-    error()
-end
-
             local objtype = fixture:getCategory()           -- an enum
             if objtype == enum.categoryFriendlyPod or objtype == enum.categoryEnemyPod then
                 love.graphics.setColor(1,1,1,1)
