@@ -41,7 +41,7 @@ function commanderai.update(dt)
                 thisorder.active = true         -- set to false if you want to queue it but not activate it
                 thisorder.order = enum.commanderOrdersEngage
                 table.insert(commanderAI[i].orders, thisorder)
-                print("Commander orders: engage")
+                -- print("Commander orders: engage")
             else
                 -- set orders to return to base
                 thisorder = {}

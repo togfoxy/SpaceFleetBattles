@@ -43,11 +43,14 @@ end
 
 function beginContact(fixtureA, fixtureB, coll)
 	-- a and be are fixtures
-print(fixtureA:getCategory(), fixtureB:getCategory())
+
 
 	local victim = {}			-- this will contain the fighter object that was hit
 	local bullet = {}
 
+	local catA = fixtureA:getCategory()
+	local catB = fixtureB:getCategory()
+	print("Contact category: " .. catA, catB)
 	-- get the object that owns the fixture
 	local guidA = fixtureA:getUserData()
 	local guidB = fixtureB:getUserData()
@@ -57,18 +60,20 @@ print(fixtureA:getCategory(), fixtureB:getCategory())
 	-- local bodyA = fixtureA:getBody()
 	-- local bodyB = fixtureB:getBody()
 
+	print("guids in contact: " .. guidA, guidB)
+
 	assert(guidA ~= nil)
 	assert(guidB ~= nil)
 	assert(objA ~= nil)
 	assert(objB ~= nil)
 
-	if objA.body:isBullet() then
+	if catA == enum.categoryEnemyBullet or catA == enum.categoryFriendlyBullet then
 		-- destroy Obj1 because its a bullet
 		victim = objB
 		bullet = objA
 		objA.lifetime = 0
 	end
-	if objB.body:isBullet() then
+	if catB == enum.categoryEnemyBullet or catB == enum.categoryFriendlyBullet then
 		-- destroy Obj2 because it's a bullet
 		victim = objA
 		bullet = objB

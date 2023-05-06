@@ -101,7 +101,6 @@ function functions.applyDamage(victim, bullet)
 		-- print(inspect(victim.componentHealth))
 	end
 
-    print(victim.componentHealth[enum.componentStructure])
 	if victim.componentHealth[enum.componentStructure] <= 0 then
 		-- boom. Victim is dead
 		fun.createAnimation(victim, enum.animExplosion)

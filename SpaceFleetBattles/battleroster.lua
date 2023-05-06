@@ -91,10 +91,12 @@ local function loadBattleObjects()
 				-- assign pilot to fighter and assign fighter to pilot
 				thisfighter.pilotguid = pilot.guid
 				thisfighter.squadCallsign = thiscallsign
+                assert(thisfighter.guid ~= nil)
 
 				pilot.vesselguid = thisfighter.guid
 
 				-- load fighter into objects
+                print("Adding friendly fighter to OBJECTS: " .. thisfighter.guid)
 				table.insert(OBJECTS, thisfighter)		-- pilots go into fighters but they don't go into OBJECTS
 
                 if pilot.isPlayer then
@@ -116,6 +118,8 @@ local function loadBattleObjects()
 		for j = 1, 6 do				--! six fighters. Make a constant
 			local thisfighter = fighter.createFighter(enum.forfEnemy)
 			thisfighter.squadCallsign = thiscallsign
+            assert(thisfighter.guid ~= nil)
+            print("Adding enemy fighter to OBJECTS: " .. thisfighter.guid)
 			table.insert(OBJECTS, thisfighter)					-- enemy fighters have no crew
 		end
 	end

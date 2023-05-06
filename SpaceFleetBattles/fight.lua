@@ -16,6 +16,7 @@ local function destroyObjects(dt)
                     print("Fighter object destroyed:")
                     -- print(inspect(OBJECTS[1]))
                 end
+                print("guid and object destroyed: " .. OBJECTS[i].guid)
                 OBJECTS[i].fixture:destroy()                --! check if mass changes
                 OBJECTS[i].body:destroy()
                 table.remove(OBJECTS, i)
