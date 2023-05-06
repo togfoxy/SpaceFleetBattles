@@ -180,37 +180,34 @@ end
 
 local function turnToObjective(Obj, destx, desty, dt)
 
-    local force = 0
+    local txt
+    -- get current facing in radians relative to east, round to 2 dec places
     local currentangle = Obj.body:getAngle()            -- rads
+    currentangle = cf.round(currentangle,2)
+
+    -- get the desired facing in radians realtive to east, round to 2 dec places
     local bearing = cf.getBearingRad(Obj.body:getX(), Obj.body:getY(), destx, desty)        -- this is absolute bearing in radians, starting from east
     local adjbearing = bearing
-    if bearing < 0 then
-        adjbearing = (math.pi * 2) + bearing
+    if bearing < 0 then adjbearing = (math.pi * 2) + bearing end
+    adjbearing = cf.round(adjbearing,2)
+
+    -- if desired facing > current facing then turn right
+    local force = 0
+    if adjbearing > currentangle and (adjbearing - currentangle < (math.pi)) then
+        txt = ("Angle is " .. currentangle .. " and adjbearing is " .. adjbearing .. " so turning right")
+        force = 1
+    elseif adjbearing < currentangle then
+        txt = ("Angle is " .. currentangle .. " and adjbearing is " .. adjbearing .. " so turning left")
+        force = -1
+    else
+        force = 0
     end
-    local delta = adjbearing - currentangle
+    force = 50 * force * Obj.currentSideThrust * dt
+
+    Obj.body:setAngularVelocity(force)
 
     if Obj.guid == PLAYER_GUID then
-        print("***********")
-        print("Unadjusted current angle: " .. currentangle)
-        print("Unadjusted/adjusted bearing: " .. bearing, adjbearing)        -- rads
-        print(delta)
-    end
-
-    if math.abs(delta) <= 0.05 and math.abs(delta) < 0.05 then
-        -- on course. Stop rotating
-        Obj.body:setAngularVelocity(0)
-    else
-        if math.abs(delta) < 0 then
-            -- turn left
-            force = -1
-            print("Turning left")
-        else
-            -- turn right
-            force = 1
-            print("Turning right")
-        end
-        force = force * Obj.currentSideThrust * dt
-        Obj.body:applyAngularImpulse( force  )
+        print(txt)
     end
 end
 
