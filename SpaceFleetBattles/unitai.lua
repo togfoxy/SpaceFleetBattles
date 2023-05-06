@@ -1,86 +1,5 @@
 unitai = {}
 
--- function unitai.createFighter(forf, squadcallsign)
---     -- forf = friend or foe.  See enums
---     -- callsign is plain text eg "Rogue One". It is also the unique identifier for the squad
---
---     local rndx, rndy
---     if forf == enum.forfFriend then
---         -- rndx = love.math.random(50, SCREEN_WIDTH /3)
---         rndx = FRIEND_START_X + love.math.random(-10, 10)
---         rndy = love.math.random(50, SCREEN_HEIGHT - 50)
---     elseif forf == enum.forfEnemy then
---         -- rndx = love.math.random(SCREEN_WIDTH * 0.66, SCREEN_WIDTH - 50)
---         rndx = FOE_START_X + love.math.random(-10, 10)
---         rndy = love.math.random(50, SCREEN_HEIGHT - 50)
---     elseif forf == enum.forfNeutral then
---         rndx = love.math.random(50, SCREEN_WIDTH - 50)
---         rndy = love.math.random(50, SCREEN_HEIGHT - 50)
---     else
---         error()
---     end
---
---     local thisobject = {}
---     thisobject.body = love.physics.newBody(PHYSICSWORLD, rndx, rndy, "dynamic")
--- 	thisobject.body:setLinearDamping(0)
--- 	-- thisobject.body:setMass(100)
---     if forf == enum.forfEnemy then
---         thisobject.body:setAngle(math.pi)
---     end
---
---     thisobject.shape = love.physics.newPolygonShape( -5, -5, 5, 0, -5, 5, -7, 0)
--- 	thisobject.fixture = love.physics.newFixture(thisobject.body, thisobject.shape, 1)		-- the 1 is the density
--- 	thisobject.fixture:setRestitution(0.25)
--- 	thisobject.fixture:setSensor(false)
---
---     if forf == enum.forfFriend then
---         thisobject.fixture:setCategory(enum.categoryFriendlyFighter)
---         thisobject.fixture:setMask(enum.categoryFriendlyFighter, enum.categoryFriendlyBullet, enum.categoryEnemyFighter)
---     else
---         thisobject.fixture:setCategory(enum.categoryEnemyFighter)
---         thisobject.fixture:setMask(enum.categoryEnemyFighter, enum.categoryEnemyBullet, enum.categoryFriendlyFighter)   -- these are the things that will not trigger a collision
---     end
---
---     local guid = cf.getGUID()
--- 	thisobject.fixture:setUserData(guid)
---     thisobject.guid = guid
---
---     thisobject.forf = forf
---     thisobject.squadCallsign = squadcallsign
---     -- thisobject.currentAction = nil              -- this will be influenced by squad orders + player choices
---     -- thisobject.taskCooldown = 0
---     thisobject.actions = {}
---     thisobject.weaponcooldown = 0           --! might be more than one weapon in the future
---
---     thisobject.currentMaxForwardThrust = 100    -- can be less than max if battle damaged
---     thisobject.maxForwardThrust = 100
---     thisobject.currentForwardThrust = 0
---     thisobject.maxAcceleration = 25
---     thisobject.maxDeacceleration = 25       -- set to 0 for bullets
---     thisobject.currentMaxAcceleration = 25 -- this can be less than maxAcceleration if battle damaged
---     thisobject.maxSideThrust = 1
---     thisobject.currentSideThrust = 1
---
---     thisobject.componentSize = {}
---     thisobject.componentSize[enum.componentStructure] = 3
---     thisobject.componentSize[enum.componentThruster] = 2
---     thisobject.componentSize[enum.componentAccelerator] = 1
---     thisobject.componentSize[enum.componentWeapon] = 1
---     thisobject.componentSize[enum.componentSideThruster] = 1
---
---     thisobject.componentHealth = {}
---     thisobject.componentHealth[enum.componentStructure] = 100
---     thisobject.componentHealth[enum.componentThruster] = 100
---     thisobject.componentHealth[enum.componentAccelerator] = 100
---     thisobject.componentHealth[enum.componentWeapon] = 100
---     thisobject.componentHealth[enum.componentSideThruster] = 100
---
---     -- thisobject.destx = nil
---     -- thisobject.desty = nil
---     print("Adding fighter to OBJECTS: " .. thisobject.guid)
---     table.insert(OBJECTS, thisobject)
--- end
-
 local function createEscapePod(Obj)
     -- Obj is the obj that is spawning/creating the pod. It assumed this Obj will soon be destroyed
 
@@ -160,7 +79,7 @@ local function createEscapePod(Obj)
     end
     thisobject.actions[1].desty = Obj.body:getY()
 
-    print("Adding pod to OBJECTS: " .. thisobject.guid)
+    -- print("Adding pod to OBJECTS: " .. thisobject.guid)
     table.insert(OBJECTS, thisobject)
     print("Pod created: " .. thisobject.body:getX(), thisobject.body:getY())
 end
@@ -210,7 +129,7 @@ end
 
 local function setTaskRTB(Obj)
     local thisaction = {}
-	thisaction.cooldown = 5
+	thisaction.cooldown = 10
 	thisaction.action = enum.unitActionReturningToBase
 	thisaction.targetguid = nil
     if Obj.forf == enum.forfFriend then
@@ -218,8 +137,17 @@ local function setTaskRTB(Obj)
     elseif Obj.forf == enum.forfEnemy then
         thisaction.destx = FOE_START_X
     end
-    thisaction.desty = Obj.body:getY()
+
+    -- set a y value that is insider the boundary
+    local y = Obj.body:getY()
+    if y < 0 then
+        y = 100
+    elseif y > SCREEN_HEIGHT then
+        y = SCREEN_HEIGHT - 100
+    end
+    thisaction.desty = y
 	table.insert(Obj.actions, thisaction)
+    print("Setting action to RTB")
 end
 
 local function setTaskDestination(Obj, x, y)
@@ -232,15 +160,16 @@ local function setTaskDestination(Obj, x, y)
 	thisaction.destx = x
 	thisaction.desty = y
 	table.insert(Obj.actions, thisaction)
+    print("Setting action to provided destination")
 end
 
 local function setTaskEject(Obj)
     Obj.lifetime = 0
+    print("Setting action to eject")
     createEscapePod(Obj)
 end
 
 local function isFighter(Obj)
-
     local category = Obj.fixture:getCategory()
     if category == enum.categoryEnemyFighter or category == enum.categoryFriendlyFighter then
         return true
@@ -250,30 +179,36 @@ local function isFighter(Obj)
 end
 
 local function turnToObjective(Obj, destx, desty, dt)
-    -- turn the object towards the destx/desty
 
-    local force = 1
+    local txt
+    -- get current facing in radians relative to east, round to 2 dec places
     local currentangle = Obj.body:getAngle()            -- rads
+    currentangle = cf.round(currentangle,2)
 
-    assert(currentangle <= math.pi * 2)
-    assert(currentangle >= math.pi * -2)
+    -- get the desired facing in radians realtive to east, round to 2 dec places
+    local bearing = cf.getBearingRad(Obj.body:getX(), Obj.body:getY(), destx, desty)        -- this is absolute bearing in radians, starting from east
+    local adjbearing = bearing
+    if bearing < 0 then adjbearing = (math.pi * 2) + bearing end
+    adjbearing = cf.round(adjbearing,2)
 
-    local bearing = cf.getBearingRad(Obj.body:getX(), Obj.body:getY(), destx, desty)        -- this is absolute bearing in radians, starting from north
-
-    local bearingdelta = bearing - currentangle
-
-    if bearingdelta < -0.05 or bearingdelta > 0.05 then         -- rads
-        if bearingdelta > 0 then
-            -- turn right
-            force = 1
-        else
-            force = -1
-        end
+    -- if desired facing > current facing then turn right
+    local force = 0
+    if adjbearing > currentangle and (adjbearing - currentangle < (math.pi)) then
+        txt = ("Angle is " .. currentangle .. " and adjbearing is " .. adjbearing .. " so turning right")
+        force = 1
+    elseif adjbearing < currentangle then
+        txt = ("Angle is " .. currentangle .. " and adjbearing is " .. adjbearing .. " so turning left")
+        force = -1
     else
-        Obj.body:setAngularVelocity(0)
+        force = 0
     end
-    force = force * Obj.currentSideThrust * dt
-    Obj.body:applyAngularImpulse( force  )
+    force = 50 * force * Obj.currentSideThrust * dt
+
+    Obj.body:setAngularVelocity(force)
+
+    if Obj.guid == PLAYER_GUID then
+        print(txt)
+    end
 end
 
 local function adjustAngle(Obj, dt)
@@ -282,21 +217,27 @@ local function adjustAngle(Obj, dt)
 
     assert(Obj.body:isBullet() == false)
 
-    while Obj.body:getAngle() > (math.pi * 1) do
+    while Obj.body:getAngle() > (math.pi * 2) do
+        print("Angle was: " .. Obj.body:getAngle())
         Obj.body:setAngle(Obj.body:getAngle() - (math.pi * 2))
+        print("Angle now: " .. Obj.body:getAngle())
     end
-    while Obj.body:getAngle() < (math.pi * -1) do
+    while Obj.body:getAngle() < (math.pi * - 2) do
+        print("Angle was: " .. Obj.body:getAngle())
         Obj.body:setAngle(Obj.body:getAngle() + (math.pi * 2))
+        print("Angle now: " .. Obj.body:getAngle())
     end
 
     local bearingrad
+
+    -- turn to destination if one exists
     if Obj.actions[1] ~= nil and Obj.actions[1].destx ~= nil then
         -- move to destination
         local objx, objy = Obj.body:getPosition()
         local destx = Obj.actions[1].destx
         local desty = Obj.actions[1].desty
         local disttodest = cf.getDistance(objx, objy, destx, desty)
-        if disttodest < 10 then
+        if disttodest < 20 then
             -- arrived at destination
             if Obj.actions[1].action == enum.unitActionReturningToBase then
                 -- RTB successful. Destroy this object
@@ -304,10 +245,14 @@ local function adjustAngle(Obj, dt)
                 Obj.lifetime = 0                        -- destroy the object
                 -- print(disttodest)
                 -- print(inspect(Obj))
+            else
+                print("Unit arrived at destination")
             end
         else
             turnToObjective(Obj, destx, desty, dt)
         end
+
+    -- turn to target if one exists
     elseif Obj.actions[1] ~= nil and Obj.actions[1].targetguid ~= nil then
         local x1, y1 = Obj.body:getPosition()           --! can refactor this code
         local enemyobject = fun.getObject(Obj.actions[1].targetguid)
@@ -319,7 +264,8 @@ local function adjustAngle(Obj, dt)
             turnToObjective(Obj, x2, y2, dt)
         end
     else
-        --! actions[1] == nil or some other condition. Error?
+        -- this can happen when the object is a pod.
+        print("Unit has no action therefore no angle")
     end
 end
 
@@ -344,7 +290,8 @@ local function adjustThrust(Obj, dt)
                 -- print("alpha")
                 local targetx, targety = targetObj.body:getPosition()
 
-                if cf.isInFront(objx, objy, objfacing, targetx, targety) then
+                if cf.isInFront2(Obj, targetx, targety) then            -- only works on physical objects that have a facing
+                -- if cf.isInFront(objx, objy, objfacing, targetx, targety) then
                     -- print("beta")
                     if targetObj.currentForwardThrust < Obj.currentForwardThrust then
                         -- print("charlie")
@@ -382,7 +329,8 @@ local function adjustThrust(Obj, dt)
                     Obj.currentForwardThrust = Obj.currentForwardThrust + (Obj.currentMaxAcceleration * dt)
                 end
             else
-                print("Engaging but no target. ??")
+                print("Engaging but no target. Killing current action")
+                Obj.actions[1].cooldown = 0
             end
         elseif destx ~= nil then
     		local objx, objy = Obj.body:getPosition()
@@ -515,11 +463,17 @@ local function updateUnitTask(Obj, squadorder, dt)
     if #Obj.actions <= 0 then
         -- try to find a new action
 
+        local unitIsTargeted = fun.unitIsTargeted(Obj.guid)
+        local toporder = fun.getTopAction(Obj)
+        local targetguid
+        if toporder ~= nil then
+            targetguid = toporder.targetguid
+        end
+
         -- do self-preservation checks firstly. Remember the ordering matters
         if (Obj.componentHealth[enum.componentStructure] <= 35 and fun.unitIsTargeted(Obj.guid))
             or (Obj.componentHealth[enum.componentStructure] <= 35 and Obj.componentHealth[enum.componentThruster] <= 0) then
             setTaskEject(Obj)
-            print("Ho")
         elseif Obj.componentHealth[enum.componentWeapon] <= 0 then
             setTaskRTB(Obj)
         elseif Obj.componentHealth[enum.componentThruster] <= 50 then
@@ -530,12 +484,7 @@ local function updateUnitTask(Obj, squadorder, dt)
             setTaskRTB(Obj)
         elseif Obj.componentHealth[enum.componentStructure] <= 50 then
             setTaskRTB(Obj)
-        elseif not fun.unitIsTargeted(Obj.guid) and Obj.body:getY() < 0 then
-			-- move back inside the battle map
-			setTaskDestination(Obj, Obj.body:getX(), 100)		--! check that this 100 value is correct
-		elseif not fun.unitIsTargeted(Obj.guid) and Obj.body:getY() > SCREEN_HEIGHT then
-			-- move back inside the battle map
-			setTaskDestination(Obj, Obj.body:getX(), SCREEN_HEIGHT - 100)		--! check that this 100 value is correct
+
 
 		-- after the self-preservation bits, take direction from current squad orders
         elseif squadorder == enum.squadOrdersEngage then
@@ -546,13 +495,29 @@ local function updateUnitTask(Obj, squadorder, dt)
             if Obj.forf == enum.forfEnemy then
                 targetguid = getClosestFighter(Obj, enum.forfFriend)       -- this OBJECTS guid or nil
             end
-            local thisorder = {}
-            thisorder.action = enum.unitActionEngaging
-            thisorder.cooldown = 5
-            thisorder.destx = nil
-            thisorder.desty = nil
-            thisorder.targetguid = targetguid
-            table.insert(Obj.actions, thisorder)
+            if targetguid ~= nil then
+                local thisorder = {}
+                thisorder.action = enum.unitActionEngaging
+                thisorder.cooldown = 5
+                thisorder.destx = nil
+                thisorder.desty = nil
+                thisorder.targetguid = targetguid
+                table.insert(Obj.actions, thisorder)
+                print("Setting action = engage")
+            else
+                -- trying to engage but no target found.
+                if not unitIsTargeted and Obj.body:getY() < 0 and targetguid == nil then
+                    -- move back inside the battle map
+                    setTaskDestination(Obj, Obj.body:getX(), 100)
+                elseif not unitIsTargeted and Obj.body:getY() > SCREEN_HEIGHT and targetguid == nil then
+                    -- move back inside the battle map
+                    setTaskDestination(Obj, Obj.body:getX(), SCREEN_HEIGHT - 100)
+                else
+                    -- no target found and still inside map. Allow code to fall through to RTB
+                end
+                print("Stacking orders: return to battle and RTB")
+                setTaskRTB(Obj)     --! this is first instance of stacking. See if it works
+            end
         elseif squadorder == enum.squadOrdersReturnToBase then
                 setTaskRTB(Obj)
             -- print("Unit task: RTB")

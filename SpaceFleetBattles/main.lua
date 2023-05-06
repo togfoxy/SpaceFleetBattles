@@ -50,7 +50,7 @@ function beginContact(fixtureA, fixtureB, coll)
 
 	local catA = fixtureA:getCategory()
 	local catB = fixtureB:getCategory()
-	print("Contact category: " .. catA, catB)
+	-- print("Contact category: " .. catA, catB)
 	-- get the object that owns the fixture
 	local guidA = fixtureA:getUserData()
 	local guidB = fixtureB:getUserData()
@@ -60,7 +60,7 @@ function beginContact(fixtureA, fixtureB, coll)
 	-- local bodyA = fixtureA:getBody()
 	-- local bodyB = fixtureB:getBody()
 
-	print("guids in contact: " .. guidA, guidB)
+	-- print("guids in contact: " .. guidA, guidB)
 
 	assert(guidA ~= nil)
 	assert(guidB ~= nil)

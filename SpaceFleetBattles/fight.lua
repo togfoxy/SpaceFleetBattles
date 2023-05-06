@@ -13,10 +13,10 @@ local function destroyObjects(dt)
             if OBJECTS[i].lifetime <= 0 then
                 --! debugging
                 if OBJECTS[i].fixture:getCategory() == enum.categoryEnemyFighter or OBJECTS[i].fixture:getCategory() == enum.categoryFriendlyFighter then
-                    print("Fighter object destroyed:")
+                    print("Fighter object destroyed")
                     -- print(inspect(OBJECTS[1]))
                 end
-                print("guid and object destroyed: " .. OBJECTS[i].guid)
+                -- print("guid and object destroyed: " .. OBJECTS[i].guid)
                 OBJECTS[i].fixture:destroy()                --! check if mass changes
                 OBJECTS[i].body:destroy()
                 table.remove(OBJECTS, i)
@@ -143,7 +143,7 @@ function fight.draw()
 
     -- draw BG
     love.graphics.setColor(1,1,1,0.25)
-    love.graphics.draw(IMAGE[enum.imageFightBG], 0, 0, 0, 2.4, 1)
+    love.graphics.draw(IMAGE[enum.imageFightBG], 0, 0, 0, 2.4, 0.90)
 
     -- draw the boundary
     love.graphics.setColor(1,1,1,0.25)
@@ -159,17 +159,17 @@ function fight.draw()
         local cat = Obj.fixture:getCategory()               --! probably not used
 
         -- draw callsign first
-        -- if Obj.squadCallsign ~= nil then
-        --     local str = "CS: " .. Obj.squadCallsign .. "-" .. string.sub(Obj.guid, -2)
-        --
-        --     love.graphics.setColor(1,1,1,1)
-        --     love.graphics.print(str, drawx, drawy, 0, 1, 1, -15, 30)
-        --
-        --     -- draw a cool line next
-        --     local x2, y2 = drawx + 30, drawy - 14
-        --     love.graphics.setColor(1,1,1,1)
-        --     love.graphics.line(drawx, drawy, x2, y2)
-        -- end
+        if Obj.squadCallsign ~= nil then
+            local str = "CS: " .. Obj.squadCallsign .. "-" .. string.sub(Obj.guid, -2)
+
+            love.graphics.setColor(1,1,1,1)
+            love.graphics.print(str, drawx, drawy, 0, 1, 1, -15, 30)
+
+            -- draw a cool line next
+            local x2, y2 = drawx + 30, drawy - 14
+            love.graphics.setColor(1,1,1,1)
+            love.graphics.line(drawx, drawy, x2, y2)
+        end
 
         -- draw the physics object
         for _, fixture in pairs(Obj.body:getFixtures()) do
@@ -254,7 +254,8 @@ function fight.draw()
     end
 
     -- draw yellow recticle if player is targeted
-    if fun.unitIsTargeted(PLAYER_GUID) then
+    local playeristargeted = fun.unitIsTargeted(PLAYER_GUID)
+    if playeristargeted then
         -- draw yellow recticle on player craft
         local Obj = fun.getObject(PLAYER_GUID)
         if Obj ~= nil and Obj.fixture:getCategory() ~= enum.categoryFriendlyPod then
@@ -295,7 +296,7 @@ function fight.draw()
         love.graphics.line(drawx, drawy + 15, drawx + menuwidth, drawy + 15)
 
         -- draw current action and a line
-        actionenum = Obj.currentAction
+        actionenum = Obj.actions[1].action
         if actionenum == enum.unitActionEngaging then
             txt = "Engaging"
         elseif actionenum == enum.unitActionReturningToBase then
@@ -307,6 +308,21 @@ function fight.draw()
             love.graphics.setColor(1,1,1,1)
             love.graphics.line(drawx, drawy + 36, drawx + menuwidth, drawy + 36)
         end
+    end
+
+    -- draw current action
+    local txt
+    if fun.isPlayerAlive() then
+        local Obj = fun.getObject(PLAYER_GUID)
+        currentaction = fun.getTopAction(Obj)
+        if currentaction ~= nil then
+            txt = currentaction.action
+        else
+            txt = "None"
+        end
+        local drawx, drawy = res.toGame(Obj.body:getX(), Obj.body:getY()) -- need to convert physical to screen
+        love.graphics.setColor(1,1,1,1)
+        love.graphics.print(txt, drawx - 20, drawy + 10)
     end
 
     -- cf.printAllPhysicsObjects(PHYSICSWORLD, 1)

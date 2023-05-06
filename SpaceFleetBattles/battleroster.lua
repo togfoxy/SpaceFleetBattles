@@ -100,7 +100,7 @@ local function loadBattleObjects()
 				pilot.vesselguid = thisfighter.guid
 
 				-- load fighter into objects
-                print("Adding friendly fighter to OBJECTS: " .. thisfighter.guid)
+                -- print("Adding friendly fighter to OBJECTS: " .. thisfighter.guid)
 				table.insert(OBJECTS, thisfighter)		-- pilots go into fighters but they don't go into OBJECTS
 
                 if pilot.isPlayer then
@@ -114,16 +114,17 @@ local function loadBattleObjects()
 	end
 
 	-- now load enemy squadrons
-	for i = 1, 2 do					--! two squadrons. make this a constant
+    for i = 1, FOE_SQUADRON_COUNT do
 		local thiscallsign = getUniqueCallsign()
         squadAI[thiscallsign] = {}
         squadAI[thiscallsign].forf = enum.forfEnemy
         squadAI[thiscallsign].orders = {}
-		for j = 1, 6 do				--! six fighters. Make a constant
+
+        for j = 1, FOE_SHIPS_PER_SQUADRON do
 			local thisfighter = fighter.createFighter(enum.forfEnemy)
 			thisfighter.squadCallsign = thiscallsign
             assert(thisfighter.guid ~= nil)
-            print("Adding enemy fighter to OBJECTS: " .. thisfighter.guid)
+            -- print("Adding enemy fighter to OBJECTS: " .. thisfighter.guid)
 			table.insert(OBJECTS, thisfighter)					-- enemy fighters have no crew
 		end
 	end

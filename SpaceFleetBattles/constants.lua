@@ -39,8 +39,10 @@ function constants.load()
     FRIEND_FIGHTER_COUNT = 24		-- not actually a constant
     FRIEND_PILOT_COUNT = 24			-- not actually a constant
 
-	FRIEND_SQUADRON_COUNT = 2		-- not a constant and changes for each battle
-    FRIEND_SHIPS_PER_SQUADRON = 6	-- not a constant and changes for each battle
+	FRIEND_SQUADRON_COUNT = 1		-- not a constant and changes for each battle
+    FRIEND_SHIPS_PER_SQUADRON = 1	-- not a constant and changes for each battle
+    FOE_SQUADRON_COUNT = 1
+    FOE_SHIPS_PER_SQUADRON = 1
 
 	SHIPS_PER_SQUADRON = 6
 

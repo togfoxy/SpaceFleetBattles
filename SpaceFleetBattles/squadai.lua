@@ -62,7 +62,7 @@ function squadai.update(dt)
                                     thisorder.active = true         -- set to false if you want to queue it but not activate it
                                     thisorder.order = enum.squadOrdersEngage
                                     table.insert(squadAI[callsign].orders, thisorder)
-                                    -- print("Squad orders: engage")
+                                    print("Squad orders: engage")
                                 elseif commanderAI[i].orders[1].order == enum.commanderOrdersReturnToBase then
                                     -- squad RTB
                                     thisorder = {}
@@ -84,7 +84,7 @@ function squadai.update(dt)
                         end
                     else
                         -- this commander is not the commander for this squad
-                        -- print("Wrong commander. Skipping to next commander")
+                        print("Wrong commander. Skipping to next commander")
                     end
                 else
                     --! is this an error?
@@ -93,7 +93,13 @@ function squadai.update(dt)
             end
         else
             -- do nothing. Cooldown will be invoked next cycle
-            -- print("Squad has order: " .. callsign .. squad.orders[1].order)
+            print("Number of squad orders: " .. #squad.orders)
+            print(inspect(squad.orders))
+            print(callsign .. " squad has order: " .. squad.orders[1].order)
+        end
+
+        if not (squad.orders[1] ~= nil) then
+            print(inspect(squad.orders))
         end
         assert(squad.orders[1] ~= nil)
     end

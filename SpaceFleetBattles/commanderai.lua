@@ -1,9 +1,10 @@
 commanderai = {}
 
-local function numberOfObjects(forf)
+local function numberOfObjects(requiredcat)
     local result = 0
     for k, Obj in pairs(OBJECTS) do
-        if Obj.forf == forf then
+        local cat = Obj.fixture:getCategory()
+        if cat == requiredcat then
             result = result + 1
         end
     end
@@ -27,9 +28,9 @@ function commanderai.update(dt)
             -- need to determine new orders
             local numofobjs
             if commanderAI[i].forf == enum.forfFriend then
-                numofobjs = numberOfObjects(enum.forfEnemy)
+                numofobjs = numberOfObjects(enum.categoryEnemyFighter)
             elseif commanderAI[i].forf == enum.forfEnemy then
-                numofobjs = numberOfObjects(enum.forfFriend)
+                numofobjs = numberOfObjects(enum.categoryFriendlyFighter)
             else
                 print(inspect(commanderAI[i]))
                 error()

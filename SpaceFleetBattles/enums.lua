@@ -7,7 +7,7 @@ function enums.load()
     enum.sceneCredits = 2
     enum.sceneFight = 3
     enum.sceneEndBattle = 4
-	enum.sceneBattleRoster = 5 
+	enum.sceneBattleRoster = 5
 
     enum.buttonMainMenuNewGame = 1
     enum.buttonMainMenuContinueGame = 2
@@ -48,6 +48,7 @@ function enums.load()
     enum.unitActionEngaging = 1
     enum.unitActionReturningToBase = 2
     enum.unitActionEject = 3
+    enum.unitActionMoveToDest = 4
 
     enum.imageExplosion = 1
     enum.imageFightHUD = 2
