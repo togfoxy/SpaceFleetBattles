@@ -183,7 +183,4 @@ function battleroster.loadButtons()
 
 
 end
-
-
-
 return battleroster
