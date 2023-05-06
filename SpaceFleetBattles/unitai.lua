@@ -196,18 +196,26 @@ local function turnToObjective(Obj, destx, desty, dt)
     if adjbearing > currentangle and (adjbearing - currentangle < (math.pi)) then
         txt = ("Angle is " .. currentangle .. " and adjbearing is " .. adjbearing .. " so turning right")
         force = 1
+    elseif adjbearing > currentangle and (adjbearing - currentangle > (math.pi)) then
+        txt = ("Angle is " .. currentangle .. " and adjbearing is " .. adjbearing .. " so turning left")
+        force = -1        
     elseif adjbearing < currentangle then
         txt = ("Angle is " .. currentangle .. " and adjbearing is " .. adjbearing .. " so turning left")
         force = -1
-    else
+    elseif currentangle == adjbearing then
+        txt = "Angle is perfect. Not turning"
         force = 0
+    else
+        txt = "Unknown code flow. current/desired angle: " .. currentangle .. " / " .. adjbearing
+        print(txt)
+        error()
     end
-    force = 50 * force * Obj.currentSideThrust * dt
+    force = 60 * force * Obj.currentSideThrust * dt
 
     Obj.body:setAngularVelocity(force)
 
     if Obj.guid == PLAYER_GUID then
-        print(txt)
+        print("Message: " .. txt)
     end
 end
 
