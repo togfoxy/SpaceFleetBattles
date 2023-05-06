@@ -179,34 +179,39 @@ local function isFighter(Obj)
 end
 
 local function turnToObjective(Obj, destx, desty, dt)
-    -- turn the object towards the destx/desty
 
-    local force = 1
+    local force = 0
     local currentangle = Obj.body:getAngle()            -- rads
+    local bearing = cf.getBearingRad(Obj.body:getX(), Obj.body:getY(), destx, desty)        -- this is absolute bearing in radians, starting from east
+    local adjbearing = bearing
+    if bearing < 0 then
+        adjbearing = (math.pi * 2) + bearing
+    end
+    local delta = adjbearing - currentangle
 
-    assert(currentangle <= math.pi * 2)
-    assert(currentangle >= math.pi * -2)
+    if Obj.guid == PLAYER_GUID then
+        print("***********")
+        print("Unadjusted current angle: " .. currentangle)
+        print("Unadjusted/adjusted bearing: " .. bearing, adjbearing)        -- rads
+        print(delta)
+    end
 
-    local bearing = cf.getBearingRad(Obj.body:getX(), Obj.body:getY(), destx, desty)        -- this is absolute bearing in radians, starting from north
-
-    local bearingdelta = bearing - currentangle
-
-    if bearingdelta < -0.05 or bearingdelta > 0.05 then         -- rads
-        if Obj.guid == PLAYER_GUID then
-            print("Bearing delta: " .. bearingdelta)                    -- rads
-        end
-
-        if bearingdelta > 0 then
+    if math.abs(delta) <= 0.05 and math.abs(delta) < 0.05 then
+        -- on course. Stop rotating
+        Obj.body:setAngularVelocity(0)
+    else
+        if math.abs(delta) < 0 then
+            -- turn left
+            force = -1
+            print("Turning left")
+        else
             -- turn right
             force = 1
-        else
-            force = -1
+            print("Turning right")
         end
-    else
-        Obj.body:setAngularVelocity(0)
+        force = force * Obj.currentSideThrust * dt
+        Obj.body:applyAngularImpulse( force  )
     end
-    force = force * Obj.currentSideThrust * dt
-    Obj.body:applyAngularImpulse( force  )
 end
 
 local function adjustAngle(Obj, dt)
@@ -215,12 +220,12 @@ local function adjustAngle(Obj, dt)
 
     assert(Obj.body:isBullet() == false)
 
-    while Obj.body:getAngle() > (math.pi * 1) do
+    while Obj.body:getAngle() > (math.pi * 2) do
         print("Angle was: " .. Obj.body:getAngle())
         Obj.body:setAngle(Obj.body:getAngle() - (math.pi * 2))
         print("Angle now: " .. Obj.body:getAngle())
     end
-    while Obj.body:getAngle() < (math.pi * -1) do
+    while Obj.body:getAngle() < (math.pi * - 2) do
         print("Angle was: " .. Obj.body:getAngle())
         Obj.body:setAngle(Obj.body:getAngle() + (math.pi * 2))
         print("Angle now: " .. Obj.body:getAngle())
@@ -482,12 +487,7 @@ local function updateUnitTask(Obj, squadorder, dt)
             setTaskRTB(Obj)
         elseif Obj.componentHealth[enum.componentStructure] <= 50 then
             setTaskRTB(Obj)
-        elseif not unitIsTargeted and Obj.body:getY() < 0 and targetguid == nil then
-			-- move back inside the battle map
-			setTaskDestination(Obj, Obj.body:getX(), 100)
-		elseif not unitIsTargeted and Obj.body:getY() > SCREEN_HEIGHT and targetguid == nil then
-			-- move back inside the battle map
-			setTaskDestination(Obj, Obj.body:getX(), SCREEN_HEIGHT - 100)
+
 
 		-- after the self-preservation bits, take direction from current squad orders
         elseif squadorder == enum.squadOrdersEngage then
@@ -509,7 +509,17 @@ local function updateUnitTask(Obj, squadorder, dt)
                 print("Setting action = engage")
             else
                 -- trying to engage but no target found.
-                setTaskRTB(Obj)
+                if not unitIsTargeted and Obj.body:getY() < 0 and targetguid == nil then
+                    -- move back inside the battle map
+                    setTaskDestination(Obj, Obj.body:getX(), 100)
+                elseif not unitIsTargeted and Obj.body:getY() > SCREEN_HEIGHT and targetguid == nil then
+                    -- move back inside the battle map
+                    setTaskDestination(Obj, Obj.body:getX(), SCREEN_HEIGHT - 100)
+                else
+                    -- no target found and still inside map. Allow code to fall through to RTB
+                end
+                print("Stacking orders: return to battle and RTB")
+                setTaskRTB(Obj)     --! this is first instance of stacking. See if it works
             end
         elseif squadorder == enum.squadOrdersReturnToBase then
                 setTaskRTB(Obj)

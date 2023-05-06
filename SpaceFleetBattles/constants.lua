@@ -41,6 +41,8 @@ function constants.load()
 
 	FRIEND_SQUADRON_COUNT = 1		-- not a constant and changes for each battle
     FRIEND_SHIPS_PER_SQUADRON = 1	-- not a constant and changes for each battle
+    FOE_SQUADRON_COUNT = 1
+    FOE_SHIPS_PER_SQUADRON = 1
 
 	SHIPS_PER_SQUADRON = 6
 

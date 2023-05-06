@@ -258,7 +258,7 @@ function swapScreen(newScreen, screenStack)
 end
 
 function getBearingRad(x1, y1, x2, y2)
-	-- not sure if this aligns with north or east
+	-- aligns to the east
 	local x3 = x2 - x1
 	local y3 = y2 - y1
 	return math.atan2(y3, x3)

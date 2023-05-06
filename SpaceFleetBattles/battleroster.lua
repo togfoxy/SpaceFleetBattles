@@ -114,14 +114,13 @@ local function loadBattleObjects()
 	end
 
 	-- now load enemy squadrons
-	-- for i = 1, 2 do					--! two squadrons. make this a constant
-    for i = 1, 1 do					--! two squadrons. make this a constant
+    for i = 1, FOE_SQUADRON_COUNT do
 		local thiscallsign = getUniqueCallsign()
         squadAI[thiscallsign] = {}
         squadAI[thiscallsign].forf = enum.forfEnemy
         squadAI[thiscallsign].orders = {}
-		-- for j = 1, 6 do				--! six fighters. Make a constant
-        for j = 1, 1 do				--! six fighters. Make a constant
+
+        for j = 1, FOE_SHIPS_PER_SQUADRON do
 			local thisfighter = fighter.createFighter(enum.forfEnemy)
 			thisfighter.squadCallsign = thiscallsign
             assert(thisfighter.guid ~= nil)

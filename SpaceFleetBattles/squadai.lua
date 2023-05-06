@@ -84,7 +84,7 @@ function squadai.update(dt)
                         end
                     else
                         -- this commander is not the commander for this squad
-                        -- print("Wrong commander. Skipping to next commander")
+                        print("Wrong commander. Skipping to next commander")
                     end
                 else
                     --! is this an error?
@@ -93,7 +93,9 @@ function squadai.update(dt)
             end
         else
             -- do nothing. Cooldown will be invoked next cycle
-            -- print(callsign .. " squad has order: " .. squad.orders[1].order)
+            print("Number of squad orders: " .. #squad.orders)
+            print(inspect(squad.orders))
+            print(callsign .. " squad has order: " .. squad.orders[1].order)
         end
 
         if not (squad.orders[1] ~= nil) then

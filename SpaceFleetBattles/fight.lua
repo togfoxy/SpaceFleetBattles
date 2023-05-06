@@ -159,17 +159,17 @@ function fight.draw()
         local cat = Obj.fixture:getCategory()               --! probably not used
 
         -- draw callsign first
-        -- if Obj.squadCallsign ~= nil then
-        --     local str = "CS: " .. Obj.squadCallsign .. "-" .. string.sub(Obj.guid, -2)
-        --
-        --     love.graphics.setColor(1,1,1,1)
-        --     love.graphics.print(str, drawx, drawy, 0, 1, 1, -15, 30)
-        --
-        --     -- draw a cool line next
-        --     local x2, y2 = drawx + 30, drawy - 14
-        --     love.graphics.setColor(1,1,1,1)
-        --     love.graphics.line(drawx, drawy, x2, y2)
-        -- end
+        if Obj.squadCallsign ~= nil then
+            local str = "CS: " .. Obj.squadCallsign .. "-" .. string.sub(Obj.guid, -2)
+
+            love.graphics.setColor(1,1,1,1)
+            love.graphics.print(str, drawx, drawy, 0, 1, 1, -15, 30)
+
+            -- draw a cool line next
+            local x2, y2 = drawx + 30, drawy - 14
+            love.graphics.setColor(1,1,1,1)
+            love.graphics.line(drawx, drawy, x2, y2)
+        end
 
         -- draw the physics object
         for _, fixture in pairs(Obj.body:getFixtures()) do
