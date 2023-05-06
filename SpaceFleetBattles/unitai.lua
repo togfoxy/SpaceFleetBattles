@@ -250,7 +250,7 @@ local function adjustAngle(Obj, dt)
             turnToObjective(Obj, x2, y2, dt)
         end
     else
-        --! actions[1] == nil or some other condition. Error?
+        -- this can happen when the object is a pod.
         print("Unit has no action therefore no angle")
     end
 end
@@ -276,7 +276,8 @@ local function adjustThrust(Obj, dt)
                 -- print("alpha")
                 local targetx, targety = targetObj.body:getPosition()
 
-                if cf.isInFront(objx, objy, objfacing, targetx, targety) then
+                if cf.isInFront2(Obj, targetx, targety) then            -- only works on physical objects that have a facing
+                -- if cf.isInFront(objx, objy, objfacing, targetx, targety) then
                     -- print("beta")
                     if targetObj.currentForwardThrust < Obj.currentForwardThrust then
                         -- print("charlie")
@@ -314,7 +315,8 @@ local function adjustThrust(Obj, dt)
                     Obj.currentForwardThrust = Obj.currentForwardThrust + (Obj.currentMaxAcceleration * dt)
                 end
             else
-                print("Engaging but no target. ??")
+                print("Engaging but no target. Killing current action")
+                Obj.actions[1].cooldown = 0
             end
         elseif destx ~= nil then
     		local objx, objy = Obj.body:getPosition()

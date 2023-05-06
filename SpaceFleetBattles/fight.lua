@@ -13,7 +13,7 @@ local function destroyObjects(dt)
             if OBJECTS[i].lifetime <= 0 then
                 --! debugging
                 if OBJECTS[i].fixture:getCategory() == enum.categoryEnemyFighter or OBJECTS[i].fixture:getCategory() == enum.categoryFriendlyFighter then
-                    print("Fighter object destroyed:")
+                    print("Fighter object destroyed")
                     -- print(inspect(OBJECTS[1]))
                 end
                 -- print("guid and object destroyed: " .. OBJECTS[i].guid)
@@ -143,7 +143,7 @@ function fight.draw()
 
     -- draw BG
     love.graphics.setColor(1,1,1,0.25)
-    love.graphics.draw(IMAGE[enum.imageFightBG], 0, 0, 0, 2.4, 0.85)
+    love.graphics.draw(IMAGE[enum.imageFightBG], 0, 0, 0, 2.4, 0.90)
 
     -- draw the boundary
     love.graphics.setColor(1,1,1,0.25)
@@ -314,18 +314,9 @@ function fight.draw()
     local txt
     if fun.isPlayerAlive() then
         local Obj = fun.getObject(PLAYER_GUID)
-        if Obj.actions ~= nil then
-            if Obj.actions[1] ~= nil then
-                if Obj.actions[1].action ~= nil then
-                    txt = Obj.actions[1].action
-                else
-                    print(inspect(Obj.actions))
-                    error()
-                end
-            else
-                print(inspect(Obj.actions))
-                error()
-            end
+        currentaction = fun.getTopAction(Obj)
+        if currentaction ~= nil then
+            txt = currentaction.action
         else
             txt = "None"
         end

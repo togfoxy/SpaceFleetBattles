@@ -412,6 +412,23 @@ function printAllPhysicsObjects(world, BOX2D_SCALE)
 	end
 end
 
+function isInFront2(Obj, targetx, targety)
+	-- only works on physical bodies that have a facing
+	--! need to generic this one so it doesn't use box2d
+	local currentangle = Obj.body:getAngle()
+	local objx, objy = Obj.body:getPosition()
+	local bearingtotarget = cf.getBearingRad(objx,objy,targetx,targety)
+	local angletotarget = bearingtotarget - currentangle
+	-- print(currentangle, bearingtotarget, angletotarget)
+
+	if angletotarget > -1.5707 and angletotarget < 1.5707 then
+		return true
+	else
+		return false
+	end
+
+end
+
 function isInFront(x, y, facingrad, x2, y2)
     -- x,y is the object that is looking (real coordinates, i.e. not normalised and not translated to origin)
     -- facing is the facing of the object at x, y in radians
