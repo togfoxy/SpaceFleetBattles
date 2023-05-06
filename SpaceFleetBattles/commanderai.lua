@@ -10,19 +10,19 @@ local function numberOfObjects(forf)
     return result
 end
 
-function commanderai.update(commanderAI, dt)
+function commanderai.update(dt)
     -- updates all the commanders by  ensuring each commander has decided on a strategy and is broadcasting it
 
     for i = 1, #commanderAI do
         if commanderAI[i].orders == nil then commanderAI[i].orders = {} end
-
-        -- adjust cooldown on the order stack
-        for k = #commanderAI[i].orders, 1, -1 do        -- traverse backwards
-            commanderAI[i].orders[k].cooldown = commanderAI[i].orders[k].cooldown - dt
-            if commanderAI[i].orders[k].cooldown <= 0 then
-                table.remove(commanderAI[i].orders, k)
+        -- adjust cooldown on the top order
+        if #commanderAI[i].orders > 0 then
+            commanderAI[i].orders[1].cooldown = commanderAI[i].orders[1].cooldown - dt
+            if commanderAI[i].orders[1].cooldown <= 0 then
+                table.remove(commanderAI[i].orders, 1)
             end
         end
+
         if #commanderAI[i].orders == 0 then
             -- need to determine new orders
             local numofobjs
@@ -54,10 +54,8 @@ function commanderai.update(commanderAI, dt)
         else
             -- this commander has at least one order. Do nothing.
         end
-
         assert(#commanderAI[i].orders > 0)
     end
 end
-
 
 return commanderai

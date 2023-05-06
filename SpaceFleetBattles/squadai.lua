@@ -1,63 +1,58 @@
 squadai = {}
 
-function squadai.initialiseSquadList()
-    for i = 65, 90 do
-        for j = 1, 9 do
-            local str = string.char(i) .. tostring(j)
-            SQUAD_LIST[str] = nil            -- setting to nil makes it available for selection
-        end
-    end
-end
 
-function squadai.createSquadron(forf)
-    -- create a wing of 6 units
-    -- the squadron is a concept only and is created by giving x fighters the same squad id
-    -- input: forf = friend or foe. example: enum.forfFriend
 
-    -- get a random and empty callsign from the squadlist
-    -- the squad callsign is a two character code. the squadlist ensures it is unique
-    local squadcallsign = nil
-    while squadcallsign == nil do
-        local txt = string.char(love.math.random(65, 90))
-        local txt = txt .. tostring(love.math.random(1,9))
-        squadcallsign = txt
-        if SQUAD_LIST[squadcallsign] == nil then
+-- function squadai.createSquadron(forf)
+--     -- create a wing of 6 units
+--     -- the squadron is a concept only and is created by giving x fighters the same squad id
+--     -- input: forf = friend or foe. example: enum.forfFriend
+--
+--     -- get a random and empty callsign from the squadlist
+--     -- the squad callsign is a two character code. the squadlist ensures it is unique
+--     local squadcallsign = nil
+--     while squadcallsign == nil do
+--         local txt = string.char(love.math.random(65, 90))
+--         local txt = txt .. tostring(love.math.random(1,9))
+--         squadcallsign = txt
+--         if SQUAD_LIST[squadcallsign] == nil then
+--
+--             SQUAD_LIST[squadcallsign] = forf       -- mark this squad as friend or enemy
+--
+--             squadAI[squadcallsign] = {}
+--             squadAI[squadcallsign].forf = forf
+--             squadAI[squadcallsign].orders = {}
+--         end
+--     end
+--
+--     print("Created squad callsign: " .. squadcallsign)
+--
+--     table.insert(SQUADS, squadcallsign)
+--
+--     for i = 1, SHIPS_PER_SQUADRON do
+--         unitai.createFighter(forf, squadcallsign)
+--     end
+-- end
 
-            SQUAD_LIST[squadcallsign] = forf       -- mark this squad as friend or enemy
-
-            squadAI[squadcallsign] = {}
-            squadAI[squadcallsign].forf = forf
-            squadAI[squadcallsign].orders = {}
-        end
-    end
-
-    print("Created squad callsign: " .. squadcallsign)
-
-    table.insert(SQUADS, squadcallsign)
-
-    for i = 1, SHIPS_PER_SQUADRON do
-        unitai.createFighter(forf, squadcallsign)
-    end
-end
-
-function squadai.update(commanderAI, squadAI, dt)
+function squadai.update(dt)
     -- cycle through all squads and assign orders or cool down existing orders
     -- the commanderAI is all the commanders. Be sure to filter into the one appropriate for the squad
-    for callsign, squadforf in pairs(SQUAD_LIST) do -- cycle through all known squads (SQUAD_LIST) e.g. C7 = enum.forfFriend
-        if squadAI[callsign].orders == nil then squadAI[callsign].orders = {} end
 
-        for j = #squadAI[callsign].orders, 1, -1 do
-            squadAI[callsign].orders[j].cooldown = squadAI[callsign].orders[j].cooldown - dt
-            if squadAI[callsign].orders[j].cooldown <= 0 then
-                table.remove(squadAI[callsign].orders, j)
+    for callsign, squad in pairs(squadAI) do
+        if squad.orders == nil then squad.orders = {} end
+
+        -- cool down the top order
+        if #squad.orders > 0 then
+            squad.orders[1].cooldown = squad.orders[1].cooldown - dt
+            if squad.orders[1].cooldown <= 0 then
+                table.remove(squadAI[callsign].orders, 1)
             end
         end
 
-        if #squadAI[callsign].orders == 0 then
+        if #squad.orders == 0 then
             -- squad has no current orders. Check what commander is ordering
             for i = 1, #commanderAI do
                 if commanderAI[i] ~= nil then
-                    if commanderAI[i].forf == squadAI[callsign].forf then
+                    if commanderAI[i].forf == squad.forf then
                         if commanderAI[i].orders ~= nil then
                             if commanderAI[i].orders[1].order ~= nil then
                                 if commanderAI[i].orders[1].order == enum.commanderOrdersEngage then
@@ -75,7 +70,7 @@ function squadai.update(commanderAI, squadAI, dt)
                                     thisorder.active = true         -- set to false if you want to queue it but not activate it
                                     thisorder.order = enum.squadOrdersReturnToBase
                                     table.insert(squadAI[callsign].orders, thisorder)
-                                    -- print("Squad orders: RTB")
+                                    print("Squad orders: RTB")
                                 else
                                     error("Commander has an unexpected order.", 80)
                                 end
@@ -87,6 +82,9 @@ function squadai.update(commanderAI, squadAI, dt)
                             --! is this an error?
                             print("Commander has no orders. Is that possible?")
                         end
+                    else
+                        -- this commander is not the commander for this squad
+                        -- print("Wrong commander. Skipping to next commander")
                     end
                 else
                     --! is this an error?
@@ -95,9 +93,10 @@ function squadai.update(commanderAI, squadAI, dt)
             end
         else
             -- do nothing. Cooldown will be invoked next cycle
+            -- print("Squad has order: " .. callsign .. squad.orders[1].order)
         end
+        assert(squad.orders[1] ~= nil)
     end
-
 end
 
 return squadai

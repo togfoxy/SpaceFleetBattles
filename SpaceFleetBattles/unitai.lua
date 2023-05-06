@@ -1,85 +1,85 @@
 unitai = {}
 
-function unitai.createFighter(forf, squadcallsign)
-    -- forf = friend or foe.  See enums
-    -- callsign is plain text eg "Rogue One". It is also the unique identifier for the squad
-
-    local rndx, rndy
-    if forf == enum.forfFriend then
-        -- rndx = love.math.random(50, SCREEN_WIDTH /3)
-        rndx = FRIEND_START_X + love.math.random(-10, 10)
-        rndy = love.math.random(50, SCREEN_HEIGHT - 50)
-    elseif forf == enum.forfEnemy then
-        -- rndx = love.math.random(SCREEN_WIDTH * 0.66, SCREEN_WIDTH - 50)
-        rndx = FOE_START_X + love.math.random(-10, 10)
-        rndy = love.math.random(50, SCREEN_HEIGHT - 50)
-    elseif forf == enum.forfNeutral then
-        rndx = love.math.random(50, SCREEN_WIDTH - 50)
-        rndy = love.math.random(50, SCREEN_HEIGHT - 50)
-    else
-        error()
-    end
-
-    local thisobject = {}
-    thisobject.body = love.physics.newBody(PHYSICSWORLD, rndx, rndy, "dynamic")
-	thisobject.body:setLinearDamping(0)
-	-- thisobject.body:setMass(100)
-    if forf == enum.forfEnemy then
-        thisobject.body:setAngle(math.pi)
-    end
-
-    thisobject.shape = love.physics.newPolygonShape( -5, -5, 5, 0, -5, 5, -7, 0)
-	thisobject.fixture = love.physics.newFixture(thisobject.body, thisobject.shape, 1)		-- the 1 is the density
-	thisobject.fixture:setRestitution(0.25)
-	thisobject.fixture:setSensor(false)
-
-    if forf == enum.forfFriend then
-        thisobject.fixture:setCategory(enum.categoryFriendlyFighter)
-        thisobject.fixture:setMask(enum.categoryFriendlyFighter, enum.categoryFriendlyBullet, enum.categoryEnemyFighter)
-    else
-        thisobject.fixture:setCategory(enum.categoryEnemyFighter)
-        thisobject.fixture:setMask(enum.categoryEnemyFighter, enum.categoryEnemyBullet, enum.categoryFriendlyFighter)   -- these are the things that will not trigger a collision
-    end
-
-    local guid = cf.getGUID()
-	thisobject.fixture:setUserData(guid)
-    thisobject.guid = guid
-
-    thisobject.forf = forf
-    thisobject.squadCallsign = squadcallsign
-    -- thisobject.currentAction = nil              -- this will be influenced by squad orders + player choices
-    -- thisobject.taskCooldown = 0
-    thisobject.actions = {}
-    thisobject.weaponcooldown = 0           --! might be more than one weapon in the future
-
-    thisobject.currentMaxForwardThrust = 100    -- can be less than max if battle damaged
-    thisobject.maxForwardThrust = 100
-    thisobject.currentForwardThrust = 0
-    thisobject.maxAcceleration = 25
-    thisobject.maxDeacceleration = 25       -- set to 0 for bullets
-    thisobject.currentMaxAcceleration = 25 -- this can be less than maxAcceleration if battle damaged
-    thisobject.maxSideThrust = 1
-    thisobject.currentSideThrust = 1
-
-    thisobject.componentSize = {}
-    thisobject.componentSize[enum.componentStructure] = 3
-    thisobject.componentSize[enum.componentThruster] = 2
-    thisobject.componentSize[enum.componentAccelerator] = 1
-    thisobject.componentSize[enum.componentWeapon] = 1
-    thisobject.componentSize[enum.componentSideThruster] = 1
-
-    thisobject.componentHealth = {}
-    thisobject.componentHealth[enum.componentStructure] = 100
-    thisobject.componentHealth[enum.componentThruster] = 100
-    thisobject.componentHealth[enum.componentAccelerator] = 100
-    thisobject.componentHealth[enum.componentWeapon] = 100
-    thisobject.componentHealth[enum.componentSideThruster] = 100
-
-    -- thisobject.destx = nil
-    -- thisobject.desty = nil
-
-    table.insert(OBJECTS, thisobject)
-end
+-- function unitai.createFighter(forf, squadcallsign)
+--     -- forf = friend or foe.  See enums
+--     -- callsign is plain text eg "Rogue One". It is also the unique identifier for the squad
+--
+--     local rndx, rndy
+--     if forf == enum.forfFriend then
+--         -- rndx = love.math.random(50, SCREEN_WIDTH /3)
+--         rndx = FRIEND_START_X + love.math.random(-10, 10)
+--         rndy = love.math.random(50, SCREEN_HEIGHT - 50)
+--     elseif forf == enum.forfEnemy then
+--         -- rndx = love.math.random(SCREEN_WIDTH * 0.66, SCREEN_WIDTH - 50)
+--         rndx = FOE_START_X + love.math.random(-10, 10)
+--         rndy = love.math.random(50, SCREEN_HEIGHT - 50)
+--     elseif forf == enum.forfNeutral then
+--         rndx = love.math.random(50, SCREEN_WIDTH - 50)
+--         rndy = love.math.random(50, SCREEN_HEIGHT - 50)
+--     else
+--         error()
+--     end
+--
+--     local thisobject = {}
+--     thisobject.body = love.physics.newBody(PHYSICSWORLD, rndx, rndy, "dynamic")
+-- 	thisobject.body:setLinearDamping(0)
+-- 	-- thisobject.body:setMass(100)
+--     if forf == enum.forfEnemy then
+--         thisobject.body:setAngle(math.pi)
+--     end
+--
+--     thisobject.shape = love.physics.newPolygonShape( -5, -5, 5, 0, -5, 5, -7, 0)
+-- 	thisobject.fixture = love.physics.newFixture(thisobject.body, thisobject.shape, 1)		-- the 1 is the density
+-- 	thisobject.fixture:setRestitution(0.25)
+-- 	thisobject.fixture:setSensor(false)
+--
+--     if forf == enum.forfFriend then
+--         thisobject.fixture:setCategory(enum.categoryFriendlyFighter)
+--         thisobject.fixture:setMask(enum.categoryFriendlyFighter, enum.categoryFriendlyBullet, enum.categoryEnemyFighter)
+--     else
+--         thisobject.fixture:setCategory(enum.categoryEnemyFighter)
+--         thisobject.fixture:setMask(enum.categoryEnemyFighter, enum.categoryEnemyBullet, enum.categoryFriendlyFighter)   -- these are the things that will not trigger a collision
+--     end
+--
+--     local guid = cf.getGUID()
+-- 	thisobject.fixture:setUserData(guid)
+--     thisobject.guid = guid
+--
+--     thisobject.forf = forf
+--     thisobject.squadCallsign = squadcallsign
+--     -- thisobject.currentAction = nil              -- this will be influenced by squad orders + player choices
+--     -- thisobject.taskCooldown = 0
+--     thisobject.actions = {}
+--     thisobject.weaponcooldown = 0           --! might be more than one weapon in the future
+--
+--     thisobject.currentMaxForwardThrust = 100    -- can be less than max if battle damaged
+--     thisobject.maxForwardThrust = 100
+--     thisobject.currentForwardThrust = 0
+--     thisobject.maxAcceleration = 25
+--     thisobject.maxDeacceleration = 25       -- set to 0 for bullets
+--     thisobject.currentMaxAcceleration = 25 -- this can be less than maxAcceleration if battle damaged
+--     thisobject.maxSideThrust = 1
+--     thisobject.currentSideThrust = 1
+--
+--     thisobject.componentSize = {}
+--     thisobject.componentSize[enum.componentStructure] = 3
+--     thisobject.componentSize[enum.componentThruster] = 2
+--     thisobject.componentSize[enum.componentAccelerator] = 1
+--     thisobject.componentSize[enum.componentWeapon] = 1
+--     thisobject.componentSize[enum.componentSideThruster] = 1
+--
+--     thisobject.componentHealth = {}
+--     thisobject.componentHealth[enum.componentStructure] = 100
+--     thisobject.componentHealth[enum.componentThruster] = 100
+--     thisobject.componentHealth[enum.componentAccelerator] = 100
+--     thisobject.componentHealth[enum.componentWeapon] = 100
+--     thisobject.componentHealth[enum.componentSideThruster] = 100
+--
+--     -- thisobject.destx = nil
+--     -- thisobject.desty = nil
+--     print("Adding fighter to OBJECTS: " .. thisobject.guid)
+--     table.insert(OBJECTS, thisobject)
+-- end
 
 local function createEscapePod(Obj)
     -- Obj is the obj that is spawning/creating the pod. It assumed this Obj will soon be destroyed
@@ -118,6 +118,7 @@ local function createEscapePod(Obj)
     end
 	thisobject.fixture:setUserData(guid)
     thisobject.guid = guid
+    assert(thisobject.guid ~= nil)
 
     thisobject.forf = Obj.forf
     thisobject.squadCallsign = Obj.squadcallsign
@@ -158,6 +159,7 @@ local function createEscapePod(Obj)
     end
     thisobject.actions[1].desty = Obj.body:getY()
 
+    print("Adding pod to OBJECTS: " .. thisobject.guid)
     table.insert(OBJECTS, thisobject)
     print("Pod created: " .. thisobject.body:getX(), thisobject.body:getY())
 end
@@ -436,6 +438,7 @@ local function createNewBullet(Obj, bullet)
     end
     local guid = cf.getGUID()
     thisobject.fixture:setUserData(guid)
+    thisobject.guid = guid
 
     thisobject.squadCallsign = nil
     thisobject.lifetime = 10            -- seconds
@@ -444,6 +447,7 @@ local function createNewBullet(Obj, bullet)
     thisobject.body:setAngle(currentangle)
     thisobject.body:setLinearVelocity(math.cos(currentangle) * 300, math.sin(currentangle) * 300)
 
+    -- print("Adding bullet to OBJECTS: " .. thisobject.guid)
     table.insert(OBJECTS, thisobject)
 end
 
@@ -498,6 +502,8 @@ end
 local function updateUnitTask(Obj, squadorder, dt)
     -- this adjusts targets or other goals based on the squad order
 
+    assert(Obj ~= nil)
+
     if Obj.actions[1] ~= nil then
         Obj.actions[1].cooldown = Obj.actions[1].cooldown - dt
         if Obj.actions[1].cooldown <= 0 then
@@ -551,25 +557,25 @@ local function updateUnitTask(Obj, squadorder, dt)
             -- print("Unit task: RTB")
         else
             --! no squad order or unexpected squad order
-            Obj.currentAction = nil
+            Obj.actions[1] = nil
             print("No squad order available for this unit")
         end
     end
 end
 
-function unitai.update(squadAI, dt)
+function unitai.update(dt)
     -- update all units in OBJECTS based on the AI above them
     -- update the unit based on orders broadcasted in squadAI
 
     local squadorder
-    for k = #OBJECTS, 1, -1 do
+    for k = #OBJECTS, 1, -1 do          --! this backwards thing is unnecessary
         Obj = OBJECTS[k]
         local callsign = Obj.squadCallsign
         local objcategory = Obj.fixture:getCategory()
 
         if objcategory == enum.categoryEnemyFighter or objcategory == enum.categoryFriendlyFighter then
             assert(Obj.body:isBullet() == false)
-            if #squadAI[callsign].orders == 0 then
+            if squadAI[callsign] == nil or #squadAI[callsign].orders == 0 then
                 squadorder = nil
                 print("Unit detecting squad has no order")
             else
@@ -586,16 +592,18 @@ function unitai.update(squadAI, dt)
         end
     end
     --! debugging only
-    if OBJECTS[1].actions[1].targetguid ~= nil then
-        local targetguid = OBJECTS[1].actions[1].targetguid
-        local targetObj = fun.getObject(targetguid)
-        if targetObj == nil then
-            OBJECTS[1].actions[1].cooldown = 0
-        else
-            local cat = targetObj.fixture:getCategory()
-            -- print("Object 1 target type = " .. cat)
-        end
-    end
+    -- if OBJECTS[1].actions ~= nil then
+    --     if OBJECTS[1].actions[1].targetguid ~= nil then
+    --         local targetguid = OBJECTS[1].actions[1].targetguid
+    --         local targetObj = fun.getObject(targetguid)
+    --         if targetObj == nil then
+    --             OBJECTS[1].actions[1].cooldown = 0
+    --         else
+    --             local cat = targetObj.fixture:getCategory()
+    --             -- print("Object 1 target type = " .. cat)
+    --         end
+    --     end
+    -- end
 end
 
 return unitai
