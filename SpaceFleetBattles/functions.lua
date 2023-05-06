@@ -242,4 +242,16 @@ function functions.getLaunchXY(forf)
     return rndx, rndy
 end
 
+function functions.getTopAction(Obj)
+    -- return the top most action table that includes the action type and cooldown etc
+    if Obj.actions ~= nil then
+        if Obj.actions[1] ~= nil then
+            if Obj.actions[1].action ~= nil then
+                return Obj.actions[1]
+            end
+        end
+    end
+    return nil
+end
+
 return functions

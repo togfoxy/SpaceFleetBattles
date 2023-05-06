@@ -143,7 +143,7 @@ function fight.draw()
 
     -- draw BG
     love.graphics.setColor(1,1,1,0.25)
-    love.graphics.draw(IMAGE[enum.imageFightBG], 0, 0, 0, 2.4, 1)
+    love.graphics.draw(IMAGE[enum.imageFightBG], 0, 0, 0, 2.4, 0.85)
 
     -- draw the boundary
     love.graphics.setColor(1,1,1,0.25)
@@ -255,7 +255,6 @@ function fight.draw()
 
     -- draw yellow recticle if player is targeted
     local playeristargeted = fun.unitIsTargeted(PLAYER_GUID)
-    print(playeristargeted)
     if playeristargeted then
         -- draw yellow recticle on player craft
         local Obj = fun.getObject(PLAYER_GUID)
@@ -297,7 +296,7 @@ function fight.draw()
         love.graphics.line(drawx, drawy + 15, drawx + menuwidth, drawy + 15)
 
         -- draw current action and a line
-        actionenum = Obj.currentAction
+        actionenum = Obj.actions[1].action
         if actionenum == enum.unitActionEngaging then
             txt = "Engaging"
         elseif actionenum == enum.unitActionReturningToBase then
@@ -309,6 +308,30 @@ function fight.draw()
             love.graphics.setColor(1,1,1,1)
             love.graphics.line(drawx, drawy + 36, drawx + menuwidth, drawy + 36)
         end
+    end
+
+    -- draw current action
+    local txt
+    if fun.isPlayerAlive() then
+        local Obj = fun.getObject(PLAYER_GUID)
+        if Obj.actions ~= nil then
+            if Obj.actions[1] ~= nil then
+                if Obj.actions[1].action ~= nil then
+                    txt = Obj.actions[1].action
+                else
+                    print(inspect(Obj.actions))
+                    error()
+                end
+            else
+                print(inspect(Obj.actions))
+                error()
+            end
+        else
+            txt = "None"
+        end
+        local drawx, drawy = res.toGame(Obj.body:getX(), Obj.body:getY()) -- need to convert physical to screen
+        love.graphics.setColor(1,1,1,1)
+        love.graphics.print(txt, drawx - 20, drawy + 10)
     end
 
     -- cf.printAllPhysicsObjects(PHYSICSWORLD, 1)

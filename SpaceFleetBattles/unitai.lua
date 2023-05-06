@@ -139,6 +139,7 @@ local function setTaskRTB(Obj)
     end
     thisaction.desty = Obj.body:getY()
 	table.insert(Obj.actions, thisaction)
+    print("Setting action to RTB")
 end
 
 local function setTaskDestination(Obj, x, y)
@@ -151,10 +152,12 @@ local function setTaskDestination(Obj, x, y)
 	thisaction.destx = x
 	thisaction.desty = y
 	table.insert(Obj.actions, thisaction)
+    print("Setting action to provided destination")
 end
 
 local function setTaskEject(Obj)
     Obj.lifetime = 0
+    print("Setting action to eject")
     createEscapePod(Obj)
 end
 
@@ -181,6 +184,10 @@ local function turnToObjective(Obj, destx, desty, dt)
     local bearingdelta = bearing - currentangle
 
     if bearingdelta < -0.05 or bearingdelta > 0.05 then         -- rads
+        if Obj.guid == PLAYER_GUID then
+            print("Bearing delta: " .. bearingdelta)                    -- rads
+        end
+
         if bearingdelta > 0 then
             -- turn right
             force = 1
@@ -208,6 +215,8 @@ local function adjustAngle(Obj, dt)
     end
 
     local bearingrad
+
+    -- turn to destination if one exists
     if Obj.actions[1] ~= nil and Obj.actions[1].destx ~= nil then
         -- move to destination
         local objx, objy = Obj.body:getPosition()
@@ -222,10 +231,14 @@ local function adjustAngle(Obj, dt)
                 Obj.lifetime = 0                        -- destroy the object
                 -- print(disttodest)
                 -- print(inspect(Obj))
+            else
+                print("Unit arrived at destination")
             end
         else
             turnToObjective(Obj, destx, desty, dt)
         end
+
+    -- turn to target if one exists
     elseif Obj.actions[1] ~= nil and Obj.actions[1].targetguid ~= nil then
         local x1, y1 = Obj.body:getPosition()           --! can refactor this code
         local enemyobject = fun.getObject(Obj.actions[1].targetguid)
@@ -238,6 +251,7 @@ local function adjustAngle(Obj, dt)
         end
     else
         --! actions[1] == nil or some other condition. Error?
+        print("Unit has no action therefore no angle")
     end
 end
 
@@ -437,7 +451,6 @@ local function updateUnitTask(Obj, squadorder, dt)
         if (Obj.componentHealth[enum.componentStructure] <= 35 and fun.unitIsTargeted(Obj.guid))
             or (Obj.componentHealth[enum.componentStructure] <= 35 and Obj.componentHealth[enum.componentThruster] <= 0) then
             setTaskEject(Obj)
-            print("Ho")
         elseif Obj.componentHealth[enum.componentWeapon] <= 0 then
             setTaskRTB(Obj)
         elseif Obj.componentHealth[enum.componentThruster] <= 50 then
@@ -471,6 +484,7 @@ local function updateUnitTask(Obj, squadorder, dt)
             thisorder.desty = nil
             thisorder.targetguid = targetguid
             table.insert(Obj.actions, thisorder)
+            print("Setting action = engage")
         elseif squadorder == enum.squadOrdersReturnToBase then
                 setTaskRTB(Obj)
             -- print("Unit task: RTB")

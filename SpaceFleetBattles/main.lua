@@ -60,7 +60,7 @@ function beginContact(fixtureA, fixtureB, coll)
 	-- local bodyA = fixtureA:getBody()
 	-- local bodyB = fixtureB:getBody()
 
-	print("guids in contact: " .. guidA, guidB)
+	-- print("guids in contact: " .. guidA, guidB)
 
 	assert(guidA ~= nil)
 	assert(guidB ~= nil)
