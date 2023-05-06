@@ -95,6 +95,10 @@ function squadai.update(dt)
             -- do nothing. Cooldown will be invoked next cycle
             -- print(callsign .. " squad has order: " .. squad.orders[1].order)
         end
+
+        if not (squad.orders[1] ~= nil) then
+            print(inspect(squad.orders))
+        end
         assert(squad.orders[1] ~= nil)
     end
 end

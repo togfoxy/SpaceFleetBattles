@@ -137,7 +137,15 @@ local function setTaskRTB(Obj)
     elseif Obj.forf == enum.forfEnemy then
         thisaction.destx = FOE_START_X
     end
-    thisaction.desty = Obj.body:getY()
+
+    -- set a y value that is insider the boundary
+    local y = Obj.body:getY()
+    if y < 0 then
+        y = 100
+    elseif y > SCREEN_HEIGHT then
+        y = SCREEN_HEIGHT - 100
+    end
+    thisaction.desty = y
 	table.insert(Obj.actions, thisaction)
     print("Setting action to RTB")
 end
@@ -208,10 +216,14 @@ local function adjustAngle(Obj, dt)
     assert(Obj.body:isBullet() == false)
 
     while Obj.body:getAngle() > (math.pi * 1) do
+        print("Angle was: " .. Obj.body:getAngle())
         Obj.body:setAngle(Obj.body:getAngle() - (math.pi * 2))
+        print("Angle now: " .. Obj.body:getAngle())
     end
     while Obj.body:getAngle() < (math.pi * -1) do
+        print("Angle was: " .. Obj.body:getAngle())
         Obj.body:setAngle(Obj.body:getAngle() + (math.pi * 2))
+        print("Angle now: " .. Obj.body:getAngle())
     end
 
     local bearingrad
@@ -223,7 +235,7 @@ local function adjustAngle(Obj, dt)
         local destx = Obj.actions[1].destx
         local desty = Obj.actions[1].desty
         local disttodest = cf.getDistance(objx, objy, destx, desty)
-        if disttodest < 10 then
+        if disttodest < 20 then
             -- arrived at destination
             if Obj.actions[1].action == enum.unitActionReturningToBase then
                 -- RTB successful. Destroy this object
@@ -449,6 +461,13 @@ local function updateUnitTask(Obj, squadorder, dt)
     if #Obj.actions <= 0 then
         -- try to find a new action
 
+        local unitIsTargeted = fun.unitIsTargeted(Obj.guid)
+        local toporder = fun.getTopAction(Obj)
+        local targetguid
+        if toporder ~= nil then
+            targetguid = toporder.targetguid
+        end
+
         -- do self-preservation checks firstly. Remember the ordering matters
         if (Obj.componentHealth[enum.componentStructure] <= 35 and fun.unitIsTargeted(Obj.guid))
             or (Obj.componentHealth[enum.componentStructure] <= 35 and Obj.componentHealth[enum.componentThruster] <= 0) then
@@ -463,12 +482,12 @@ local function updateUnitTask(Obj, squadorder, dt)
             setTaskRTB(Obj)
         elseif Obj.componentHealth[enum.componentStructure] <= 50 then
             setTaskRTB(Obj)
-        elseif not fun.unitIsTargeted(Obj.guid) and Obj.body:getY() < 0 then
+        elseif not unitIsTargeted and Obj.body:getY() < 0 and targetguid == nil then
 			-- move back inside the battle map
-			setTaskDestination(Obj, Obj.body:getX(), 100)		--! check that this 100 value is correct
-		elseif not fun.unitIsTargeted(Obj.guid) and Obj.body:getY() > SCREEN_HEIGHT then
+			setTaskDestination(Obj, Obj.body:getX(), 100)
+		elseif not unitIsTargeted and Obj.body:getY() > SCREEN_HEIGHT and targetguid == nil then
 			-- move back inside the battle map
-			setTaskDestination(Obj, Obj.body:getX(), SCREEN_HEIGHT - 100)		--! check that this 100 value is correct
+			setTaskDestination(Obj, Obj.body:getX(), SCREEN_HEIGHT - 100)
 
 		-- after the self-preservation bits, take direction from current squad orders
         elseif squadorder == enum.squadOrdersEngage then
@@ -479,14 +498,19 @@ local function updateUnitTask(Obj, squadorder, dt)
             if Obj.forf == enum.forfEnemy then
                 targetguid = getClosestFighter(Obj, enum.forfFriend)       -- this OBJECTS guid or nil
             end
-            local thisorder = {}
-            thisorder.action = enum.unitActionEngaging
-            thisorder.cooldown = 5
-            thisorder.destx = nil
-            thisorder.desty = nil
-            thisorder.targetguid = targetguid
-            table.insert(Obj.actions, thisorder)
-            print("Setting action = engage")
+            if targetguid ~= nil then
+                local thisorder = {}
+                thisorder.action = enum.unitActionEngaging
+                thisorder.cooldown = 5
+                thisorder.destx = nil
+                thisorder.desty = nil
+                thisorder.targetguid = targetguid
+                table.insert(Obj.actions, thisorder)
+                print("Setting action = engage")
+            else
+                -- trying to engage but no target found.
+                setTaskRTB(Obj)
+            end
         elseif squadorder == enum.squadOrdersReturnToBase then
                 setTaskRTB(Obj)
             -- print("Unit task: RTB")
