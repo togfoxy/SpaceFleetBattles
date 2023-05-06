@@ -33,19 +33,26 @@ function constants.load()
     enums.load()
     -- add extra items below this line ======================================================
 
-    FRIEND_START_X = 0      -- left side of screen
-    FOE_START_X = SCREEN_WIDTH * 2
+    FRIEND_START_X = 0      			-- left side of screen
+    FOE_START_X = SCREEN_WIDTH * 2		-- right side of screen
 
-    FRIEND_SHIP_COUNT = 24
-    FRIEND_PILOT_COUNT = 24
-    SHIPS_PER_SQUADRON = 6
+    FRIEND_FIGHTER_COUNT = 24		-- not actually a constant
+    FRIEND_PILOT_COUNT = 24			-- not actually a constant
+
+	FRIEND_SQUADRON_COUNT = 2		-- not a constant and changes for each battle
+    FRIEND_SHIPS_PER_SQUADRON = 6	-- not a constant and changes for each battle
+
+	SHIPS_PER_SQUADRON = 6
 
     OBJECTS = {}            -- table of items
     SQUADS = {}             -- a list of squad guids
     SQUAD_LIST = {}         -- a list of callsigns and their forf
+    commanderAI = {}
     squadAI = {}
     SOUNDS = {}             -- sound effects
     SCORE = {}              -- track casulties in this table
+	ROSTER = {}
+	HANGER = {}
     SCORE.friendsdead = 0       -- put here for documentation and to help me remember
     SCORE.enemiesdead = 0
 

@@ -29,46 +29,58 @@ fun = require 'functions'
 cf = require 'lib.commonfunctions'
 
 require 'mainmenu'
+require 'battleroster'
 require 'fight'
 require 'endbattle'
 require 'commanderai'
 require 'squadai'
 require 'unitai'
+require 'fighter'
 
 function love.resize(w, h)
 	res.resize(w, h)
 end
 
-function beginContact(a, b, coll)
+function beginContact(fixtureA, fixtureB, coll)
 	-- a and be are fixtures
-	-- get the body that owns the fixture
-	local object1index, object2index
 
-	for i = 1, #OBJECTS do
-		if OBJECTS[i].fixture == a then
-			object1index = i
-		end
-		if OBJECTS[i].fixture == b then
-			object2index = i
-		end
-	end
 
 	local victim = {}			-- this will contain the fighter object that was hit
 	local bullet = {}
-	if OBJECTS[object1index].body:isBullet() then
-		-- destroy Obj2
-		victim = OBJECTS[object2index]
-		bullet = OBJECTS[object1index]
-		OBJECTS[object1index].lifetime = 0
+
+	local catA = fixtureA:getCategory()
+	local catB = fixtureB:getCategory()
+	print("Contact category: " .. catA, catB)
+	-- get the object that owns the fixture
+	local guidA = fixtureA:getUserData()
+	local guidB = fixtureB:getUserData()
+	local objA = fun.getObject(guidA)		-- this is different Fixture:getBody( )
+	local objB = fun.getObject(guidB)
+	--
+	-- local bodyA = fixtureA:getBody()
+	-- local bodyB = fixtureB:getBody()
+
+	print("guids in contact: " .. guidA, guidB)
+
+	assert(guidA ~= nil)
+	assert(guidB ~= nil)
+	assert(objA ~= nil)
+	assert(objB ~= nil)
+
+	if catA == enum.categoryEnemyBullet or catA == enum.categoryFriendlyBullet then
+		-- destroy Obj1 because its a bullet
+		victim = objB
+		bullet = objA
+		objA.lifetime = 0
 	end
-	if OBJECTS[object2index].body:isBullet() then
-		-- destroy Obj1
-		victim = OBJECTS[object1index]
-		bullet = OBJECTS[object2index]
-		OBJECTS[object2index].lifetime = 0
+	if catB == enum.categoryEnemyBullet or catB == enum.categoryFriendlyBullet then
+		-- destroy Obj2 because it's a bullet
+		victim = objA
+		bullet = objB
+		objB.lifetime = 0
 	end
 
-	fun.applyDamage(victim, bullet)		-- assumes bullet hit fighter
+	fun.applyDamage(victim, bullet)		-- assumes bullet hit fighter. Send in bullet to check if bullet belongs to player
 
 	-- play sounds if player is hit  		--! what about explosion if dead?
 	if victim.guid == PLAYER_GUID then
@@ -110,7 +122,8 @@ function love.mousereleased(x, y, button, isTouch)
 
 	if currentscene == enum.sceneFight then
 		fight.mousereleased(rx, ry, x, y, button)		-- need to send through the res adjusted x/y and the 'real' x/y
-	elseif currentscene == enum.scenePodium then
+	elseif currentscene == enum.sceneBattleRoster then
+		battleroster.mousereleased(rx, ry, x, y, button)
 	elseif currentscene == enum.sceneMainMenu then
 		mainmenu.mousereleased(rx, ry, x, y, button)
 	end
@@ -131,6 +144,7 @@ function love.load()
 	fun.loadImages()
 
 	mainmenu.loadButtons()
+	battleroster.loadButtons()
 	endbattle.loadButtons()
 
 	cam = Camera.new(SCREEN_WIDTH / 2, SCREEN_HEIGHT / 2, 1)
@@ -161,6 +175,8 @@ function love.draw()
 	local currentscene = cf.currentScreenName(SCREEN_STACK)
 	if currentscene == enum.sceneFight then
 		fight.draw()
+	elseif currentscene == enum.sceneBattleRoster then
+		battleroster.draw()
 	elseif currentscene == enum.sceneMainMenu then
 		mainmenu.draw()
 	elseif currentscene == enum.sceneEndBattle then
