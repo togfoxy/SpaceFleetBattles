@@ -167,9 +167,9 @@ end
 function functions.unitIsTargeted(guid)
     -- return true if any object has this guid as a target
     for _, Obj in pairs(OBJECTS) do
-        if Obj.orders ~= nil then
-            if Obj.orders[1].order ~= nil then
-                if Obj.orders[1].targetguid == guid then
+        if Obj.actions ~= nil then
+            if Obj.actions[1] ~= nil then
+                if Obj.actions[1].targetguid == guid then
                     return true
                 end
             end

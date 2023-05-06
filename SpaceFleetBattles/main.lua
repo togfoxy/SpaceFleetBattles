@@ -50,7 +50,7 @@ function beginContact(fixtureA, fixtureB, coll)
 
 	local catA = fixtureA:getCategory()
 	local catB = fixtureB:getCategory()
-	print("Contact category: " .. catA, catB)
+	-- print("Contact category: " .. catA, catB)
 	-- get the object that owns the fixture
 	local guidA = fixtureA:getUserData()
 	local guidB = fixtureB:getUserData()

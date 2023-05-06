@@ -412,16 +412,17 @@ function printAllPhysicsObjects(world, BOX2D_SCALE)
 	end
 end
 
-function isInFront(x, y, facing, x2, y2)
+function isInFront(x, y, facingrad, x2, y2)
     -- x,y is the object that is looking (real coordinates, i.e. not normalised and not translated to origin)
-    -- facing is the facing of the object at x, y
+    -- facing is the facing of the object at x, y in radians
     -- x2, y2 is the target that the first object is looking for
 	assert(x ~= nil and y ~= nil)
 	assert(x2 ~= nil and y2 ~= nil)
-	assert(facing ~= nil)
+	assert(facingrad ~= nil)
 
     -- get a vector in the direction of facing
-    local x1, y1 = cf.addVectorToPoint(x,y,facing,5)        -- 5 is an arbitrary value that doesn't matter
+	local facingdeg = math.deg(facingrad)
+    local x1, y1 = cf.addVectorToPoint(x,y,facingdeg,5)        -- 5 is an arbitrary value that doesn't matter
     -- reduce the real vector down to a delta vector
     local deltax1 = x1 - x
     local deltay1 = y1 - y

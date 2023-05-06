@@ -16,7 +16,7 @@ local function destroyObjects(dt)
                     print("Fighter object destroyed:")
                     -- print(inspect(OBJECTS[1]))
                 end
-                print("guid and object destroyed: " .. OBJECTS[i].guid)
+                -- print("guid and object destroyed: " .. OBJECTS[i].guid)
                 OBJECTS[i].fixture:destroy()                --! check if mass changes
                 OBJECTS[i].body:destroy()
                 table.remove(OBJECTS, i)
@@ -254,7 +254,9 @@ function fight.draw()
     end
 
     -- draw yellow recticle if player is targeted
-    if fun.unitIsTargeted(PLAYER_GUID) then
+    local playeristargeted = fun.unitIsTargeted(PLAYER_GUID)
+    print(playeristargeted)
+    if playeristargeted then
         -- draw yellow recticle on player craft
         local Obj = fun.getObject(PLAYER_GUID)
         if Obj ~= nil and Obj.fixture:getCategory() ~= enum.categoryFriendlyPod then
