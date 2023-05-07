@@ -194,6 +194,7 @@ function functions.initialiseRoster()
 		thispilot.kills = 0
 		thispilot.missions = 0
 		thispilot.ejections = 0
+        thispilot.isDead = fase
 		table.insert(ROSTER, thispilot)
 	end
 	ROSTER[1].isPlayer = true

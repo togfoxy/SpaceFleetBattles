@@ -149,7 +149,21 @@ function battleroster.draw()
     love.graphics.draw(IMAGE[enum.imageBattleRoster],0,0,0, 1,1)
 
 
+
 	--! draw roster
+    local drawx = 100
+    local drawy = 100
+    for i = 1, #ROSTER do
+        if ROSTER[1].isDead then
+            love.graphics.setColor(1,1,1,0.5)
+        else
+            love.graphics.setColor(1,1,1,1)
+        end
+        local txt = ROSTER[i].firstname .. " " .. ROSTER[i].lastname .. " " .. ROSTER[i].health .. " " .. ROSTER[i].missions .. " " .. ROSTER[i].kills .. " " .. ROSTER[i].ejections
+        love.graphics.print(txt, drawx, drawy)
+        drawy = drawy + 30
+    end
+
 
 	--! draw fighters in hanger
 
