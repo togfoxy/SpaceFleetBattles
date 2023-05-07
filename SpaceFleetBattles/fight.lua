@@ -63,7 +63,7 @@ function fight.wheelmoved(x, y)
 end
 
 function fight.mousemoved(x, y, dx, dy)
-    if love.mouse.isDown(3) then
+    if love.mouse.isDown(2) or love.mouse.isDown(3) then
         snapcamera = false
         TRANSLATEX = TRANSLATEX - dx
         TRANSLATEY = TRANSLATEY - dy
