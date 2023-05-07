@@ -323,7 +323,7 @@ local function adjustThrust(Obj, dt)
     							Obj.currentForwardThrust = Obj.currentForwardThrust - (Obj.maxDeacceleration * dt)
     							if Obj.currentForwardThrust < targetObj.currentForwardThrust then
     								-- print("echo")
-    								Obj.currentForwardThrust = targetObj.currentForwardThrust
+    								Obj.currentForwardThrust = targetObj.currentForwardThrust * 0.9
     							end
     						else
     							-- unit is not behind target so max thrust
@@ -488,7 +488,11 @@ local function updateUnitTask(Obj, squadorder, dt)
         -- do self-preservation checks firstly. Remember the ordering matters
         if (Obj.componentHealth[enum.componentStructure] <= 35 and fun.unitIsTargeted(Obj.guid))
             or (Obj.componentHealth[enum.componentStructure] <= 35 and Obj.componentHealth[enum.componentThruster] <= 0) then
-            setTaskEject(Obj)
+            -- eject is a bit of a dice roll
+            local rndnum = love.math.random(1, 35)
+            if rndnum > Obj.componentHealth[enum.componentStructure] then       -- more damage = more chance of eject
+                setTaskEject(Obj)
+            end
         elseif Obj.componentHealth[enum.componentWeapon] <= 0 then
             setTaskRTB(Obj)
         elseif Obj.componentHealth[enum.componentThruster] <= 50 then

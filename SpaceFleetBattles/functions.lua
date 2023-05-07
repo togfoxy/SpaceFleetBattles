@@ -94,6 +94,14 @@ function functions.getImpactedComponent(Obj)
     error()     -- should not reach this point
 end
 
+function functions.getPilot(guid)
+
+    for i = 1, #ROSTER do
+        if ROSTER[i].guid == guid then return ROSTER[i] end
+    end
+    return nil
+end
+
 function functions.applyDamage(victim, bullet)
 
     local componenthit = fun.getImpactedComponent(victim)
@@ -116,6 +124,13 @@ function functions.applyDamage(victim, bullet)
         victim.lifetime = 0
         unitai.clearTarget(victim.guid)		-- remove this guid from everyone's target
         print("Unit exploded")
+
+        -- remove friendly pilots from roster
+        local pilotguid = victim.pilotguid
+        local pilotobj = fun.getPilot(pilotguid)
+        if pilotobj ~= nil then pilotobj.isDead = true end
+
+        print("Adjusted roster: " .. inspect(ROSTER))
     else
         -- victim not dead so attach a smoke animation to the object
         fun.createAnimation(victim, enum.animSmoke)

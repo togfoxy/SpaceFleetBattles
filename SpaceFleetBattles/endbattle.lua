@@ -5,18 +5,49 @@ endbattle = {}
 --!fightsceneHasLoaded = false
 
 function endbattle.draw()
-    love.graphics.setColor(1,1,1,1)
-    local txt = "Friendly ships lost: " .. SCORE.friendsdead
-    love.graphics.print(txt, 100, 100)
-    local txt = "Enemy ships destroyed: " .. SCORE.enemiesdead
-    love.graphics.print(txt, 100, 150)
 
-    if fun.isPlayerAlive() then
-        txt = "Player survived"
-    else
-        txt = "Player was lost in battle"
+    love.graphics.setColor(1,1,1,0.5)
+    love.graphics.draw(IMAGE[enum.imageBattleRoster],0,0,0, 1,1)
+
+	-- draw roster
+    local drawx = 100
+    local drawy = 100
+    for i = 1, #ROSTER do
+        if ROSTER[1].isDead then
+            love.graphics.setColor(1,1,1,0.5)
+        else
+            love.graphics.setColor(1,1,1,1)
+        end
+        local txt = ROSTER[i].firstname .. " " .. ROSTER[i].lastname .. " " .. ROSTER[i].health .. " " .. ROSTER[i].missions .. " " .. ROSTER[i].kills .. " " .. ROSTER[i].ejections
+        love.graphics.print(txt, drawx, drawy)
+        drawy = drawy + 30
     end
-    love.graphics.print(txt, 100, 200)
+
+	-- draw fighters in hanger
+    local drawx = 900
+    local drawy = 100
+    love.graphics.setColor(1,1,1,1)
+    for i = 1, #HANGER do
+        local txt = string.sub(HANGER[i].guid, -2)
+        txt = txt .. " " .. HANGER[i].componentHealth[enum.componentStructure]
+        love.graphics.print(txt, drawx, drawy)
+        drawy = drawy + 30
+    end
+
+
+
+    -- love.graphics.setColor(1,1,1,1)
+    -- local txt = "Friendly ships lost: " .. SCORE.friendsdead
+    -- love.graphics.print(txt, 100, 100)
+    -- local txt = "Enemy ships destroyed: " .. SCORE.enemiesdead
+    -- love.graphics.print(txt, 100, 150)
+    --
+    -- if fun.isPlayerAlive() then
+    --     txt = "Player survived"
+    -- else
+    --     txt = "Player was lost in battle"
+    -- end
+    -- love.graphics.print(txt, 100, 200)
 end
 
 function endbattle.loadButtons()

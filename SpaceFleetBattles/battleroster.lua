@@ -148,8 +148,6 @@ function battleroster.draw()
     love.graphics.setColor(1,1,1,0.5)
     love.graphics.draw(IMAGE[enum.imageBattleRoster],0,0,0, 1,1)
 
-
-
 	-- draw roster
     local drawx = 100
     local drawy = 100
@@ -163,10 +161,8 @@ function battleroster.draw()
         love.graphics.print(txt, drawx, drawy)
         drawy = drawy + 30
     end
-	--! draw fighters in hanger
 
-    -- print(inspect(HANGER))
-
+	-- draw fighters in hanger
     local drawx = 900
     local drawy = 100
     love.graphics.setColor(1,1,1,1)
