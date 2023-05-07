@@ -1,38 +1,5 @@
 squadai = {}
 
-
-
--- function squadai.createSquadron(forf)
---     -- create a wing of 6 units
---     -- the squadron is a concept only and is created by giving x fighters the same squad id
---     -- input: forf = friend or foe. example: enum.forfFriend
---
---     -- get a random and empty callsign from the squadlist
---     -- the squad callsign is a two character code. the squadlist ensures it is unique
---     local squadcallsign = nil
---     while squadcallsign == nil do
---         local txt = string.char(love.math.random(65, 90))
---         local txt = txt .. tostring(love.math.random(1,9))
---         squadcallsign = txt
---         if SQUAD_LIST[squadcallsign] == nil then
---
---             SQUAD_LIST[squadcallsign] = forf       -- mark this squad as friend or enemy
---
---             squadAI[squadcallsign] = {}
---             squadAI[squadcallsign].forf = forf
---             squadAI[squadcallsign].orders = {}
---         end
---     end
---
---     print("Created squad callsign: " .. squadcallsign)
---
---     table.insert(SQUADS, squadcallsign)
---
---     for i = 1, SHIPS_PER_SQUADRON do
---         unitai.createFighter(forf, squadcallsign)
---     end
--- end
-
 function squadai.update(dt)
     -- cycle through all squads and assign orders or cool down existing orders
     -- the commanderAI is all the commanders. Be sure to filter into the one appropriate for the squad
@@ -84,7 +51,7 @@ function squadai.update(dt)
                         end
                     else
                         -- this commander is not the commander for this squad
-                        print("Wrong commander. Skipping to next commander")
+                        -- print("Wrong commander. Skipping to next commander")
                     end
                 else
                     --! is this an error?
@@ -93,9 +60,10 @@ function squadai.update(dt)
             end
         else
             -- do nothing. Cooldown will be invoked next cycle
-            print("Number of squad orders: " .. #squad.orders)
-            print(inspect(squad.orders))
-            print(callsign .. " squad has order: " .. squad.orders[1].order)
+            --! debugging
+            -- print("Number of squad orders: " .. #squad.orders)
+            -- print(inspect(squad.orders))
+            -- print(callsign .. " squad has order: " .. squad.orders[1].order)
         end
 
         if not (squad.orders[1] ~= nil) then
