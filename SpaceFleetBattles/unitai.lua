@@ -180,10 +180,12 @@ end
 
 local function turnToObjective(Obj, destx, desty, dt)
 
-    local txt
+    local txt = ""
     -- get current facing in radians relative to east, round to 2 dec places
     local currentangle = Obj.body:getAngle()            -- rads
-    currentangle = cf.round(currentangle,2)
+    adjcurrentangle = currentangle
+    if currentangle < 0 then adjcurrentangle = (math.pi * 2) + currentangle end
+    adjcurrentangle = cf.round(adjcurrentangle,2)
 
     -- get the desired facing in radians realtive to east, round to 2 dec places
     local bearing = cf.getBearingRad(Obj.body:getX(), Obj.body:getY(), destx, desty)        -- this is absolute bearing in radians, starting from east
@@ -193,28 +195,33 @@ local function turnToObjective(Obj, destx, desty, dt)
 
     -- if desired facing > current facing then turn right
     local force = 0
-    if adjbearing > currentangle and (adjbearing - currentangle < (math.pi)) then
-        txt = ("Angle is " .. currentangle .. " and adjbearing is " .. adjbearing .. " so turning right")
-        force = 1
-    elseif adjbearing > currentangle and (adjbearing - currentangle > (math.pi)) then
-        txt = ("Angle is " .. currentangle .. " and adjbearing is " .. adjbearing .. " so turning left")
-        force = -1        
-    elseif adjbearing < currentangle then
-        txt = ("Angle is " .. currentangle .. " and adjbearing is " .. adjbearing .. " so turning left")
-        force = -1
-    elseif currentangle == adjbearing then
-        txt = "Angle is perfect. Not turning"
+    if adjbearing > adjcurrentangle and (adjbearing - adjcurrentangle < (math.pi)) then
+        txt = ("Adjcurrentangle is " .. adjcurrentangle .. " and adjbearing is " .. adjbearing .. " so turning right")
+        force = love.math.random(9,11) / 10         -- force a small wiggle
+    elseif adjbearing > adjcurrentangle and (adjbearing - adjcurrentangle >= (math.pi)) then
+        txt = ("Angle is " .. adjcurrentangle .. " and adjbearing is " .. adjbearing .. " so turning left")
+        force = (love.math.random(9,11) / 10) * -1         -- force a small wiggle
+    elseif adjbearing < adjcurrentangle and (adjcurrentangle - adjbearing < math.pi) then
+        txt = ("Angle is " .. adjcurrentangle .. " and adjbearing is " .. adjbearing .. " so turning left")
+        force = (love.math.random(9,11) / 10) * -1         -- force a small wiggle
+    elseif adjbearing < adjcurrentangle and (adjcurrentangle - adjbearing >= math.pi) then
+        txt = ("Adjcurrentangle is " .. adjcurrentangle .. " and adjbearing is " .. adjbearing .. " so turning right")
+        force = love.math.random(9,11) / 10         -- force a small wiggle
+    elseif adjcurrentangle == adjbearing then
+        -- txt = "Angle is perfect. Not turning"
         force = 0
+        -- apply a small random number to force wiggle and no ship ever goes truely straight
+        force = love.math.random(0, 5) / 100
     else
-        txt = "Unknown code flow. current/desired angle: " .. currentangle .. " / " .. adjbearing
+        txt = "Unknown code flow. current/desired angle: " .. adjcurrentangle .. " / " .. adjbearing
         print(txt)
         error()
     end
-    force = 60 * force * Obj.currentSideThrust * dt
+    force = 70 * force * Obj.currentSideThrust * dt         -- the constant is an arbitrary value to make turning cool
 
     Obj.body:setAngularVelocity(force)
 
-    if Obj.guid == PLAYER_GUID then
+    if Obj.guid == PLAYER_GUID and txt ~= "" then
         print("Message: " .. txt)
     end
 end
