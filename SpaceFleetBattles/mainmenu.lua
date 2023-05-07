@@ -20,6 +20,10 @@ end
 
 function mainmenu.draw()
 
+    love.graphics.draw(IMAGE[enum.imageMainMenu], 0, 0)
+    love.graphics.draw(IMAGE[enum.imageMainMenuBanner], 250, 25, 0, 1.5, 1.5)
+
+
     buttons.drawButtons()
 end
 
@@ -34,8 +38,8 @@ function mainmenu.loadButtons()
 
     -- button for new game
     local mybutton = {}
-    mybutton.x = (SCREEN_WIDTH / 2) - 75
-    mybutton.y = SCREEN_HEIGHT / 2 - 100
+    mybutton.x = (SCREEN_WIDTH / 7)
+    mybutton.y = SCREEN_HEIGHT / 2 - 150
     mybutton.width = 175
     mybutton.height = 25
     mybutton.bgcolour = {169/255,169/255,169/255,1}
@@ -61,8 +65,8 @@ function mainmenu.loadButtons()
 
     -- button for continue game
     local mybutton = {}
-    mybutton.x = (SCREEN_WIDTH / 2) - 75
-    mybutton.y = SCREEN_HEIGHT / 2 + 0
+    mybutton.x = (SCREEN_WIDTH / 7)
+    mybutton.y = SCREEN_HEIGHT / 2 -50
     mybutton.width = 175
     mybutton.height = 25
     mybutton.bgcolour = {169/255,169/255,169/255,1}
@@ -88,8 +92,8 @@ function mainmenu.loadButtons()
 
     -- button for exit game
     local mybutton = {}
-    mybutton.x = (SCREEN_WIDTH / 2) - 75
-    mybutton.y = SCREEN_HEIGHT / 2 + 50
+    mybutton.x = (SCREEN_WIDTH / 7)
+    mybutton.y = SCREEN_HEIGHT / 2 + 0
     mybutton.width = 175
     mybutton.height = 25
     mybutton.bgcolour = {169/255,169/255,169/255,1}

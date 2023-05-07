@@ -5,6 +5,10 @@ function functions.loadImages()
     IMAGE[enum.imageFightHUD] = love.graphics.newImage("assets/images/fighthud.png")
     IMAGE[enum.imageFightBG] = love.graphics.newImage("assets/images/background1.png")
     IMAGE[enum.imageEscapePod] = love.graphics.newImage("assets/images/pod.png")
+    IMAGE[enum.imageMainMenu] = love.graphics.newImage("assets/images/1172814.jpg")
+    IMAGE[enum.imageMainMenuBanner] = love.graphics.newImage("assets/images/mainmenutitle.png")
+    IMAGE[enum.imageBattleRoster] = love.graphics.newImage("assets/images/207634_1920_1217.png")
+
 end
 
 function functions.loadFonts()

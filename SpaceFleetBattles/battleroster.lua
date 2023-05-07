@@ -145,6 +145,10 @@ end
 
 function battleroster.draw()
 
+    love.graphics.setColor(1,1,1,0.5)
+    love.graphics.draw(IMAGE[enum.imageBattleRoster],0,0,0, 1,1)
+
+
 	--! draw roster
 
 	--! draw fighters in hanger
@@ -162,8 +166,8 @@ function battleroster.loadButtons()
     -- button for continue game
     local mybutton = {}
     mybutton.label = "Launch fighters"
-	mybutton.x = (SCREEN_WIDTH / 2) - 75
-    mybutton.y = SCREEN_HEIGHT / 2 + 0
+	mybutton.x = SCREEN_WIDTH * 0.85
+    mybutton.y = SCREEN_HEIGHT - 200
     mybutton.width = 175
     mybutton.height = 25
     mybutton.bgcolour = {169/255,169/255,169/255,1}

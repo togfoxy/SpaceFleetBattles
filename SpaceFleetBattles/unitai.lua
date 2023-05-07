@@ -222,7 +222,7 @@ local function turnToObjective(Obj, destx, desty, dt)
     Obj.body:setAngularVelocity(force)
 
     if Obj.guid == PLAYER_GUID and txt ~= "" then
-        print("Message: " .. txt)
+        -- print("Message: " .. txt)
     end
 end
 
@@ -233,14 +233,14 @@ local function adjustAngle(Obj, dt)
     assert(Obj.body:isBullet() == false)
 
     while Obj.body:getAngle() > (math.pi * 2) do
-        print("Angle was: " .. Obj.body:getAngle())
+        -- print("Angle was: " .. Obj.body:getAngle())
         Obj.body:setAngle(Obj.body:getAngle() - (math.pi * 2))
-        print("Angle now: " .. Obj.body:getAngle())
+        -- print("Angle now: " .. Obj.body:getAngle())
     end
     while Obj.body:getAngle() < (math.pi * - 2) do
-        print("Angle was: " .. Obj.body:getAngle())
+        -- print("Angle was: " .. Obj.body:getAngle())
         Obj.body:setAngle(Obj.body:getAngle() + (math.pi * 2))
-        print("Angle now: " .. Obj.body:getAngle())
+        -- print("Angle now: " .. Obj.body:getAngle())
     end
 
     local bearingrad
