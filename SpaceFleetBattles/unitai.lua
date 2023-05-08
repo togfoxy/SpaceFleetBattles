@@ -440,14 +440,15 @@ local function fireWeapons(Obj, dt)
                     local targetx = enemyobject.body:getX()
                     local targety = enemyobject.body:getY()
 
-                    local currentangle = Obj.body:getAngle()
-                    local bearingtotarget = cf.getBearingRad(objx,objy,targetx,targety)
+                    local currentangle = math.abs(Obj.body:getAngle())
+                    local bearingtotarget = math.abs(cf.getBearingRad(objx,objy,targetx,targety))
                     local angletotarget = bearingtotarget - currentangle
-                    -- print(currentangle, bearingtotarget, angletotarget)
 
                     if angletotarget > -0.08 and angletotarget < 0.08 then
                         Obj.weaponcooldown = 4
                         createNewBullet(Obj, true)       -- includes missiles and bombs. Use TRUE for fast moving bullets
+                    else
+                        -- print(currentangle, bearingtotarget, angletotarget)
                     end
                 end
             end

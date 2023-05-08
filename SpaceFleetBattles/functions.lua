@@ -174,6 +174,7 @@ function functions.applyDamage(victim, bullet)
             -- print(inspect(victim.actions))
             table.insert(victim.actions, 1, thisaction)
             print("Evasive force applied")
+            -- print(inspect(victim.actions))
         end
 	end
 
