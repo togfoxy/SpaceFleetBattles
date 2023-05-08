@@ -412,23 +412,6 @@ function printAllPhysicsObjects(world, BOX2D_SCALE)
 	end
 end
 
-function isInFront2(Obj, targetx, targety)
-	-- only works on physical bodies that have a facing
-	--! need to generic this one so it doesn't use box2d
-	local currentangle = Obj.body:getAngle()
-	local objx, objy = Obj.body:getPosition()
-	local bearingtotarget = cf.getBearingRad(objx,objy,targetx,targety)
-	local angletotarget = bearingtotarget - currentangle
-	-- print(currentangle, bearingtotarget, angletotarget)
-
-	if angletotarget > -1.5707 and angletotarget < 1.5707 then
-		return true
-	else
-		return false
-	end
-
-end
-
 function isInFront(x, y, facingrad, x2, y2)
     -- x,y is the object that is looking (real coordinates, i.e. not normalised and not translated to origin)
     -- facing is the facing of the object at x, y in radians
@@ -438,18 +421,19 @@ function isInFront(x, y, facingrad, x2, y2)
 	assert(facingrad ~= nil)
 
     -- get a vector in the direction of facing
-	local facingdeg = math.deg(facingrad)
+	local facingdeg = math.deg(facingrad) + 90
+    if facingdeg > 359 then facingdeg = facingdeg - 360 end
     local x1, y1 = cf.addVectorToPoint(x,y,facingdeg,5)        -- 5 is an arbitrary value that doesn't matter
     -- reduce the real vector down to a delta vector
-    local deltax1 = x1 - x
-    local deltay1 = y1 - y
+    local vectorx = x1 - x
+    local vectory = y1 - y
 
     -- reduce the vector from object to target down to a delta vector
     local deltax2 = x2 - x	-- the dot product assumes the same origin so need to translate
     local deltay2 = y2 - y
 
     -- can now do a dot product
-    local dotv = cf.dotVectors(deltax1, deltay1, deltax2, deltay2)
+    local dotv = dotVectors(vectorx, vectory, deltax2, deltay2)
 
     if dotv > 0 then
         -- target is in front of entity

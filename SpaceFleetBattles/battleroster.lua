@@ -145,9 +145,33 @@ end
 
 function battleroster.draw()
 
-	--! draw roster
+    love.graphics.setColor(1,1,1,0.5)
+    love.graphics.draw(IMAGE[enum.imageBattleRoster],0,0,0, 1,1)
 
-	--! draw fighters in hanger
+	-- draw roster
+    local drawx = 100
+    local drawy = 100
+    for i = 1, #ROSTER do
+        if ROSTER[1].isDead then
+            love.graphics.setColor(1,1,1,0.5)
+        else
+            love.graphics.setColor(1,1,1,1)
+        end
+        local txt = i .. ") " .. ROSTER[i].firstname .. " " .. ROSTER[i].lastname .. " " .. ROSTER[i].health .. " " .. ROSTER[i].missions .. " " .. ROSTER[i].kills .. " " .. ROSTER[i].ejections
+        love.graphics.print(txt, drawx, drawy)
+        drawy = drawy + 30
+    end
+
+	-- draw fighters in hanger
+    local drawx = 900
+    local drawy = 100
+    love.graphics.setColor(1,1,1,1)
+    for i = 1, #HANGER do
+        local txt = i .. ") " .. string.sub(HANGER[i].guid, -2)
+        txt = txt .. " " .. HANGER[i].componentHealth[enum.componentStructure]
+        love.graphics.print(txt, drawx, drawy)
+        drawy = drawy + 30
+    end
 
 	--! provide some way to specify how many squadrons to launch
 	--! how many fighters per squadron
@@ -162,8 +186,8 @@ function battleroster.loadButtons()
     -- button for continue game
     local mybutton = {}
     mybutton.label = "Launch fighters"
-	mybutton.x = (SCREEN_WIDTH / 2) - 75
-    mybutton.y = SCREEN_HEIGHT / 2 + 0
+	mybutton.x = 125
+    mybutton.y = SCREEN_HEIGHT - 200
     mybutton.width = 175
     mybutton.height = 25
     mybutton.bgcolour = {169/255,169/255,169/255,1}

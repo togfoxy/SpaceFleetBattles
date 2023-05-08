@@ -63,7 +63,7 @@ function fight.wheelmoved(x, y)
 end
 
 function fight.mousemoved(x, y, dx, dy)
-    if love.mouse.isDown(3) then
+    if love.mouse.isDown(2) or love.mouse.isDown(3) then
         snapcamera = false
         TRANSLATEX = TRANSLATEX - dx
         TRANSLATEY = TRANSLATEY - dy
@@ -213,13 +213,13 @@ function fight.draw()
 		end
 
         -- draw velocity as text
-        if not Obj.body:isBullet() then
-            local vx, vy = Obj.body:getLinearVelocity()
-            local vel = cf.getDistance(0, 0, vx, vy)    -- get distance of velocity vector
-            vel = "v: " .. cf.round(vel, 0)             -- this is not the same as getLinearVelocity x/y because this is the distance between two points
-            love.graphics.setColor(1,1,1,1)
-            love.graphics.print(vel, drawx, drawy, 0, 1, 1, 30, 30)
-        end
+        -- if not Obj.body:isBullet() then
+        --     local vx, vy = Obj.body:getLinearVelocity()
+        --     local vel = cf.getDistance(0, 0, vx, vy)    -- get distance of velocity vector
+        --     vel = "v: " .. cf.round(vel, 0)             -- this is not the same as getLinearVelocity x/y because this is the distance between two points
+        --     love.graphics.setColor(1,1,1,1)
+        --     love.graphics.print(vel, drawx, drawy, 0, 1, 1, 30, 30)
+        -- end
 
         -- draw the velocity indicator (purple line)
         -- local linx, liny = Obj.body:getLinearVelocity( )        --! a lot of duplicate code here. Can be cleand up

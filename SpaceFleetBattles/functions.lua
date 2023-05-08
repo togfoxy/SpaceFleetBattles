@@ -5,6 +5,10 @@ function functions.loadImages()
     IMAGE[enum.imageFightHUD] = love.graphics.newImage("assets/images/fighthud.png")
     IMAGE[enum.imageFightBG] = love.graphics.newImage("assets/images/background1.png")
     IMAGE[enum.imageEscapePod] = love.graphics.newImage("assets/images/pod.png")
+    IMAGE[enum.imageMainMenu] = love.graphics.newImage("assets/images/1172814.jpg")
+    IMAGE[enum.imageMainMenuBanner] = love.graphics.newImage("assets/images/mainmenutitle.png")
+    IMAGE[enum.imageBattleRoster] = love.graphics.newImage("assets/images/207634_1920_1217.png")
+
 end
 
 function functions.loadFonts()
@@ -90,6 +94,14 @@ function functions.getImpactedComponent(Obj)
     error()     -- should not reach this point
 end
 
+function functions.getPilot(guid)
+
+    for i = 1, #ROSTER do
+        if ROSTER[i].guid == guid then return ROSTER[i] end
+    end
+    return nil
+end
+
 function functions.applyDamage(victim, bullet)
 
     local componenthit = fun.getImpactedComponent(victim)
@@ -112,12 +124,57 @@ function functions.applyDamage(victim, bullet)
         victim.lifetime = 0
         unitai.clearTarget(victim.guid)		-- remove this guid from everyone's target
         print("Unit exploded")
+
+        -- remove friendly pilots from roster
+        local pilotguid = victim.pilotguid
+        local pilotobj = fun.getPilot(pilotguid)
+        if pilotobj ~= nil then pilotobj.isDead = true end
+        print("Adjusted roster: " .. inspect(ROSTER))
+
+        -- remove fighter from hanger
+        for i = #HANGER, 1, -1 do
+            if HANGER[i].guid == victim.guid then
+                table.remove(HANGER, i)
+            end
+        end
     else
         -- victim not dead so attach a smoke animation to the object
         fun.createAnimation(victim, enum.animSmoke)
         if fun.isPlayerAlive() and bullet.ownerObjectguid == PLAYER_GUID then
             -- this bullet is the players bullet. Make an audible
             cf.playAudio(enum.audioBulletHit, false, true)
+        end
+
+        -- apply a small evasion wobble if trying to RTB
+        local action = fun.getTopAction(victim)
+        local thisaction = {}
+        if action ~= nil and action.action == enum.unitActionReturningToBase then
+            -- insert an action at the TOP of the queue
+            if victim.forf == enum.forfFriend then
+                local x = FRIEND_START_X
+                local y = love.math.random(0, SCREEN_HEIGHT)
+
+            	thisaction.cooldown = 3
+            	thisaction.action = enum.unitActionMoveToDest
+            	thisaction.targetguid = nil
+            	thisaction.destx = x
+            	thisaction.desty = y
+            elseif victim.forf == enum.forfEnemy then
+                local x = FOE_START_X
+                local y = love.math.random(0, SCREEN_HEIGHT)
+
+                thisaction.cooldown = 3
+                thisaction.action = enum.unitActionMoveToDest
+                thisaction.targetguid = nil
+                thisaction.destx = x
+                thisaction.desty = y
+            end
+
+            -- print(inspect(thisaction))
+            -- print(inspect(victim.actions))
+            table.insert(victim.actions, 1, thisaction)
+            print("Evasive force applied")
+            -- print(inspect(victim.actions))
         end
 	end
 
@@ -190,6 +247,7 @@ function functions.initialiseRoster()
 		thispilot.kills = 0
 		thispilot.missions = 0
 		thispilot.ejections = 0
+        thispilot.isDead = fase
 		table.insert(ROSTER, thispilot)
 	end
 	ROSTER[1].isPlayer = true

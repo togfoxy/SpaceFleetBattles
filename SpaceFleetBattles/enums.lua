@@ -54,6 +54,9 @@ function enums.load()
     enum.imageFightHUD = 2
     enum.imageFightBG = 3
     enum.imageEscapePod = 4
+    enum.imageMainMenu = 5
+    enum.imageMainMenuBanner = 6
+    enum.imageBattleRoster = 7
 
     enum.gridExplosion = 1
 

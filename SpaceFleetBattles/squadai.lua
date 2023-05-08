@@ -18,50 +18,45 @@ function squadai.update(dt)
         if #squad.orders == 0 then
             -- squad has no current orders. Check what commander is ordering
             for i = 1, #commanderAI do
-                if commanderAI[i] ~= nil then
-                    if commanderAI[i].forf == squad.forf then
-                        if commanderAI[i].orders ~= nil then
-                            if commanderAI[i].orders[1].order ~= nil then
-                                if commanderAI[i].orders[1].order == enum.commanderOrdersEngage then
-                                    -- squad engages. Add the order to the squadAI
-                                    thisorder = {}
-                                    thisorder.cooldown = 5
-                                    thisorder.active = true         -- set to false if you want to queue it but not activate it
-                                    thisorder.order = enum.squadOrdersEngage
-                                    table.insert(squadAI[callsign].orders, thisorder)
-                                    print("Squad orders: engage")
-                                elseif commanderAI[i].orders[1].order == enum.commanderOrdersReturnToBase then
-                                    -- squad RTB
-                                    thisorder = {}
-                                    thisorder.cooldown = 5
-                                    thisorder.active = true         -- set to false if you want to queue it but not activate it
-                                    thisorder.order = enum.squadOrdersReturnToBase
-                                    table.insert(squadAI[callsign].orders, thisorder)
-                                    print("Squad orders: RTB")
-                                else
-                                    error("Commander has an unexpected order.", 80)
-                                end
+                if commanderAI[i].forf == squad.forf then
+                    if commanderAI[i].orders ~= nil then
+                        if commanderAI[i].orders[1].order ~= nil then
+                            if commanderAI[i].orders[1].order == enum.commanderOrdersEngage then
+                                -- squad engages. Add the order to the squadAI
+                                thisorder = {}
+                                thisorder.cooldown = 5
+                                thisorder.active = true         -- set to false if you want to queue it but not activate it
+                                thisorder.order = enum.squadOrdersEngage
+                                table.insert(squadAI[callsign].orders, thisorder)
+                                -- print("Squad orders: engage")
+                            elseif commanderAI[i].orders[1].order == enum.commanderOrdersReturnToBase then
+                                -- squad RTB
+                                thisorder = {}
+                                thisorder.cooldown = 5
+                                thisorder.active = true         -- set to false if you want to queue it but not activate it
+                                thisorder.order = enum.squadOrdersReturnToBase
+                                table.insert(squadAI[callsign].orders, thisorder)
+                                print("Squad orders: RTB")
                             else
-                                print(inspect(commanderAI[i].orders[1]))
-                                error("Commander has an unexpected order.", 83)
+                                error("Commander has an unexpected order.", 80)
                             end
                         else
-                            --! is this an error?
-                            print("Commander has no orders. Is that possible?")
+                            print(inspect(commanderAI[i].orders[1]))
+                            error("Commander has an unexpected order.", 83)
                         end
                     else
-                        -- this commander is not the commander for this squad
-                        -- print("Wrong commander. Skipping to next commander")
+                        --! is this an error?
+                        print("Commander has no orders. Is that possible?")
                     end
                 else
-                    --! is this an error?
-                    print("Hello world")
+                    -- this commander is not the commander for this squad
+                    -- print("Wrong commander. Skipping to next commander")
                 end
             end
         else
             -- do nothing. Cooldown will be invoked next cycle
             --! debugging
-            -- print("Number of squad orders: " .. #squad.orders)
+            print("Number of squad orders: " .. #squad.orders)
             -- print(inspect(squad.orders))
             -- print(callsign .. " squad has order: " .. squad.orders[1].order)
         end
