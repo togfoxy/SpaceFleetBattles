@@ -133,7 +133,7 @@ local function drawHUD()
     local drawy = 25
     local timeleft = cf.round(RTB_TIMER_LIMIT - RTB_TIMER)
     if timeleft > 30 then love.graphics.setColor(1,1,1,1) end
-    if timeleft <= 30 and timelet > 0 then love.graphics.setColor(1,1,0,1) end
+    if timeleft <= 30 and timeleft > 0 then love.graphics.setColor(1,1,0,1) end
     if timeleft <= 0 then love.graphics.setColor(1,0,0,1) end
     love.graphics.setFont(FONT[enum.fontalienEncounters48])
     love.graphics.print(timeleft, drawx, drawy)

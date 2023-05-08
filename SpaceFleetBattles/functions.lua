@@ -102,16 +102,110 @@ function functions.getPilot(guid)
     return nil
 end
 
+local function createEscapePod(Obj)
+    -- Obj is the obj that is spawning/creating the pod. It assumed this Obj will soon be destroyed
+
+    local podx, pody = Obj.body:getPosition()
+
+    local thisobject = {}
+    thisobject.body = love.physics.newBody(PHYSICSWORLD, podx, pody, "dynamic")
+	thisobject.body:setLinearDamping(0)
+
+    if forf == enum.forfFriend then
+        thisobject.body:setAngle(math.pi)   -- towards base
+    else
+        thisobject.body:setAngle(0)
+    end
+
+    thisobject.shape = love.physics.newRectangleShape(4, 3)
+	thisobject.fixture = love.physics.newFixture(thisobject.body, thisobject.shape, 1)		-- the 1 is the density
+	thisobject.fixture:setRestitution(0.25)
+	thisobject.fixture:setSensor(false)
+
+    if Obj.forf == enum.forfFriend then
+        thisobject.fixture:setCategory(enum.categoryFriendlyPod)
+        thisobject.fixture:setMask(enum.categoryFriendlyFighter, enum.categoryFriendlyBullet, enum.categoryEnemyFighter, enum.categoryFriendlyPod)
+        thisobject.body:applyLinearImpulse(-0.75, 0)
+    elseif Obj.forf == enum.forfEnemy then
+        thisobject.fixture:setCategory(enum.categoryEnemyPod)
+        thisobject.fixture:setMask(enum.categoryEnemyFighter, enum.categoryEnemyBullet, enum.categoryFriendlyFighter, enum.categoryEnemyPod)   -- these are the things that will not trigger a collision
+        thisobject.body:applyLinearImpulse(0.75, 0)
+    end
+
+    local guid
+    if Obj.guid == PLAYER_GUID then
+        guid = PLAYER_GUID      -- POD inherits player guid
+    else
+        guid = cf.getGUID()
+    end
+	thisobject.fixture:setUserData(guid)
+    thisobject.guid = guid
+    assert(thisobject.guid ~= nil)
+
+    thisobject.forf = Obj.forf
+    thisobject.squadCallsign = Obj.squadcallsign
+
+    thisobject.weaponcooldown = 0           --! might be more than one weapon in the future
+
+    thisobject.currentMaxForwardThrust = 50    -- can be less than max if battle damaged
+    thisobject.maxForwardThrust = 50
+    thisobject.currentForwardThrust = 0
+    thisobject.maxAcceleration = 25
+    thisobject.maxDeacceleration = 25       -- set to 0 for bullets
+    thisobject.currentMaxAcceleration = 25 -- this can be less than maxAcceleration if battle damaged
+    thisobject.maxSideThrust = 0
+    thisobject.currentSideThrust = 0
+
+    thisobject.componentSize = {}
+    thisobject.componentSize[enum.componentStructure] = 3
+    thisobject.componentSize[enum.componentThruster] = 0
+    thisobject.componentSize[enum.componentAccelerator] = 0
+    thisobject.componentSize[enum.componentWeapon] = 0
+    thisobject.componentSize[enum.componentSideThruster] = 0
+
+    thisobject.componentHealth = {}
+    thisobject.componentHealth[enum.componentStructure] = 100
+    thisobject.componentHealth[enum.componentThruster] = 0
+    thisobject.componentHealth[enum.componentAccelerator] = 0
+    thisobject.componentHealth[enum.componentWeapon] = 0
+    thisobject.componentHealth[enum.componentSideThruster] = 0
+
+    thisobject.actions = {}         -- this will be influenced by squad orders + player choices
+    thisobject.actions[1] = {}
+    thisobject.actions[1].action = enum.unitActionReturningToBase
+    thisobject.actions[1].targetguid = nil
+    if thisobject.forf == enum.forfFriend then
+        thisobject.actions[1].destx = FRIEND_START_X
+    elseif thisobject.forf == enum.forfEnemy then
+        thisobject.actions[1].destx = FOE_START_X
+    end
+    thisobject.actions[1].desty = Obj.body:getY()
+
+    -- print("Adding pod to OBJECTS: " .. thisobject.guid)
+    table.insert(OBJECTS, thisobject)
+    print("Pod guid created: " .. guid)
+end
+
+function functions.setTaskEject(Obj)
+    Obj.lifetime = 0
+    Obj.actions = {}
+    print("Setting action to eject")
+    createEscapePod(Obj)
+
+    -- remove fighter from hanger, noting foe fighers don't have a hanger
+    for i = #HANGER, 1, -1 do
+        if HANGER[i].guid == Obj.guid then
+            table.remove(HANGER, i)
+            print("Removed fighter guid from hanger: " .. Obj.guid)
+        end
+    end
+end
+
 function functions.applyDamage(victim, bullet)
 
     local componenthit = fun.getImpactedComponent(victim)
     victim.componentHealth[componenthit] = victim.componentHealth[componenthit] - love.math.random(15, 35)
     if victim.componentHealth[componenthit] < 0 then victim.componentHealth[componenthit] = 0 end
-
-	--! debugging
-	if victim.guid == PLAYER_GUID then
-		-- print(inspect(victim.componentHealth))
-	end
 
 	if victim.componentHealth[enum.componentStructure] <= 0 then
 		-- boom. Victim is dead
@@ -140,6 +234,8 @@ function functions.applyDamage(victim, bullet)
     else
         -- victim not dead so attach a smoke animation to the object
         fun.createAnimation(victim, enum.animSmoke)
+
+        -- play audio
         if fun.isPlayerAlive() and bullet.ownerObjectguid == PLAYER_GUID then
             -- this bullet is the players bullet. Make an audible
             cf.playAudio(enum.audioBulletHit, false, true)
@@ -151,14 +247,16 @@ function functions.applyDamage(victim, bullet)
         if action ~= nil and action.action == enum.unitActionReturningToBase then
             -- insert an action at the TOP of the queue
             if victim.forf == enum.forfFriend then
-                local x = FRIEND_START_X
-                local y = love.math.random(0, SCREEN_HEIGHT)
+                -- set a destination random degrees from current location
+                local objx, objy = victim.body:getPosition()
+                local rndangle = love.math.random(-45, 45)
+                local destx, desty = cf.addVectorToPoint(objx,objy,(270 + rndangle),300)        --! check the 100 is enough
 
-            	thisaction.cooldown = 3
-            	thisaction.action = enum.unitActionMoveToDest
-            	thisaction.targetguid = nil
-            	thisaction.destx = x
-            	thisaction.desty = y
+                thisaction.cooldown = 3
+                thisaction.action = enum.unitActionMoveToDest
+                thisaction.targetguid = nil
+                thisaction.destx = destx
+                thisaction.desty = desty
             elseif victim.forf == enum.forfEnemy then
                 local x = FOE_START_X
                 local y = love.math.random(0, SCREEN_HEIGHT)
@@ -170,34 +268,42 @@ function functions.applyDamage(victim, bullet)
                 thisaction.desty = y
             end
 
-            -- print(inspect(thisaction))
-            -- print(inspect(victim.actions))
             table.insert(victim.actions, 1, thisaction)
             print("Evasive force applied")
-            -- print(inspect(victim.actions))
+        else
+            -- not ejecting and not RTB. Unit is still in the fight
+            if victim.componentHealth[enum.componentWeapon] <= 0 then
+                victim.actions = {}         -- significant trauma. get a new task
+            end
+            if victim.componentHealth[enum.componentThruster] <= 50 then
+                victim.actions = {}         -- significant trauma. get a new task
+            end
+            if victim.componentHealth[enum.componentSideThruster] <= 50 then
+                victim.actions = {}         -- significant trauma. get a new task
+            end
+            if victim.componentHealth[enum.componentAccelerator] <= 25 then
+                victim.actions = {}         -- significant trauma. get a new task
+            end
+            if victim.componentHealth[enum.componentStructure] <= 33 then
+                victim.actions = {}         -- significant trauma. get a new task
+            end
         end
+
+        -- see if ejects or applies wobble
+        if (victim.componentHealth[enum.componentStructure] <= 35 ) then
+            -- eject is a bit of a dice roll
+            local rndnum = love.math.random(1, 35)
+            if rndnum > victim.componentHealth[enum.componentStructure] then       -- more damage = more chance of eject
+                fun.setTaskEject(victim)
+            end
+        end
+
+        -- adjust object performance after receiving battle damage
+        victim.currentMaxForwardThrust = victim.maxForwardThrust * (victim.componentHealth[enum.componentThruster] / 100)
+        victim.currentMaxAcceleration = victim.maxAcceleration * (victim.componentHealth[enum.componentAccelerator] / 100)
+        victim.currentSideThrust = victim.maxSideThrust * (victim.componentHealth[enum.componentSideThruster] / 100)
+
 	end
-
-    -- adjust object performance after receiving battle damage
-    victim.currentMaxForwardThrust = victim.maxForwardThrust * (victim.componentHealth[enum.componentThruster] / 100)
-    victim.currentMaxAcceleration = victim.maxAcceleration * (victim.componentHealth[enum.componentAccelerator] / 100)
-    victim.currentSideThrust = victim.maxSideThrust * (victim.componentHealth[enum.componentSideThruster] / 100)
-
-    if victim.componentHealth[enum.componentWeapon] <= 0 then
-        victim.actions = {}         -- significant trauma. get a new task
-    end
-    if victim.componentHealth[enum.componentThruster] <= 50 then
-        victim.actions = {}         -- significant trauma. get a new task
-    end
-    if victim.componentHealth[enum.componentSideThruster] <= 50 then
-        victim.actions = {}         -- significant trauma. get a new task
-    end
-    if victim.componentHealth[enum.componentAccelerator] <= 25 then
-        victim.actions = {}         -- significant trauma. get a new task
-    end
-    if victim.componentHealth[enum.componentStructure] <= 33 then
-        victim.actions = {}         -- significant trauma. get a new task
-    end
 end
 
 function functions.getObject(guid)

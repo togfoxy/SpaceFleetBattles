@@ -13,7 +13,7 @@ function endbattle.draw()
     local drawx = 100
     local drawy = 100
     for i = 1, #ROSTER do
-        if ROSTER[1].isDead then
+        if ROSTER[i].isDead then
             love.graphics.setColor(1,1,1,0.5)
         else
             love.graphics.setColor(1,1,1,1)
@@ -33,8 +33,6 @@ function endbattle.draw()
         love.graphics.print(txt, drawx, drawy)
         drawy = drawy + 30
     end
-
-
 
     -- love.graphics.setColor(1,1,1,1)
     -- local txt = "Friendly ships lost: " .. SCORE.friendsdead

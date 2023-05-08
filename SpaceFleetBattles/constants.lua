@@ -45,7 +45,7 @@ function constants.load()
     FOE_SHIPS_PER_SQUADRON = 6
 
     RTB_TIMER = 0
-    RTB_TIMER_LIMIT = 60 * 5    -- commander will RTB after this time limit
+    RTB_TIMER_LIMIT = 60 * 5        -- commander will RTB after this time limit
     BATTLE_TIMER = 0
     BATTLE_TIMER_LIMIT = 60 * 6     -- game will assume a stalemate and end at this piont
 
