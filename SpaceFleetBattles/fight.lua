@@ -345,10 +345,12 @@ function fight.update(dt)
         SCORE.friendsdead = 0
         SCORE.enemiesdead = 0
 
+        RTB_TIMER = 0
         BATTLE_TIMER = 0
     end
 
     if not pause then
+        RTB_TIMER = RTB_TIMER + dt
         BATTLE_TIMER = BATTLE_TIMER + dt
         commanderai.update(dt)
         squadai.update(dt)
@@ -367,7 +369,7 @@ function fight.update(dt)
         end
     end
 
-    if battleOver() then
+    if battleOver() or BATTLE_TIMER > BATTLE_TIMER_LIMIT then
         cf.swapScreen(enum.sceneEndBattle, SCREEN_STACK)
     end
 
