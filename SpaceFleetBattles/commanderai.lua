@@ -26,16 +26,19 @@ function commanderai.update(dt)
 
         if #commanderAI[i].orders == 0 then
             -- need to determine new orders
-            local numofobjs
+            local numoffriends = numberOfObjects(enum.categoryFriendlyFighter)
+            local numoffoes = numberOfObjects(enum.categoryEnemyFighter)
+            local ratio     -- friend vs enemy
+
             if commanderAI[i].forf == enum.forfFriend then
-                numofobjs = numberOfObjects(enum.categoryEnemyFighter)
+                ratio = numoffriends / numoffoes
             elseif commanderAI[i].forf == enum.forfEnemy then
-                numofobjs = numberOfObjects(enum.categoryFriendlyFighter)
+                ratio = numoffoes / numoffriends
             else
                 print(inspect(commanderAI[i]))
                 error()
             end
-            if numofobjs > 0 and RTB_TIMER <= RTB_TIMER_LIMIT then
+            if ratio > 0.66 and RTB_TIMER <= RTB_TIMER_LIMIT then
                 -- set orders to engage
                 thisorder = {}
                 thisorder.cooldown = 10
