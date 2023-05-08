@@ -35,7 +35,7 @@ function commanderai.update(dt)
                 print(inspect(commanderAI[i]))
                 error()
             end
-            if numofobjs > 0 then
+            if numofobjs > 0 and RTB_TIMER <= RTB_TIMER_LIMIT then
                 -- set orders to engage
                 thisorder = {}
                 thisorder.cooldown = 10

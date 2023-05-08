@@ -39,10 +39,15 @@ function constants.load()
     FRIEND_FIGHTER_COUNT = 24		-- not actually a constant
     FRIEND_PILOT_COUNT = 24			-- not actually a constant
 
-	FRIEND_SQUADRON_COUNT = 1		-- not a constant and changes for each battle
-    FRIEND_SHIPS_PER_SQUADRON = 1	-- not a constant and changes for each battle
-    FOE_SQUADRON_COUNT = 1
-    FOE_SHIPS_PER_SQUADRON = 1
+	FRIEND_SQUADRON_COUNT = 2		-- not a constant and changes for each battle
+    FRIEND_SHIPS_PER_SQUADRON = 6	-- not a constant and changes for each battle
+    FOE_SQUADRON_COUNT = 2
+    FOE_SHIPS_PER_SQUADRON = 6
+
+    RTB_TIMER = 0
+    RTB_TIMER_LIMIT = 60 * 5        -- commander will RTB after this time limit
+    BATTLE_TIMER = 0
+    BATTLE_TIMER_LIMIT = 60 * 6     -- game will assume a stalemate and end at this piont
 
     OBJECTS = {}            -- table of items
     SQUADS = {}             -- a list of squad guids
@@ -53,6 +58,7 @@ function constants.load()
     SCORE = {}              -- track casulties in this table
 	ROSTER = {}
 	HANGER = {}
+    POD_QUEUE = {}              -- a list of pods waiting to spawn. Box2D work around
     SCORE.friendsdead = 0       -- put here for documentation and to help me remember
     SCORE.enemiesdead = 0
 

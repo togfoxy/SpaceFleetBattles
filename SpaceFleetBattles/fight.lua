@@ -5,6 +5,7 @@ local pause = false
 local snapcamera = true
 local showmenu = false
 
+
 local function destroyObjects(dt)
 
     for i = #OBJECTS, 1, -1 do
@@ -102,12 +103,6 @@ local function drawHUD()
 
     if fun.isPlayerAlive() then
         local Obj = fun.getObject(PLAYER_GUID)
-
-        -- print(PLAYER_GUID)
-        -- print(inspect(Obj))
-        --
-        -- error()
-
         local barlength = 100       -- unnecessary but a reminder that the barlength is a convenient 100 pixels
         local barheight = 10
         love.graphics.setColor(0,1,0,0.3)
@@ -131,8 +126,18 @@ local function drawHUD()
         -- throttle bar (componentAccelerator)
         local drawlength = Obj.componentHealth[enum.componentAccelerator]
         love.graphics.rectangle("fill", 145, 143, drawlength, 10)
-
     end
+
+    -- draw the battle timer
+    local drawx = SCREEN_WIDTH - 150
+    local drawy = 25
+    local timeleft = cf.round(RTB_TIMER_LIMIT - RTB_TIMER)
+    if timeleft > 30 then love.graphics.setColor(1,1,1,1) end
+    if timeleft <= 30 and timeleft > 0 then love.graphics.setColor(1,1,0,1) end
+    if timeleft <= 0 then love.graphics.setColor(1,0,0,1) end
+    love.graphics.setFont(FONT[enum.fontalienEncounters48])
+    love.graphics.print(timeleft, drawx, drawy)
+    love.graphics.setFont(FONT[enum.fontDefault])
 end
 
 function fight.draw()
@@ -341,17 +346,23 @@ function fight.update(dt)
 
 		local playerfighter = fun.getPlayerPilot()
 
+        SCORE = {}
         SCORE.friendsdead = 0
         SCORE.enemiesdead = 0
+
+        RTB_TIMER = 0
+        BATTLE_TIMER = 0
     end
 
     if not pause then
+        RTB_TIMER = RTB_TIMER + dt
+        BATTLE_TIMER = BATTLE_TIMER + dt
         commanderai.update(dt)
-
         squadai.update(dt)
         unitai.update(dt)
 
         destroyObjects(dt)
+        fun.spawnPods()
 
         PHYSICSWORLD:update(dt) --this puts the world into motion
     end
@@ -364,7 +375,7 @@ function fight.update(dt)
         end
     end
 
-    if battleOver() then
+    if battleOver() or BATTLE_TIMER > BATTLE_TIMER_LIMIT then
         cf.swapScreen(enum.sceneEndBattle, SCREEN_STACK)
     end
 

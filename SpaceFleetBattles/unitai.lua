@@ -1,91 +1,5 @@
 unitai = {}
 
-local function createEscapePod(Obj)
-    -- Obj is the obj that is spawning/creating the pod. It assumed this Obj will soon be destroyed
-
-    local podx, pody = Obj.body:getPosition()
-
-    local thisobject = {}
-    thisobject.body = love.physics.newBody(PHYSICSWORLD, podx, pody, "dynamic")
-	thisobject.body:setLinearDamping(0)
-
-    if forf == enum.forfFriend then
-        thisobject.body:setAngle(math.pi)   -- towards base
-    else
-        thisobject.body:setAngle(0)
-    end
-
-    thisobject.shape = love.physics.newRectangleShape(4, 3)
-	thisobject.fixture = love.physics.newFixture(thisobject.body, thisobject.shape, 1)		-- the 1 is the density
-	thisobject.fixture:setRestitution(0.25)
-	thisobject.fixture:setSensor(false)
-
-    if Obj.forf == enum.forfFriend then
-        thisobject.fixture:setCategory(enum.categoryFriendlyPod)
-        thisobject.fixture:setMask(enum.categoryFriendlyFighter, enum.categoryFriendlyBullet, enum.categoryEnemyFighter, enum.categoryFriendlyPod)
-        thisobject.body:applyLinearImpulse(-0.75, 0)
-    elseif Obj.forf == enum.forfEnemy then
-        thisobject.fixture:setCategory(enum.categoryEnemyPod)
-        thisobject.fixture:setMask(enum.categoryEnemyFighter, enum.categoryEnemyBullet, enum.categoryFriendlyFighter, enum.categoryEnemyPod)   -- these are the things that will not trigger a collision
-        thisobject.body:applyLinearImpulse(0.75, 0)
-    end
-
-    local guid
-    if Obj.guid == PLAYER_GUID then
-        guid = PLAYER_GUID      -- POD inherits player guid
-    else
-        guid = cf.getGUID()
-    end
-	thisobject.fixture:setUserData(guid)
-    thisobject.guid = guid
-    assert(thisobject.guid ~= nil)
-
-    thisobject.forf = Obj.forf
-    thisobject.squadCallsign = Obj.squadcallsign
-
-    thisobject.weaponcooldown = 0           --! might be more than one weapon in the future
-
-    thisobject.currentMaxForwardThrust = 50    -- can be less than max if battle damaged
-    thisobject.maxForwardThrust = 50
-    thisobject.currentForwardThrust = 0
-    thisobject.maxAcceleration = 25
-    thisobject.maxDeacceleration = 25       -- set to 0 for bullets
-    thisobject.currentMaxAcceleration = 25 -- this can be less than maxAcceleration if battle damaged
-    thisobject.maxSideThrust = 0
-    thisobject.currentSideThrust = 0
-
-    thisobject.componentSize = {}
-    thisobject.componentSize[enum.componentStructure] = 3
-    thisobject.componentSize[enum.componentThruster] = 0
-    thisobject.componentSize[enum.componentAccelerator] = 0
-    thisobject.componentSize[enum.componentWeapon] = 0
-    thisobject.componentSize[enum.componentSideThruster] = 0
-
-    thisobject.componentHealth = {}
-    thisobject.componentHealth[enum.componentStructure] = 100
-    thisobject.componentHealth[enum.componentThruster] = 0
-    thisobject.componentHealth[enum.componentAccelerator] = 0
-    thisobject.componentHealth[enum.componentWeapon] = 0
-    thisobject.componentHealth[enum.componentSideThruster] = 0
-
-    thisobject.actions = {}         -- this will be influenced by squad orders + player choices
-    thisobject.actions[1] = {}
-    thisobject.actions[1].action = enum.unitActionReturningToBase
-    thisobject.actions[1].targetguid = nil
-    if thisobject.forf == enum.forfFriend then
-        thisobject.actions[1].destx = FRIEND_START_X
-    elseif thisobject.forf == enum.forfEnemy then
-        thisobject.actions[1].destx = FOE_START_X
-    end
-    thisobject.actions[1].desty = Obj.body:getY()
-
-    -- print("Adding pod to OBJECTS: " .. thisobject.guid)
-    table.insert(OBJECTS, thisobject)
-    print("Pod guid created: " .. guid)
-
-
-end
-
 function unitai.clearTarget(deadtargetguid)
     -- move through all objects and clear target guid if target guid = input parameter
     -- use this to remove targets from other craft if a target is destroyed
@@ -165,20 +79,6 @@ local function setTaskDestination(Obj, x, y)
     print("Setting action to provided destination")
 end
 
-local function setTaskEject(Obj)
-    Obj.lifetime = 0
-    print("Setting action to eject")
-    createEscapePod(Obj)
-
-    -- remove fighter from hanger, noting foe fighers don't have a hanger
-    for i = #HANGER, 1, -1 do
-        if HANGER[i].guid == Obj.guid then
-            table.remove(HANGER, i)
-            print("Removed fighter guid from hanger: " .. Obj.guid)
-        end
-    end
-end
-
 local function isFighter(Obj)
     local category = Obj.fixture:getCategory()
     if category == enum.categoryEnemyFighter or category == enum.categoryFriendlyFighter then
@@ -237,8 +137,6 @@ local function turnToObjective(Obj, destx, desty, dt)
 end
 
 local function adjustAngle(Obj, dt)
-    -- turn to face the current target
-    -- if there is a nominated target then find the preferred angle and turn towards it
 
     assert(Obj.body:isBullet() == false)
 
@@ -304,7 +202,6 @@ local function adjustThrustEngaging(Obj, dt)
         local targetx, targety = targetObj.body:getPosition()
 
         if cf.isInFront(objx, objy, objfacing, targetx, targety) then
-        -- if cf.isInFront(objx, objy, objfacing, targetx, targety) then
             -- print("beta")
             if targetObj.currentForwardThrust < Obj.currentForwardThrust then
                 -- print("charlie")
@@ -321,7 +218,7 @@ local function adjustThrustEngaging(Obj, dt)
                         Obj.currentForwardThrust = Obj.currentForwardThrust - (Obj.maxDeacceleration * dt)
                         if Obj.currentForwardThrust < targetObj.currentForwardThrust then
                             -- print("echo")
-                            Obj.currentForwardThrust = targetObj.currentForwardThrust * 0.9
+                            Obj.currentForwardThrust = targetObj.currentForwardThrust * (love.math.random(7,9) / 10)
                         end
                     else
                         -- unit is not behind target so max thrust
@@ -452,7 +349,7 @@ local function fireWeapons(Obj, dt)
                     local angletotarget = bearingtotarget - currentangle
                     if angletotarget < (math.pi * -2) then angletotarget = angletotarget + (math.pi * 2) end
 
-                    if angletotarget > -0.08 and angletotarget < 0.08 then
+                    if angletotarget > -0.07 and angletotarget < 0.07 then
                         Obj.weaponcooldown = 4
                         createNewBullet(Obj, true)       -- includes missiles and bombs. Use TRUE for fast moving bullets
                     else
@@ -505,14 +402,7 @@ local function updateUnitTask(Obj, squadorder, dt)
         end
 
         -- do self-preservation checks firstly. Remember the ordering matters
-        if (Obj.componentHealth[enum.componentStructure] <= 35 and fun.unitIsTargeted(Obj.guid))
-            or (Obj.componentHealth[enum.componentStructure] <= 35 and Obj.componentHealth[enum.componentThruster] <= 0) then
-            -- eject is a bit of a dice roll
-            local rndnum = love.math.random(1, 35)
-            if rndnum > Obj.componentHealth[enum.componentStructure] then       -- more damage = more chance of eject
-                setTaskEject(Obj)
-            end
-        elseif Obj.componentHealth[enum.componentWeapon] <= 0 then
+        if Obj.componentHealth[enum.componentWeapon] <= 0 then
             setTaskRTB(Obj)
         elseif Obj.componentHealth[enum.componentThruster] <= 50 then
             setTaskRTB(Obj)
@@ -522,47 +412,49 @@ local function updateUnitTask(Obj, squadorder, dt)
             setTaskRTB(Obj)
         elseif Obj.componentHealth[enum.componentStructure] <= 50 then
             setTaskRTB(Obj)
+        end
 
-
-		-- after the self-preservation bits, take direction from current squad orders
-        elseif squadorder == enum.squadOrdersEngage then
-            local targetguid
-            if Obj.forf == enum.forfFriend then
-                targetguid = getClosestFighter(Obj, enum.forfEnemy)        -- this OBJECTS guid or nil
-            end
-            if Obj.forf == enum.forfEnemy then
-                targetguid = getClosestFighter(Obj, enum.forfFriend)       -- this OBJECTS guid or nil
-            end
-            if targetguid ~= nil then
-                local thisorder = {}
-                thisorder.action = enum.unitActionEngaging
-                thisorder.cooldown = 5
-                thisorder.destx = nil
-                thisorder.desty = nil
-                thisorder.targetguid = targetguid
-                table.insert(Obj.actions, thisorder)
-                -- print("Setting action = engage")
-            else
-                -- trying to engage but no target found.
-                if not unitIsTargeted and Obj.body:getY() < 0 and targetguid == nil then
-                    -- move back inside the battle map
-                    setTaskDestination(Obj, Obj.body:getX(), 100)
-                elseif not unitIsTargeted and Obj.body:getY() > SCREEN_HEIGHT and targetguid == nil then
-                    -- move back inside the battle map
-                    setTaskDestination(Obj, Obj.body:getX(), SCREEN_HEIGHT - 100)
-                else
-                    -- no target found and still inside map. Allow code to fall through to RTB
+        if #Obj.actions <= 0 then
+    		-- after the self-preservation bits, take direction from current squad orders
+            if squadorder == enum.squadOrdersEngage then
+                local targetguid
+                if Obj.forf == enum.forfFriend then
+                    targetguid = getClosestFighter(Obj, enum.forfEnemy)        -- this OBJECTS guid or nil
                 end
-                print("Stacking orders: return to battle and RTB")
-                setTaskRTB(Obj)     --! this is first instance of stacking. See if it works
+                if Obj.forf == enum.forfEnemy then
+                    targetguid = getClosestFighter(Obj, enum.forfFriend)       -- this OBJECTS guid or nil
+                end
+                if targetguid ~= nil then
+                    local thisorder = {}
+                    thisorder.action = enum.unitActionEngaging
+                    thisorder.cooldown = 5
+                    thisorder.destx = nil
+                    thisorder.desty = nil
+                    thisorder.targetguid = targetguid
+                    table.insert(Obj.actions, thisorder)
+                    -- print("Setting action = engage")
+                else
+                    -- trying to engage but no target found.
+                    if not unitIsTargeted and Obj.body:getY() < 0 and targetguid == nil then
+                        -- move back inside the battle map
+                        setTaskDestination(Obj, Obj.body:getX(), 100)
+                    elseif not unitIsTargeted and Obj.body:getY() > SCREEN_HEIGHT and targetguid == nil then
+                        -- move back inside the battle map
+                        setTaskDestination(Obj, Obj.body:getX(), SCREEN_HEIGHT - 100)
+                    else
+                        -- no target found and still inside map. Allow code to fall through to RTB
+                    end
+                    print("Stacking orders: return to battle and RTB")
+                    setTaskRTB(Obj)     --! this is first instance of stacking. See if it works
+                end
+            elseif squadorder == enum.squadOrdersReturnToBase then
+                    setTaskRTB(Obj)
+                -- print("Unit task: RTB")
+            else
+                --! no squad order or unexpected squad order
+                Obj.actions[1] = nil
+                print("No squad order available for this unit")
             end
-        elseif squadorder == enum.squadOrdersReturnToBase then
-                setTaskRTB(Obj)
-            -- print("Unit task: RTB")
-        else
-            --! no squad order or unexpected squad order
-            Obj.actions[1] = nil
-            print("No squad order available for this unit")
         end
     end
 end
