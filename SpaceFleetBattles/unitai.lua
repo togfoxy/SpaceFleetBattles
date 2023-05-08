@@ -237,9 +237,6 @@ local function turnToObjective(Obj, destx, desty, dt)
 end
 
 local function adjustAngle(Obj, dt)
-    -- turn to face the current target
-    -- if there is a nominated target then find the preferred angle and turn towards it
-
     assert(Obj.body:isBullet() == false)
 
     while Obj.body:getAngle() > (math.pi * 2) do
@@ -521,47 +518,49 @@ local function updateUnitTask(Obj, squadorder, dt)
             setTaskRTB(Obj)
         elseif Obj.componentHealth[enum.componentStructure] <= 50 then
             setTaskRTB(Obj)
+        end
 
-
-		-- after the self-preservation bits, take direction from current squad orders
-        elseif squadorder == enum.squadOrdersEngage then
-            local targetguid
-            if Obj.forf == enum.forfFriend then
-                targetguid = getClosestFighter(Obj, enum.forfEnemy)        -- this OBJECTS guid or nil
-            end
-            if Obj.forf == enum.forfEnemy then
-                targetguid = getClosestFighter(Obj, enum.forfFriend)       -- this OBJECTS guid or nil
-            end
-            if targetguid ~= nil then
-                local thisorder = {}
-                thisorder.action = enum.unitActionEngaging
-                thisorder.cooldown = 5
-                thisorder.destx = nil
-                thisorder.desty = nil
-                thisorder.targetguid = targetguid
-                table.insert(Obj.actions, thisorder)
-                -- print("Setting action = engage")
-            else
-                -- trying to engage but no target found.
-                if not unitIsTargeted and Obj.body:getY() < 0 and targetguid == nil then
-                    -- move back inside the battle map
-                    setTaskDestination(Obj, Obj.body:getX(), 100)
-                elseif not unitIsTargeted and Obj.body:getY() > SCREEN_HEIGHT and targetguid == nil then
-                    -- move back inside the battle map
-                    setTaskDestination(Obj, Obj.body:getX(), SCREEN_HEIGHT - 100)
-                else
-                    -- no target found and still inside map. Allow code to fall through to RTB
+        if #Obj.actions <= 0 then
+    		-- after the self-preservation bits, take direction from current squad orders
+            if squadorder == enum.squadOrdersEngage then
+                local targetguid
+                if Obj.forf == enum.forfFriend then
+                    targetguid = getClosestFighter(Obj, enum.forfEnemy)        -- this OBJECTS guid or nil
                 end
-                print("Stacking orders: return to battle and RTB")
-                setTaskRTB(Obj)     --! this is first instance of stacking. See if it works
+                if Obj.forf == enum.forfEnemy then
+                    targetguid = getClosestFighter(Obj, enum.forfFriend)       -- this OBJECTS guid or nil
+                end
+                if targetguid ~= nil then
+                    local thisorder = {}
+                    thisorder.action = enum.unitActionEngaging
+                    thisorder.cooldown = 5
+                    thisorder.destx = nil
+                    thisorder.desty = nil
+                    thisorder.targetguid = targetguid
+                    table.insert(Obj.actions, thisorder)
+                    -- print("Setting action = engage")
+                else
+                    -- trying to engage but no target found.
+                    if not unitIsTargeted and Obj.body:getY() < 0 and targetguid == nil then
+                        -- move back inside the battle map
+                        setTaskDestination(Obj, Obj.body:getX(), 100)
+                    elseif not unitIsTargeted and Obj.body:getY() > SCREEN_HEIGHT and targetguid == nil then
+                        -- move back inside the battle map
+                        setTaskDestination(Obj, Obj.body:getX(), SCREEN_HEIGHT - 100)
+                    else
+                        -- no target found and still inside map. Allow code to fall through to RTB
+                    end
+                    print("Stacking orders: return to battle and RTB")
+                    setTaskRTB(Obj)     --! this is first instance of stacking. See if it works
+                end
+            elseif squadorder == enum.squadOrdersReturnToBase then
+                    setTaskRTB(Obj)
+                -- print("Unit task: RTB")
+            else
+                --! no squad order or unexpected squad order
+                Obj.actions[1] = nil
+                print("No squad order available for this unit")
             end
-        elseif squadorder == enum.squadOrdersReturnToBase then
-                setTaskRTB(Obj)
-            -- print("Unit task: RTB")
-        else
-            --! no squad order or unexpected squad order
-            Obj.actions[1] = nil
-            print("No squad order available for this unit")
         end
     end
 end
