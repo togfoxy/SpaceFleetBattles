@@ -105,10 +105,8 @@ end
 local function createEscapePod(Obj)
     -- Obj is the obj that is spawning/creating the pod. It assumed this Obj will soon be destroyed
 
-    local podx, pody = Obj.body:getPosition()
-
     local thisobject = {}
-    thisobject.body = love.physics.newBody(PHYSICSWORLD, podx, pody, "dynamic")
+    thisobject.body = love.physics.newBody(PHYSICSWORLD, Obj.podx, Obj.pody, "dynamic")
 	thisobject.body:setLinearDamping(0)
 
     if forf == enum.forfFriend then
@@ -179,18 +177,31 @@ local function createEscapePod(Obj)
     elseif thisobject.forf == enum.forfEnemy then
         thisobject.actions[1].destx = FOE_START_X
     end
-    thisobject.actions[1].desty = Obj.body:getY()
+    thisobject.actions[1].desty = Obj.pody
 
     -- print("Adding pod to OBJECTS: " .. thisobject.guid)
     table.insert(OBJECTS, thisobject)
     print("Pod guid created: " .. guid)
 end
 
+function functions.spawnPods()
+    for i = #POD_QUEUE, 1, -1 do
+        createEscapePod(POD_QUEUE[i])       -- send the object into this function so it can spawn a pod
+        table.remove(POD_QUEUE, i)
+    end
+end
+
 function functions.setTaskEject(Obj)
     Obj.lifetime = 0
     Obj.actions = {}
     print("Setting action to eject")
-    createEscapePod(Obj)
+
+    local thisObj = {}
+    thisObj.podx, thisObj.pody = Obj.body:getPosition()
+    thisObj.forf = Obj.forf
+    thisObj.guid = Obj.guid
+    thisObj.squadCallsign = Obj.squadcallsign
+    table.insert(POD_QUEUE, thisObj)        -- Box2D won't let an object to be created inside contact event so queue it here
 
     -- remove fighter from hanger, noting foe fighers don't have a hanger
     for i = #HANGER, 1, -1 do

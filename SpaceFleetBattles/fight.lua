@@ -362,6 +362,7 @@ function fight.update(dt)
         unitai.update(dt)
 
         destroyObjects(dt)
+        fun.spawnPods()
 
         PHYSICSWORLD:update(dt) --this puts the world into motion
     end
