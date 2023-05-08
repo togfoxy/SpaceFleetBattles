@@ -304,7 +304,6 @@ local function adjustThrustEngaging(Obj, dt)
         local targetx, targety = targetObj.body:getPosition()
 
         if cf.isInFront(objx, objy, objfacing, targetx, targety) then
-        -- if cf.isInFront(objx, objy, objfacing, targetx, targety) then
             -- print("beta")
             if targetObj.currentForwardThrust < Obj.currentForwardThrust then
                 -- print("charlie")
@@ -321,7 +320,7 @@ local function adjustThrustEngaging(Obj, dt)
                         Obj.currentForwardThrust = Obj.currentForwardThrust - (Obj.maxDeacceleration * dt)
                         if Obj.currentForwardThrust < targetObj.currentForwardThrust then
                             -- print("echo")
-                            Obj.currentForwardThrust = targetObj.currentForwardThrust * 0.9
+                            Obj.currentForwardThrust = targetObj.currentForwardThrust * (love.math.random(7,9) / 10)
                         end
                     else
                         -- unit is not behind target so max thrust
