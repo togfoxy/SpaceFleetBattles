@@ -95,7 +95,7 @@ function functions.getImpactedComponent(Obj)
 end
 
 function functions.getPilot(guid)
-
+    -- scans the ROSTER for the provided guid. Returns nil if not found or foe guid provided
     for i = 1, #ROSTER do
         if ROSTER[i].guid == guid then return ROSTER[i] end
     end
@@ -203,11 +203,36 @@ function functions.setTaskEject(Obj)
     thisObj.squadCallsign = Obj.squadcallsign
     table.insert(POD_QUEUE, thisObj)        -- Box2D won't let an object to be created inside contact event so queue it here
 
+    -- update pilot stats
+    local pilot = fun.getPilot(Obj.pilotguid)
+    if pilot ~= nil then pilot.ejections = pilot.ejections + 1 end
+
     -- remove fighter from hanger, noting foe fighers don't have a hanger
     for i = #HANGER, 1, -1 do
         if HANGER[i].guid == Obj.guid then
             table.remove(HANGER, i)
             print("Removed fighter guid from hanger: " .. Obj.guid)
+        end
+    end
+end
+
+local function giveKillCredit(bullet)
+    -- give kill credit
+    local vesselguid = bullet.ownerObjectguid           -- this is the vessel that shot the bullet
+    local vesselobj = fun.getObject(vesselguid)
+    local pilotguid = vesselobj.pilotguid
+
+    local shooter = fun.getPilot(pilotguid)
+    if shooter ~= nil then
+        shooter.kills = shooter.kills + 1
+    else
+        if bullet.forf == enum.forfFriend then
+            print("********************")
+            print(inspect(ROSTER))
+            print(inspect(bullet))
+            print(shooterguid)
+            print(inspect(shooter))
+            error()
         end
     end
 end
@@ -229,6 +254,9 @@ function functions.applyDamage(victim, bullet)
         victim.lifetime = 0
         unitai.clearTarget(victim.guid)		-- remove this guid from everyone's target
         print("Unit exploded")
+
+        -- give kill credit
+        giveKillCredit(bullet)
 
         -- remove friendly pilots from roster
         local pilotguid = victim.pilotguid
@@ -306,6 +334,8 @@ function functions.applyDamage(victim, bullet)
             local rndnum = love.math.random(1, 35)
             if rndnum > victim.componentHealth[enum.componentStructure] then       -- more damage = more chance of eject
                 fun.setTaskEject(victim)
+                -- give kill credit
+                giveKillCredit(bullet)
             end
         end
 

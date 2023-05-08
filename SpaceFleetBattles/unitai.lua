@@ -304,6 +304,7 @@ local function createNewBullet(Obj, bullet)
     thisobject.fixture = love.physics.newFixture(thisobject.body, thisobject.shape, 1)		-- the 1 is the density
     thisobject.fixture:setRestitution(0)                    -- amount of bounce after a collision
     thisobject.fixture:setSensor(false)
+    thisobject.forf = Obj.forf
     if Obj.forf == enum.forfFriend then
         thisobject.fixture:setCategory(enum.categoryFriendlyBullet)
         thisobject.fixture:setMask(enum.categoryFriendlyBullet, enum.categoryEnemyBullet, enum.categoryFriendlyFighter)
