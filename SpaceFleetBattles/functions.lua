@@ -129,14 +129,51 @@ function functions.applyDamage(victim, bullet)
         local pilotguid = victim.pilotguid
         local pilotobj = fun.getPilot(pilotguid)
         if pilotobj ~= nil then pilotobj.isDead = true end
-
         print("Adjusted roster: " .. inspect(ROSTER))
+
+        -- remove fighter from hanger
+        for i = #HANGER, 1, -1 do
+            if HANGER[i].guid == victim.guid then
+                table.remove(HANGER, i)
+            end
+        end
     else
         -- victim not dead so attach a smoke animation to the object
         fun.createAnimation(victim, enum.animSmoke)
         if fun.isPlayerAlive() and bullet.ownerObjectguid == PLAYER_GUID then
             -- this bullet is the players bullet. Make an audible
             cf.playAudio(enum.audioBulletHit, false, true)
+        end
+
+        -- apply a small evasion wobble if trying to RTB
+        local action = fun.getTopAction(victim)
+        local thisaction = {}
+        if action ~= nil and action.action == enum.unitActionReturningToBase then
+            -- insert an action at the TOP of the queue
+            if victim.forf == enum.forfFriend then
+                local x = FRIEND_START_X
+                local y = love.math.random(0, SCREEN_HEIGHT)
+
+            	thisaction.cooldown = 3
+            	thisaction.action = enum.unitActionMoveToDest
+            	thisaction.targetguid = nil
+            	thisaction.destx = x
+            	thisaction.desty = y
+            elseif victim.forf == enum.forfEnemy then
+                local x = FOE_START_X
+                local y = love.math.random(0, SCREEN_HEIGHT)
+
+                thisaction.cooldown = 3
+                thisaction.action = enum.unitActionMoveToDest
+                thisaction.targetguid = nil
+                thisaction.destx = x
+                thisaction.desty = y
+            end
+
+            -- print(inspect(thisaction))
+            -- print(inspect(victim.actions))
+            table.insert(victim.actions, 1, thisaction)
+            print("Evasive force applied")
         end
 	end
 

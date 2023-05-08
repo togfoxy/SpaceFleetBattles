@@ -29,7 +29,7 @@ function squadai.update(dt)
                                     thisorder.active = true         -- set to false if you want to queue it but not activate it
                                     thisorder.order = enum.squadOrdersEngage
                                     table.insert(squadAI[callsign].orders, thisorder)
-                                    print("Squad orders: engage")
+                                    -- print("Squad orders: engage")
                                 elseif commanderAI[i].orders[1].order == enum.commanderOrdersReturnToBase then
                                     -- squad RTB
                                     thisorder = {}

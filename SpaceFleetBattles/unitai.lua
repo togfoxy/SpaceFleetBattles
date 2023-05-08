@@ -81,7 +81,9 @@ local function createEscapePod(Obj)
 
     -- print("Adding pod to OBJECTS: " .. thisobject.guid)
     table.insert(OBJECTS, thisobject)
-    print("Pod created: " .. thisobject.body:getX(), thisobject.body:getY())
+    print("Pod guid created: " .. guid)
+
+
 end
 
 function unitai.clearTarget(deadtargetguid)
@@ -167,6 +169,14 @@ local function setTaskEject(Obj)
     Obj.lifetime = 0
     print("Setting action to eject")
     createEscapePod(Obj)
+
+    -- remove fighter from hanger, noting foe fighers don't have a hanger
+    for i = #HANGER, 1, -1 do
+        if HANGER[i].guid == Obj.guid then
+            table.remove(HANGER, i)
+            print("Removed fighter guid from hanger: " .. Obj.guid)
+        end
+    end
 end
 
 local function isFighter(Obj)
@@ -217,7 +227,7 @@ local function turnToObjective(Obj, destx, desty, dt)
         print(txt)
         error()
     end
-    force = 70 * force * Obj.currentSideThrust * dt         -- the constant is an arbitrary value to make turning cool
+    force = 80 * force * Obj.currentSideThrust * dt         -- the constant is an arbitrary value to make turning cool
 
     Obj.body:setAngularVelocity(force)
 
@@ -280,7 +290,7 @@ local function adjustAngle(Obj, dt)
         end
     else
         -- this can happen when the object is a pod.
-        print("Unit has no action therefore no angle")
+        -- print("Unit has no action therefore no angle")
     end
 end
 
@@ -305,7 +315,7 @@ local function adjustThrust(Obj, dt)
                 -- print("alpha")
                 local targetx, targety = targetObj.body:getPosition()
 
-                if cf.isInFront2(Obj, targetx, targety) then            -- only works on physical objects that have a facing
+                if cf.isInFront(objx, objy, objfacing, targetx, targety) then
                 -- if cf.isInFront(objx, objy, objfacing, targetx, targety) then
                     -- print("beta")
                     if targetObj.currentForwardThrust < Obj.currentForwardThrust then
@@ -361,7 +371,7 @@ local function adjustThrust(Obj, dt)
         end
     else
         -- no orders. Slow down and stop
-        print("No task for this unit. Will slow and stop")
+        -- print("No task for this unit. Will slow and stop")
         Obj.currentForwardThrust = Obj.currentForwardThrust - (Obj.maxDeacceleration * dt)  -- might be zero for bullets
     end
 
@@ -522,7 +532,7 @@ local function updateUnitTask(Obj, squadorder, dt)
                 thisorder.desty = nil
                 thisorder.targetguid = targetguid
                 table.insert(Obj.actions, thisorder)
-                print("Setting action = engage")
+                -- print("Setting action = engage")
             else
                 -- trying to engage but no target found.
                 if not unitIsTargeted and Obj.body:getY() < 0 and targetguid == nil then

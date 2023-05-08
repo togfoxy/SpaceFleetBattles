@@ -18,7 +18,7 @@ function endbattle.draw()
         else
             love.graphics.setColor(1,1,1,1)
         end
-        local txt = ROSTER[i].firstname .. " " .. ROSTER[i].lastname .. " " .. ROSTER[i].health .. " " .. ROSTER[i].missions .. " " .. ROSTER[i].kills .. " " .. ROSTER[i].ejections
+        local txt = i .. ") " .. ROSTER[i].firstname .. " " .. ROSTER[i].lastname .. " " .. ROSTER[i].health .. " " .. ROSTER[i].missions .. " " .. ROSTER[i].kills .. " " .. ROSTER[i].ejections
         love.graphics.print(txt, drawx, drawy)
         drawy = drawy + 30
     end
@@ -28,7 +28,7 @@ function endbattle.draw()
     local drawy = 100
     love.graphics.setColor(1,1,1,1)
     for i = 1, #HANGER do
-        local txt = string.sub(HANGER[i].guid, -2)
+        local txt = i .. ") " .. string.sub(HANGER[i].guid, -2)
         txt = txt .. " " .. HANGER[i].componentHealth[enum.componentStructure]
         love.graphics.print(txt, drawx, drawy)
         drawy = drawy + 30
