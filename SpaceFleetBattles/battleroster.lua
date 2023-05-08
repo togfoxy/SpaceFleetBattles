@@ -98,6 +98,7 @@ local function loadBattleObjects()
                 assert(thisfighter.guid ~= nil)
 
 				pilot.vesselguid = thisfighter.guid
+                pilot.missions = pilot.missions + 1
 
 				-- load fighter into objects
                 -- print("Adding friendly fighter to OBJECTS: " .. thisfighter.guid)
