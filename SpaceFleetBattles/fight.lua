@@ -5,6 +5,7 @@ local pause = false
 local snapcamera = true
 local showmenu = false
 
+
 local function destroyObjects(dt)
 
     for i = #OBJECTS, 1, -1 do
@@ -343,11 +344,13 @@ function fight.update(dt)
 
         SCORE.friendsdead = 0
         SCORE.enemiesdead = 0
+
+        BATTLE_TIMER = 0
     end
 
     if not pause then
+        BATTLE_TIMER = BATTLE_TIMER + dt
         commanderai.update(dt)
-
         squadai.update(dt)
         unitai.update(dt)
 

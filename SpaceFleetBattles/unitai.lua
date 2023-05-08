@@ -452,7 +452,7 @@ local function fireWeapons(Obj, dt)
                     local angletotarget = bearingtotarget - currentangle
                     if angletotarget < (math.pi * -2) then angletotarget = angletotarget + (math.pi * 2) end
 
-                    if angletotarget > -0.08 and angletotarget < 0.08 then
+                    if angletotarget > -0.07 and angletotarget < 0.07 then
                         Obj.weaponcooldown = 4
                         createNewBullet(Obj, true)       -- includes missiles and bombs. Use TRUE for fast moving bullets
                     else
