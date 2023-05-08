@@ -186,7 +186,7 @@ function battleroster.loadButtons()
     -- button for continue game
     local mybutton = {}
     mybutton.label = "Launch fighters"
-	mybutton.x = SCREEN_WIDTH * 0.85
+	mybutton.x = 125
     mybutton.y = SCREEN_HEIGHT - 200
     mybutton.width = 175
     mybutton.height = 25
