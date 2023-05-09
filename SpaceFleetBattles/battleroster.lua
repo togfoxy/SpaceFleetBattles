@@ -28,7 +28,7 @@ local function getUnassignedPilot()
 	if playerpilot == nil then
 		error()
 	else
-		if playerpilot.vesselguid == nil then
+		if (playerpilot.vesselguid == nil and playerpilot.isDead == false) then
 			return playerpilot
 		end
 	end
@@ -41,27 +41,26 @@ local function getUnassignedPilot()
 	repeat
 		rndnum = love.math.random(1, #ROSTER)
 		loopcounter = loopcounter + 1
-	until ROSTER[rndnum].vesselguid == nil or loopcounter > 999
+	until (ROSTER[rndnum].vesselguid == nil and (ROSTER[rndnum].isDead == false or ROSTER[rndnum].isDead == nil)) or loopcounter > 999
 
 	if loopcounter < 1000 then
 		return ROSTER[rndnum]		-- return the object
 	else
+        print("No combat-ready pilot found")
 		return nil
 	end
 end
 
-local function getEmptyVessel(vesseltype)
-	-- returns an object of the type vesseltype or nil
-	-- input: vesseltype = the fixture category (enum.category...)
+local function getEmptyVessel()
+	-- returns an object or nil
 	--! this doesn't respect the players sort order
-	--! maybe for now, sort table according to structure and thruster damage
+	--! maybe for now, sort table according to structure health and thruster damage
 	for _, vessel in pairs(HANGER) do
-		if vessel.fixture:getCategory() == vesseltype then
-			if vessel.pilotguid == nil then
-				return vessel
-			end
+		if vessel.pilotguid == nil then
+			return vessel
 		end
 	end
+    print("No combat-ready vessel found")
 	return nil
 end
 
@@ -85,13 +84,15 @@ local function loadBattleObjects()
 			local pilot = getUnassignedPilot()		-- preferences player pilot. Returns nil if failed to find any pilot
 
 			-- get an unassigned fighter from hanger, in sequence, or nil
-			local thisfighter = getEmptyVessel(enum.categoryFriendlyFighter)
+			local thisfighter = getEmptyVessel()
 
+            -- check if pilot has a fighter
 			if pilot ~= nil and thisfighter ~= nil then
 				-- assign pilot to fighter and assign fighter to pilot
 				thisfighter.pilotguid = pilot.guid
 				thisfighter.squadCallsign = thiscallsign
                 thisfighter.isLaunched = true                   -- puts it into the batlespace
+                fighter.createFighterBody(thisfighter)          -- creates a physical body
                 local x, y = functions.getLaunchXY(enum.forfFriend)
                 thisfighter.body:setPosition(x, y)
 
@@ -129,6 +130,8 @@ local function loadBattleObjects()
 			table.insert(OBJECTS, thisfighter)					-- enemy fighters have no crew
 		end
 	end
+
+    endBattleHasLoaded = false
 end
 
 function battleroster.mousereleased(rx, ry, x, y, button)
@@ -153,7 +156,7 @@ function battleroster.draw()
     local drawx = 100
     local drawy = 100
     for i = 1, #ROSTER do
-        if ROSTER[1].isDead then
+        if ROSTER[i].isDead then
             love.graphics.setColor(1,1,1,0.5)
         else
             love.graphics.setColor(1,1,1,1)

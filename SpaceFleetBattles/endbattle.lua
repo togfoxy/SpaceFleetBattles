@@ -1,8 +1,10 @@
 endbattle = {}
 
---! be sure to clear the squad_list and OBJECTS at the end of eacy battle
+--! be sure to clear the squad_list and OBJECTS at the end of each battle
 --! be sure to take pilots out of fighters
---!fightsceneHasLoaded = false
+--!endBattleHasLoaded = false
+
+endBattleHasLoaded = false
 
 function endbattle.draw()
 
@@ -46,6 +48,29 @@ function endbattle.draw()
     --     txt = "Player was lost in battle"
     -- end
     -- love.graphics.print(txt, 100, 200)
+end
+
+function endbattle.update(dt)
+
+    if not endBattleHasLoaded then
+        endBattleHasLoaded = true
+
+        cf.saveTableToFile("roster.dat", ROSTER)
+
+        -- cycle through surviving objects and reset them for next combat before saving to file
+        for k, Obj in pairs(HANGER) do
+            Obj.body = nil
+            Obj.fixture = nil
+            Obj.shape = nil
+            Obj.isLaunched = false
+            Obj.lifetime = nil
+            Obj.pilotguid = nil
+            Obj.squadCallsign = nil
+            Obj.actions = {}
+        end
+
+        cf.saveTableToFile("hanger.dat", HANGER)
+    end
 end
 
 function endbattle.loadButtons()

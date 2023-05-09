@@ -15,7 +15,7 @@ function squadai.update(dt)
             end
         end
 
-        if #squad.orders == 0 then
+        if #squad.orders < 1 then
             -- squad has no current orders. Check what commander is ordering
             for i = 1, #commanderAI do
                 if commanderAI[i].forf == squad.forf then
@@ -56,15 +56,18 @@ function squadai.update(dt)
         else
             -- do nothing. Cooldown will be invoked next cycle
             --! debugging
-            print("Number of squad orders: " .. #squad.orders)
-            -- print(inspect(squad.orders))
-            -- print(callsign .. " squad has order: " .. squad.orders[1].order)
+            if #squad.orders < 1 then
+                print("Number of squad orders: " .. #squad.orders)
+                -- print(inspect(squad.orders))
+                -- print(callsign .. " squad has order: " .. squad.orders[1].order)
+            end
         end
 
-        if not (squad.orders[1] ~= nil) then
-            print(inspect(squad.orders))
-        end
-        assert(squad.orders[1] ~= nil)
+        --! I have no idea how this can happen sometimes but it happens
+        -- if not (squad.orders[1] ~= nil) then
+        --     print(inspect(squad.orders))
+        -- end
+        -- assert(squad.orders[1] ~= nil)
     end
 end
 

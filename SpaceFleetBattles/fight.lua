@@ -27,8 +27,9 @@ local function destroyObjects(dt)
 end
 
 local function battleOver()
-       local isFriends = false
+    local isFriends = false
     local isFoes = false
+
     for i = 1, #OBJECTS do
         if OBJECTS[i].forf == enum.forfFriend then
             isFriends = true

@@ -164,10 +164,11 @@ local function adjustAngle(Obj, dt)
             -- arrived at destination
             if Obj.actions[1].action == enum.unitActionReturningToBase then
                 -- RTB successful. Destroy this object
-                print("RTB succeed. Destroying object")
-                Obj.lifetime = 0                        -- destroy the object
+                -- print("RTB succeed. Destroying object")
+                -- Obj.lifetime = 0                        -- destroy the object
                 -- print(disttodest)
                 -- print(inspect(Obj))
+                --! might need to put some meaningful code here
             else
                 print("Unit arrived at destination")
             end
@@ -236,7 +237,7 @@ local function adjustThrustEngaging(Obj, dt)
             end
         else
             -- target is not in front or target is not a fighter. Assume full thrust is needed
-            print("Target is not in front so using full thrust.", objx, objy, objfacing, targetx, targety)
+            -- print("Target is not in front so using full thrust.", objx, objy, objfacing, targetx, targety)
             Obj.currentForwardThrust = Obj.currentForwardThrust + (Obj.currentMaxAcceleration * dt)
         end
     else
@@ -380,6 +381,26 @@ local function updatePod(Pod)
     end
 end
 
+local function checkForRTB(Obj)
+    local topaction = fun.getTopAction(Obj)
+    if topaction ~= nil and topaction.action == enum.unitActionReturningToBase then
+        if Obj.forf == enum.forfFriend then
+            if Obj.body:getX() <= FRIEND_START_X then
+                -- rtb success
+                print("RTB succeed. Destroying object")
+                Obj.lifetime = 0                        -- destroy the object
+            end
+        elseif Obj.forf == enum.forfEnemy then
+            if Obj.body:getX() >= FOE_START_X then
+                print("RTB succeed. Destroying object")
+                Obj.lifetime = 0                        -- destroy the object
+            end
+        else
+            error()
+        end
+    end
+end
+
 local function updateUnitTask(Obj, squadorder, dt)
     -- this adjusts targets or other goals based on the squad order
 
@@ -470,6 +491,7 @@ function unitai.update(dt)
         local callsign = Obj.squadCallsign
         local objcategory = Obj.fixture:getCategory()
 
+        -- is this object a fighter?
         if objcategory == enum.categoryEnemyFighter or objcategory == enum.categoryFriendlyFighter then
             assert(Obj.body:isBullet() == false)
             if squadAI[callsign] == nil or #squadAI[callsign].orders == 0 then
@@ -482,8 +504,10 @@ function unitai.update(dt)
             adjustAngle(Obj, dt)         -- send the object and the order for its squad
             adjustThrust(Obj, dt)
             fireWeapons(Obj, dt)
+            checkForRTB(Obj)
         elseif objcategory == enum.categoryEnemyPod or objcategory == enum.categoryFriendlyPod then
             updatePod(Obj)
+            checkForRTB(Obj)
         else
             -- must be a bullet. Do nothing
         end

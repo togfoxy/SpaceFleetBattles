@@ -49,7 +49,7 @@ function functions.createAnimation(Obj, animtype)
         local frames = grid('1-4', '1-2')
         local anim = anim8.newAnimation(frames, 0.15)
         anim.drawx = objx
-        anim.drawy = objy
+        anim.drawy = objy + 5
         anim.angle = objangle
         anim.attachtoobject = Obj       -- put the actual object here to make the animation move with this object
         anim.duration = 0.9 	-- seconds
@@ -226,6 +226,7 @@ local function giveKillCredit(bullet)
     if shooter ~= nil then
         shooter.kills = shooter.kills + 1
     else
+        -- shooter = nil for some reason. Print debug if bullet is friendly
         if bullet.forf == enum.forfFriend then
             print("********************")
             print(inspect(ROSTER))
@@ -308,7 +309,7 @@ function functions.applyDamage(victim, bullet)
             end
 
             table.insert(victim.actions, 1, thisaction)
-            print("Evasive force applied")
+            -- print("Evasive force applied")
         else
             -- not ejecting and not RTB. Unit is still in the fight
             if victim.componentHealth[enum.componentWeapon] <= 0 then
@@ -404,17 +405,17 @@ function functions.initialiseHanger()
 	-- creates fighters and 'stores' them in the hanger table. Friendly only
     -- NOTE: this puts the object in HANGER but not in OBJECTS
 	for i = 1, FRIEND_FIGHTER_COUNT do
-		local fighter = fighter.createFighter(enum.forfFriend)
+		-- local fighter = fighter.createFighter(enum.forfFriend)
+        local fighter = fighter.createHangerFighter(enum.forfFriend)
         fighter.isLaunched = false
         -- asign a stupid x/y value for now because it's not launched
-        fighter.body:setPosition(-3000, 500)
+        -- fighter.body:setPosition(-3000, 500)
 		table.insert(HANGER, fighter)
 	end
 end
 
 function functions.initialiseSector()
 	--!
-
 end
 
 function functions.getPlayerPilot()
