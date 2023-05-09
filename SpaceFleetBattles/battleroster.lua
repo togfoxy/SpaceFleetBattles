@@ -28,7 +28,7 @@ local function getUnassignedPilot()
 	if playerpilot == nil then
 		error()
 	else
-		if playerpilot.vesselguid == nil then
+		if (playerpilot.vesselguid == nil and playerpilot.isDead == false) then
 			return playerpilot
 		end
 	end
@@ -41,11 +41,12 @@ local function getUnassignedPilot()
 	repeat
 		rndnum = love.math.random(1, #ROSTER)
 		loopcounter = loopcounter + 1
-	until ROSTER[rndnum].vesselguid == nil or loopcounter > 999
+	until (ROSTER[rndnum].vesselguid == nil and ROSTER[rndnum].isDead == false) or loopcounter > 999
 
 	if loopcounter < 1000 then
 		return ROSTER[rndnum]		-- return the object
 	else
+        print("No combat-ready pilot found")
 		return nil
 	end
 end
@@ -59,6 +60,7 @@ local function getEmptyVessel()
 			return vessel
 		end
 	end
+    print("No combat-ready vessel found")
 	return nil
 end
 
@@ -71,6 +73,10 @@ local function loadBattleObjects()
     commanderAI = {}
     squadAI = {}
 
+print("$$$$$$$$$")
+print("HANGER:")
+print(inspect(HANGER))
+print("$$$$$$$$$")
 	-- do friendly fleet first
 	for i = 1, FRIEND_SQUADRON_COUNT do
 		local thiscallsign = getUniqueCallsign()			--! make sure to cleart he squad_list at the end of each battle
@@ -154,7 +160,7 @@ function battleroster.draw()
     local drawx = 100
     local drawy = 100
     for i = 1, #ROSTER do
-        if ROSTER[1].isDead then
+        if ROSTER[i].isDead then
             love.graphics.setColor(1,1,1,0.5)
         else
             love.graphics.setColor(1,1,1,1)

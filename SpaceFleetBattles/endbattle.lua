@@ -54,17 +54,21 @@ function endbattle.update(dt)
 
     if not endBattleHasLoaded then
         endBattleHasLoaded = true
+
         cf.saveTableToFile("roster.dat", ROSTER)
 
+        -- cycle through surviving objects and reset them for next combat before saving to file
         for k, Obj in pairs(HANGER) do
-            -- print(inspect(Obj))
-            -- Obj.body:destroy()
             Obj.body = nil
             Obj.fixture = nil
             Obj.shape = nil
+            Obj.isLaunched = false
+            Obj.lifetime = nil
+            Obj.pilotguid = nil
+            Obj.squadCallsign = nil
+            Obj.actions = {}
         end
 
-        print(inspect(HANGER))
         cf.saveTableToFile("hanger.dat", HANGER)
     end
 end
