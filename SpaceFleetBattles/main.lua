@@ -206,6 +206,8 @@ function love.update(dt)
 	local currentscene = cf.currentScreenName(SCREEN_STACK)
 	if currentscene == enum.sceneFight then
         fight.update(dt)
+	elseif currentscene == enum.sceneEndBattle then
+		endbattle.update(dt)
 	end
 
 	fun.updateAnimations(dt)

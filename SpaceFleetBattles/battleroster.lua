@@ -129,6 +129,8 @@ local function loadBattleObjects()
 			table.insert(OBJECTS, thisfighter)					-- enemy fighters have no crew
 		end
 	end
+
+    endBattleHasLoaded = false
 end
 
 function battleroster.mousereleased(rx, ry, x, y, button)

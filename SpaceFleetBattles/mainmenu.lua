@@ -11,8 +11,12 @@ function mainmenu.mousereleased(rx, ry, x, y, button)
 		fun.initialiseSector()
         cf.swapScreen(enum.sceneBattleRoster, SCREEN_STACK)
 	elseif clickedButtonID == enum.buttonMainMenuContinueGame then
-		--! load game
-		--! swap to fight scene
+		-- load game
+        ROSTER = cf.loadTableFromFile("roster.dat")         --! test what happens when file doesn't exist.
+        HANGER = cf.loadTableFromFile("hanger.dat")
+		-- swap to fight scene
+        cf.swapScreen(enum.sceneBattleRoster, SCREEN_STACK)
+
     elseif clickedButtonID == enum.buttonMainMenuExitGame then
         love.event.quit()
     end

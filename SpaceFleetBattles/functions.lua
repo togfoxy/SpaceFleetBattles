@@ -49,7 +49,7 @@ function functions.createAnimation(Obj, animtype)
         local frames = grid('1-4', '1-2')
         local anim = anim8.newAnimation(frames, 0.15)
         anim.drawx = objx
-        anim.drawy = objy
+        anim.drawy = objy + 5
         anim.angle = objangle
         anim.attachtoobject = Obj       -- put the actual object here to make the animation move with this object
         anim.duration = 0.9 	-- seconds
@@ -414,7 +414,6 @@ end
 
 function functions.initialiseSector()
 	--!
-
 end
 
 function functions.getPlayerPilot()
