@@ -226,6 +226,7 @@ local function giveKillCredit(bullet)
     if shooter ~= nil then
         shooter.kills = shooter.kills + 1
     else
+        -- shooter = nil for some reason. Print debug if bullet is friendly
         if bullet.forf == enum.forfFriend then
             print("********************")
             print(inspect(ROSTER))
@@ -308,7 +309,7 @@ function functions.applyDamage(victim, bullet)
             end
 
             table.insert(victim.actions, 1, thisaction)
-            print("Evasive force applied")
+            -- print("Evasive force applied")
         else
             -- not ejecting and not RTB. Unit is still in the fight
             if victim.componentHealth[enum.componentWeapon] <= 0 then

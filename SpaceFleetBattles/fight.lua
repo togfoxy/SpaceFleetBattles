@@ -30,8 +30,6 @@ local function battleOver()
     local isFriends = false
     local isFoes = false
 
-print(inspect(OBJECTS))
-
     for i = 1, #OBJECTS do
         if OBJECTS[i].forf == enum.forfFriend then
             isFriends = true

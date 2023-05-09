@@ -41,7 +41,7 @@ local function getUnassignedPilot()
 	repeat
 		rndnum = love.math.random(1, #ROSTER)
 		loopcounter = loopcounter + 1
-	until (ROSTER[rndnum].vesselguid == nil and ROSTER[rndnum].isDead == false) or loopcounter > 999
+	until (ROSTER[rndnum].vesselguid == nil and (ROSTER[rndnum].isDead == false or ROSTER[rndnum].isDead == nil)) or loopcounter > 999
 
 	if loopcounter < 1000 then
 		return ROSTER[rndnum]		-- return the object
@@ -73,10 +73,6 @@ local function loadBattleObjects()
     commanderAI = {}
     squadAI = {}
 
-print("$$$$$$$$$")
-print("HANGER:")
-print(inspect(HANGER))
-print("$$$$$$$$$")
 	-- do friendly fleet first
 	for i = 1, FRIEND_SQUADRON_COUNT do
 		local thiscallsign = getUniqueCallsign()			--! make sure to cleart he squad_list at the end of each battle
