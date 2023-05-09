@@ -404,10 +404,11 @@ function functions.initialiseHanger()
 	-- creates fighters and 'stores' them in the hanger table. Friendly only
     -- NOTE: this puts the object in HANGER but not in OBJECTS
 	for i = 1, FRIEND_FIGHTER_COUNT do
-		local fighter = fighter.createFighter(enum.forfFriend)
+		-- local fighter = fighter.createFighter(enum.forfFriend)
+        local fighter = fighter.createHangerFighter(enum.forfFriend)
         fighter.isLaunched = false
         -- asign a stupid x/y value for now because it's not launched
-        fighter.body:setPosition(-3000, 500)
+        -- fighter.body:setPosition(-3000, 500)
 		table.insert(HANGER, fighter)
 	end
 end
