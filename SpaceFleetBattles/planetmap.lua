@@ -8,10 +8,35 @@ function planetmap.mousereleased(rx, ry, x, y, button)
     end
 end
 
+local function drawPlanets()
+
+    love.graphics.draw(IMAGE[enum.imagePlanet1], 200, 400, 0, 0.5, 0.5)
+
+    love.graphics.draw(IMAGE[enum.imagePlanet2], 400, 250, 0, 0.5, 0.5)
+    love.graphics.draw(IMAGE[enum.imagePlanet3], 400, 550, 0, 0.5, 0.5)
+
+    love.graphics.draw(IMAGE[enum.imagePlanet4], 600, 100, 0, 0.5, 0.5)
+    love.graphics.draw(IMAGE[enum.imagePlanet5], 600, 400, 0, 0.5, 0.5)
+    love.graphics.draw(IMAGE[enum.imagePlanet6], 600, 700, 0, 0.5, 0.5)
+
+    love.graphics.draw(IMAGE[enum.imagePlanet7], 800, 250, 0, 0.5, 0.5)
+    love.graphics.draw(IMAGE[enum.imagePlanet8], 800, 550, 0, 0.5, 0.5)
+
+    love.graphics.draw(IMAGE[enum.imagePlanet9], 1000, 100, 0, 0.5, 0.5)
+    love.graphics.draw(IMAGE[enum.imagePlanet10], 1000, 400, 0, 0.5, 0.5)
+    love.graphics.draw(IMAGE[enum.imagePlanet11], 1000, 700, 0, 0.5, 0.5)
+
+    love.graphics.draw(IMAGE[enum.imagePlanet12], 1200, 250, 0, 0.5, 0.5)
+    love.graphics.draw(IMAGE[enum.imagePlanet13], 1200, 550, 0, 0.5, 0.5)
+
+    love.graphics.draw(IMAGE[enum.imagePlanet14], 1400, 400, 0, 0.5, 0.5)
+
+
+end
 
 function planetmap.draw()
 
-print("Hi")
+    drawPlanets()
 
     buttons.drawButtons()
 
