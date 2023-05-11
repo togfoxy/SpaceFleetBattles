@@ -29,6 +29,7 @@ fun = require 'functions'
 cf = require 'lib.commonfunctions'
 
 require 'mainmenu'
+require 'planetmap'
 require 'battleroster'
 require 'fight'
 require 'endbattle'
@@ -122,6 +123,8 @@ function love.mousereleased(x, y, button, isTouch)
 
 	if currentscene == enum.sceneFight then
 		fight.mousereleased(rx, ry, x, y, button)		-- need to send through the res adjusted x/y and the 'real' x/y
+	elseif currentscene == enum.scenePlanetMap then
+		planetmap.mousereleased(rx, ry, x, y, button)
 	elseif currentscene == enum.sceneBattleRoster then
 		battleroster.mousereleased(rx, ry, x, y, button)
 	elseif currentscene == enum.sceneMainMenu then
@@ -144,6 +147,7 @@ function love.load()
 	fun.loadImages()
 
 	mainmenu.loadButtons()
+	planetmap.loadButtons()
 	battleroster.loadButtons()
 	endbattle.loadButtons()
 
@@ -175,6 +179,8 @@ function love.draw()
 	local currentscene = cf.currentScreenName(SCREEN_STACK)
 	if currentscene == enum.sceneFight then
 		fight.draw()
+	elseif currentscene == enum.scenePlanetMap then
+		planetmap.draw()
 	elseif currentscene == enum.sceneBattleRoster then
 		battleroster.draw()
 	elseif currentscene == enum.sceneMainMenu then

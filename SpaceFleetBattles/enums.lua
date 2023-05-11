@@ -8,6 +8,7 @@ function enums.load()
     enum.sceneFight = 3
     enum.sceneEndBattle = 4
 	enum.sceneBattleRoster = 5
+    enum.scenePlanetMap = 6
 
     enum.buttonMainMenuNewGame = 1
     enum.buttonMainMenuContinueGame = 2
@@ -15,6 +16,7 @@ function enums.load()
     enum.buttonEndBattleNewGame = 4
     enum.buttonEndBattleExitGame = 5
 	enum.buttonBattleRosterLaunch = 6
+    enum.buttonPlanetMapBattleStations = 7
 
     enum.fontDefault = 1
     enum.fontMedium = 2
