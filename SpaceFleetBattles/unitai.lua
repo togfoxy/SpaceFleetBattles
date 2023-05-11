@@ -355,7 +355,7 @@ local function fireWeapons(Obj, dt)
                         Obj.weaponcooldown = 4
                         createNewBullet(Obj, true)       -- includes missiles and bombs. Use TRUE for fast moving bullets
                     else
-                        print(currentangle, bearingtotarget, angletotarget)
+                        -- print(currentangle, bearingtotarget, angletotarget)
                     end
                 end
             end
