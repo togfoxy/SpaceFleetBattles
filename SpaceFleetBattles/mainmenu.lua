@@ -10,12 +10,14 @@ function mainmenu.mousereleased(rx, ry, x, y, button)
 		fun.initialiseHanger()
 		fun.initialiseFleet()
 		cf.addScreen(enum.scenePlanetMap, SCREEN_STACK)
+
 	elseif clickedButtonID == enum.buttonMainMenuContinueGame then
 		-- load game
         ROSTER = cf.loadTableFromFile("roster.dat")         --! test what happens when file doesn't exist.
         HANGER = cf.loadTableFromFile("hanger.dat")
 		-- swap to fight scene
         cf.addScreen(enum.scenePlanetMap, SCREEN_STACK)
+
 
     elseif clickedButtonID == enum.buttonMainMenuExitGame then
         love.event.quit()
