@@ -22,7 +22,8 @@ local function getUniqueCallsign()
 end
 
 local function getUnassignedPilot()
-
+	-- this function only works when called during battle roster
+	-- this functin will throw an error if called during battle because the player pilot might be dead or RTB
 	-- assign the player pilot first
 	local playerpilot = fun.getPlayerPilot()			-- returns the pilot object that is the player
 	if playerpilot == nil then
@@ -32,30 +33,33 @@ local function getUnassignedPilot()
 			return playerpilot
 		end
 	end
-
-	-- code reaching this point means the playerpilot has been previously assigned. From here on, assign other pilots randomly
-	--! maybe this needs to sort by pilot health in the future
-	local rndnum
-	local loopcounter = 0
-
-	repeat
-		rndnum = love.math.random(1, #ROSTER)
-		loopcounter = loopcounter + 1
-	until (ROSTER[rndnum].vesselguid == nil and (ROSTER[rndnum].isDead == false or ROSTER[rndnum].isDead == nil)) or loopcounter > 999
-
-	if loopcounter < 1000 then
-		return ROSTER[rndnum]		-- return the object
-	else
-        print("No combat-ready pilot found")
-		return nil
+	
+	-- code reaching this point means the playerpilot has been previously assigned. From here on, assign other based on health
+	table.sort(ROSTER, function(a, b)
+		return a.health > b.health
+	end)
+	
+	for i = 1, #ROSTER do
+		if ROSTER[i].vesselguid == nil and (ROSTER[i].isDead == false or ROSTER[i].isDead == nil then
+			return ROSTER[i]
+		end
 	end
+
+	print("No combat-ready pilot found")
+	return nil
+
 end
 
 local function getEmptyVessel()
 	-- returns an object or nil
-	--! this doesn't respect the players sort order
-	--! maybe for now, sort table according to structure health and thruster damage
-	for _, vessel in pairs(HANGER) do
+	-- this doesn't respect the players sort order
+	-- sort table according to structure health and thruster damage
+	
+	table.sort(HANGER, function(a, b)
+		return a.componentHealth[enum.componentStructure] > b.componentHealth[enum.componentStructure]
+	end)
+	
+	for i = 1, #HANGER do
 		if vessel.pilotguid == nil then
 			return vessel
 		end
@@ -75,7 +79,7 @@ local function loadBattleObjects()
 
 	-- do friendly fleet first
 	for i = 1, FRIEND_SQUADRON_COUNT do
-		local thiscallsign = getUniqueCallsign()			--! make sure to cleart he squad_list at the end of each battle
+		local thiscallsign = getUniqueCallsign()
         squadAI[thiscallsign] = {}
         squadAI[thiscallsign].forf = enum.forfFriend
         squadAI[thiscallsign].orders = {}
@@ -105,9 +109,11 @@ local function loadBattleObjects()
                 -- print("Adding friendly fighter to OBJECTS: " .. thisfighter.guid)
 				table.insert(OBJECTS, thisfighter)		-- pilots go into fighters but they don't go into OBJECTS
 
-                if pilot.isPlayer then
-                    PLAYER_GUID = thisfighter.guid      --! can probably do this better
-                end
+				--! I'm not sure why this code is here so I took it out.
+				--! Maybe there are logic checks for pilot/fighter guid being the same?
+                -- if pilot.isPlayer then
+                --     PLAYER_GUID = thisfighter.guid      --! can probably do this better
+                -- end
 			else
 				-- run out of pilots and/or fighters. Break the loop and go to battle with whatever you have
 				break
@@ -177,10 +183,10 @@ function battleroster.draw()
         drawy = drawy + 30
     end
 
-	--! provide some way to specify how many squadrons to launch
-	--! how many fighters per squadron
-	--! find some way to re-order fightes launched
-	--! fighters that are not launched will be slowly repaired
+	-- provide some way to specify how many squadrons to launch
+	-- how many fighters per squadron
+	-- find some way to re-order fighters launched
+	-- fighters that are not launched will be slowly repaired
 
 	buttons.drawButtons()
 end

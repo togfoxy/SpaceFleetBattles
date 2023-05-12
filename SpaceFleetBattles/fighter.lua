@@ -37,7 +37,7 @@ function fighter.createFighter(forf)
     thisobject.forf = forf
     thisobject.squadCallsign = nil
     thisobject.actions = {}
-    thisobject.weaponcooldown = 0           --! might be more than one weapon in the future
+    thisobject.weaponcooldown = 0           -- might be more than one weapon in the future
 
     thisobject.currentMaxForwardThrust = 100    -- can be less than max if battle damaged
     thisobject.maxForwardThrust = 100
@@ -110,7 +110,7 @@ function fighter.createHangerFighter(forf)
     thisobject.forf = forf
     thisobject.squadCallsign = nil
     thisobject.actions = {}
-    thisobject.weaponcooldown = 0           --! might be more than one weapon in the future
+    thisobject.weaponcooldown = 0           -- might be more than one weapon in the future
 
     thisobject.currentMaxForwardThrust = 100    -- can be less than max if battle damaged
     thisobject.maxForwardThrust = 100

@@ -161,17 +161,8 @@ local function adjustAngle(Obj, dt)
         local desty = Obj.actions[1].desty
         local disttodest = cf.getDistance(objx, objy, destx, desty)
         if disttodest < 20 then
-            -- arrived at destination
-            if Obj.actions[1].action == enum.unitActionReturningToBase then
-                -- RTB successful. Destroy this object
-                -- print("RTB succeed. Destroying object")
-                -- Obj.lifetime = 0                        -- destroy the object
-                -- print(disttodest)
-                -- print(inspect(Obj))
-                --! might need to put some meaningful code here
-            else
-                print("Unit arrived at destination")
-            end
+            -- arrived at destination. Remove the top action
+			Obj.actions[1] = nil
         else
             turnToObjective(Obj, destx, desty, dt)
         end
@@ -193,58 +184,93 @@ local function adjustAngle(Obj, dt)
     end
 end
 
-local function adjustThrustEngaging(Obj, dt)
 
-    local objx, objy = Obj.body:getPosition()
-    local objfacing = Obj.body:getAngle()
-    local targetObj = fun.getObject(Obj.actions[1].targetguid)
-    if targetObj ~= nil and isFighter(targetObj) then
-        -- print("alpha")
-        local targetx, targety = targetObj.body:getPosition()
+local function adjustThrustEngaging2(Obj, dt)
 
-        if cf.isInFront(objx, objy, objfacing, targetx, targety) then
-            -- print("beta")
-            if targetObj.currentForwardThrust < Obj.currentForwardThrust then
-                -- print("charlie")
-                local dist = cf.getDistance(objx, objy, targetx, targety)
-                if dist <= 125 then
-                    -- print("delta")
-                    -- try to match speed if unit is behind target
-                    local minheading = objfacing - 0.7853			-- 0.7 rads = 45 deg		-- should probably make these constants
-                    local maxheading = objfacing + 0.7853
-                    local targetfacing = targetObj.body:getAngle()
-
-                    if targetfacing >= minheading and targetfacing <= maxheading then		--! check that the min/max thing converts to radians properly
-                        -- unit is behind the target. Try to match speed
-                        Obj.currentForwardThrust = Obj.currentForwardThrust - (Obj.maxDeacceleration * dt)
-                        if Obj.currentForwardThrust < targetObj.currentForwardThrust then
-                            -- print("echo")
-                            Obj.currentForwardThrust = targetObj.currentForwardThrust * (love.math.random(7,9) / 10)
-                        end
-                    else
-                        -- unit is not behind target so max thrust
-                        Obj.currentForwardThrust = Obj.currentForwardThrust + (Obj.currentMaxAcceleration * dt)      --! should refactor all this
-                    end
-                else
-                    -- print("foxtrot")
-                    -- max thrust needed
-                    Obj.currentForwardThrust = Obj.currentForwardThrust + (Obj.currentMaxAcceleration * dt)
-                end
-            else
-                -- print("golf")
-                -- max throttle
-                Obj.currentForwardThrust = Obj.currentForwardThrust + (Obj.currentMaxAcceleration * dt)
-            end
-        else
-            -- target is not in front or target is not a fighter. Assume full thrust is needed
-            -- print("Target is not in front so using full thrust.", objx, objy, objfacing, targetx, targety)
-            Obj.currentForwardThrust = Obj.currentForwardThrust + (Obj.currentMaxAcceleration * dt)
-        end
-    else
-        print("Engaging but no target. Killing current action")
-        Obj.actions[1].cooldown = 0
-    end
+	local targetObj = fun.getObject(Obj.actions[1].targetguid)
+	if targetObj == nil or not isFighter(targetObj) then
+		-- abort
+	else
+		local objfacing = Obj.body:getAngle()
+		local minheading = objfacing - 0.7853			-- 0.7 rads = 45 deg		-- should probably make these constants
+		local maxheading = objfacing + 0.7853
+		local targetfacing = targetObj.body:getAngle()
+		
+		local objx, objy = Obj.body:getPosition()
+		local targetx, targety = targetObj.body:getPosition()
+		
+		local dist = cf.getDistance(objx, objy, targetx, targety)
+		if (targetfacing >= minheading and targetfacing <= maxheading) and
+			targetObj.currentForwardThrust < Obj.currentForwardThrust and
+			dist <= 125 then
+			
+			-- set pilot thrust to target thrust
+			Obj.currentForwardThrust = Obj.currentForwardThrust - (Obj.maxDeacceleration * dt)
+			if Obj.currentForwardThrust < targetObj.currentForwardThrust then
+				Obj.currentForwardThrust = targetObj.currentForwardThrust
+			end
+		else
+			-- move to full speed
+			Obj.currentForwardThrust = Obj.currentForwardThrust + (Obj.currentMaxAcceleration * dt)      
+		end
+	end
+	
+	-- ensuring thrust is not above max is checked in the parent function
 end
+			
+-- local function adjustThrustEngaging(Obj, dt)
+
+    -- local objx, objy = Obj.body:getPosition()
+    -- local objfacing = Obj.body:getAngle()
+    -- local targetObj = fun.getObject(Obj.actions[1].targetguid)
+    -- if targetObj ~= nil and isFighter(targetObj) then
+        -- -- print("alpha")
+        -- local targetx, targety = targetObj.body:getPosition()
+
+        -- if cf.isInFront(objx, objy, objfacing, targetx, targety) then
+            -- -- print("beta")
+            -- if targetObj.currentForwardThrust < Obj.currentForwardThrust then		-- is target moving slower than pilot?
+                -- -- print("charlie")
+                -- local dist = cf.getDistance(objx, objy, targetx, targety)
+                -- if dist <= 125 then
+                    -- -- print("delta")
+                    -- -- try to match speed if unit is behind target
+                    -- local minheading = objfacing - 0.7853			-- 0.7 rads = 45 deg		-- should probably make these constants
+                    -- local maxheading = objfacing + 0.7853
+                    -- local targetfacing = targetObj.body:getAngle()
+
+                    -- if targetfacing >= minheading and targetfacing <= maxheading then		--! check that the min/max thing converts to radians properly
+                        -- -- unit is behind the target. Try to match speed
+                        -- Obj.currentForwardThrust = Obj.currentForwardThrust - (Obj.maxDeacceleration * dt)
+                        -- if Obj.currentForwardThrust < targetObj.currentForwardThrust then
+                            -- -- print("echo")
+                            -- Obj.currentForwardThrust = targetObj.currentForwardThrust * (love.math.random(7,9) / 10)
+                        -- end
+                    -- else
+                        -- -- unit is not behind target so max thrust
+                        -- Obj.currentForwardThrust = Obj.currentForwardThrust + (Obj.currentMaxAcceleration * dt)      
+						-- --! should refactor all this
+                    -- end
+                -- else
+                    -- -- print("foxtrot")
+                    -- -- max thrust needed
+                    -- Obj.currentForwardThrust = Obj.currentForwardThrust + (Obj.currentMaxAcceleration * dt)
+                -- end
+            -- else
+                -- -- print("golf")
+                -- -- max throttle
+                -- Obj.currentForwardThrust = Obj.currentForwardThrust + (Obj.currentMaxAcceleration * dt)
+            -- end
+        -- else
+            -- -- target is not in front or target is not a fighter. Assume full thrust is needed
+            -- -- print("Target is not in front so using full thrust.", objx, objy, objfacing, targetx, targety)
+            -- Obj.currentForwardThrust = Obj.currentForwardThrust + (Obj.currentMaxAcceleration * dt)
+        -- end
+    -- else
+        -- print("Engaging but no target. Killing current action")
+        -- Obj.actions[1].cooldown = 0
+    -- end
+-- end
 
 local function adjustThrust(Obj, dt)
     -- move forward
@@ -258,7 +284,7 @@ local function adjustThrust(Obj, dt)
         local desty = Obj.actions[1].desty
 
         if Obj.actions[1].action == enum.unitActionEngaging then
-            adjustThrustEngaging(Obj, dt)
+            adjustThrustEngaging2(Obj, dt)
         elseif destx ~= nil then
     		local objx, objy = Obj.body:getPosition()
     		local disttodest = cf.getDistance(objx, objy, destx, desty)
@@ -405,7 +431,7 @@ local function updateUnitTask(Obj, squadorder, dt)
     -- this adjusts targets or other goals based on the squad order
 
     assert(Obj ~= nil)
-
+	
     if Obj.actions[1] ~= nil then
         Obj.actions[1].cooldown = Obj.actions[1].cooldown - dt
         if Obj.actions[1].cooldown <= 0 then
@@ -413,7 +439,8 @@ local function updateUnitTask(Obj, squadorder, dt)
         end
     end
 
-    if #Obj.actions <= 0 then
+    -- if #Obj.actions <= 0 then
+	if Obj.actions[1] == nil then
         -- try to find a new action
 
         local unitIsTargeted = fun.unitIsTargeted(Obj.guid)
@@ -467,7 +494,7 @@ local function updateUnitTask(Obj, squadorder, dt)
                         -- no target found and still inside map. Allow code to fall through to RTB
                     end
                     print("Stacking orders: return to battle and RTB")
-                    setTaskRTB(Obj)     --! this is first instance of stacking. See if it works
+                    setTaskRTB(Obj)     -- this is an instance of stacking orders
                 end
             elseif squadorder == enum.squadOrdersReturnToBase then
                     setTaskRTB(Obj)
