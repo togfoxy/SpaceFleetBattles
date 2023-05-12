@@ -45,8 +45,21 @@ local function getUnassignedPilot()
 		end
 	end
 
+
+	-- code reaching this point means the playerpilot has been previously assigned. From here on, assign other based on health
+	table.sort(ROSTER, function(a, b)
+		return a.health > b.health
+	end)
+
+	for i = 1, #ROSTER do
+		if ROSTER[i].vesselguid == nil and (ROSTER[i].isDead == false or ROSTER[i].isDead == nil) then
+			return ROSTER[i]
+		end
+	end
+
 	print("No combat-ready pilot found")
 	return nil
+
 
 end
 
@@ -54,13 +67,14 @@ local function getEmptyVessel()
 	-- returns an object or nil
 	-- this doesn't respect the players sort order
 	-- sort table according to structure health and thruster damage
-	
+
 	table.sort(HANGER, function(a, b)
 		return a.componentHealth[enum.componentStructure] > b.componentHealth[enum.componentStructure]
 	end)
-	
+
 	for i = 1, #HANGER do
-		if vessel.pilotguid == nil then
+		if HANGER[i].pilotguid == nil then
+
 			return vessel
 		end
 	end
