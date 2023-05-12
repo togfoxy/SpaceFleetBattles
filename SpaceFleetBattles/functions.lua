@@ -157,7 +157,7 @@ local function createEscapePod(Obj)
     thisobject.forf = Obj.forf
     thisobject.squadCallsign = Obj.squadcallsign
 
-    thisobject.weaponcooldown = 0           --! might be more than one weapon in the future
+    thisobject.weaponcooldown = 0           -- might be more than one weapon in the future
 
     thisobject.currentMaxForwardThrust = 50    -- can be less than max if battle damaged
     thisobject.maxForwardThrust = 50
@@ -269,6 +269,8 @@ function functions.applyDamage(victim, bullet)
         victim.lifetime = 0
         unitai.clearTarget(victim.guid)		-- remove this guid from everyone's target
         print("Unit exploded")
+		
+		--! play explosion sound here
 
         -- give kill credit
         giveKillCredit(bullet)
@@ -299,12 +301,13 @@ function functions.applyDamage(victim, bullet)
         local action = fun.getTopAction(victim)
         local thisaction = {}
         if action ~= nil and action.action == enum.unitActionReturningToBase then
-            -- insert an action at the TOP of the queue
+            -- been hit while RTB. Try to evade.
+			-- insert an action at the TOP of the queue
             if victim.forf == enum.forfFriend then
                 -- set a destination random degrees from current location
                 local objx, objy = victim.body:getPosition()
                 local rndangle = love.math.random(-45, 45)
-                local destx, desty = cf.addVectorToPoint(objx,objy,(270 + rndangle),300)        --! check the 100 is enough
+                local destx, desty = cf.addVectorToPoint(objx,objy,(270 + rndangle),300)
 
                 thisaction.cooldown = 3
                 thisaction.action = enum.unitActionMoveToDest
@@ -418,18 +421,19 @@ end
 function functions.initialiseHanger()
 	-- creates fighters and 'stores' them in the hanger table. Friendly only
     -- NOTE: this puts the object in HANGER but not in OBJECTS
+	-- NOTE: this does not create a physical object. That happens right before the battle is started
 	for i = 1, FRIEND_FIGHTER_COUNT do
 		-- local fighter = fighter.createFighter(enum.forfFriend)
         local fighter = fighter.createHangerFighter(enum.forfFriend)
         fighter.isLaunched = false
-        -- asign a stupid x/y value for now because it's not launched
-        -- fighter.body:setPosition(-3000, 500)
 		table.insert(HANGER, fighter)
 	end
 end
 
-function functions.initialiseSector()
-	--!
+function functions.initialiseFleet()
+	FLEET = {}
+	FLEET.sector = 1
+	
 end
 
 function functions.getPlayerPilot()

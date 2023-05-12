@@ -16,7 +16,7 @@ function constants.load()
 
     cam = nil       -- camera
     AUDIO = {}
-    MUSIC_TOGGLE = true     --! will need to build these features later
+    MUSIC_TOGGLE = true     -- will need to build these features later
     SOUND_TOGGLE = true
 
     IMAGE = {}
@@ -58,13 +58,13 @@ function constants.load()
     SCORE = {}              -- track casulties in this table
 	ROSTER = {}
 	HANGER = {}
+	FLEET = {}					-- tracks the fleet on the planet map
     POD_QUEUE = {}              -- a list of pods waiting to spawn. Box2D work around
     SCORE.friendsdead = 0       -- put here for documentation and to help me remember
     SCORE.enemiesdead = 0
 
     PLAYER_GUID = nil
 
-    -- animate stuff. --! check if all are necessary
     QUADS = {}		-- quads for animations
     GRIDS = {}		-- grids are used to load quads for anim8
     FRAMES = {}		-- frames within the grid. Used by anim8
