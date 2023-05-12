@@ -1,8 +1,6 @@
 endbattle = {}
 
---! be sure to clear the squad_list and OBJECTS at the end of each battle
---! be sure to take pilots out of fighters
---!endBattleHasLoaded = false
+-- NOTE: Squad list is initialised in the battle roster
 
 endBattleHasLoaded = false
 
@@ -54,6 +52,11 @@ function endbattle.update(dt)
 
     if not endBattleHasLoaded then
         endBattleHasLoaded = true
+		
+		-- take pilots out of fighters
+		for k, pilot in pairs(ROSTER) do
+			pilot.vesselguid = nil
+		end
 
         cf.saveTableToFile("roster.dat", ROSTER)
 
