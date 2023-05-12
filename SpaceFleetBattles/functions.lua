@@ -23,6 +23,8 @@ function functions.loadImages()
     IMAGE[enum.imagePlanet13] = love.graphics.newImage("assets/images/planet13.png")
     IMAGE[enum.imagePlanet14] = love.graphics.newImage("assets/images/planet14.png")
 
+    IMAGE[enum.imagePlanetBG] = love.graphics.newImage("assets/images/bd_space_seamless_fl1.png")
+
 end
 
 function functions.loadFonts()
@@ -269,7 +271,7 @@ function functions.applyDamage(victim, bullet)
         victim.lifetime = 0
         unitai.clearTarget(victim.guid)		-- remove this guid from everyone's target
         print("Unit exploded")
-		
+
 		--! play explosion sound here
 
         -- give kill credit
@@ -433,7 +435,7 @@ end
 function functions.initialiseFleet()
 	FLEET = {}
 	FLEET.sector = 1
-	
+
 end
 
 function functions.getPlayerPilot()

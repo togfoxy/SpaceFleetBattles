@@ -10,6 +10,8 @@ end
 
 local function drawPlanets()
 
+    love.graphics.draw(IMAGE[enum.imagePlanetBG], 0, 0, 0, 2, 2)
+
     love.graphics.draw(IMAGE[enum.imagePlanet1], 200, 400, 0, 0.5, 0.5)
 
     love.graphics.draw(IMAGE[enum.imagePlanet2], 400, 250, 0, 0.5, 0.5)
