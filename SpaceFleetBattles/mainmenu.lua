@@ -9,6 +9,7 @@ function mainmenu.mousereleased(rx, ry, x, y, button)
 		fun.initialiseRoster()
 		fun.initialiseHanger()
 		fun.initialiseFleet()
+        fun.initialsePlanets()
 		cf.addScreen(enum.scenePlanetMap, SCREEN_STACK)
 	elseif clickedButtonID == enum.buttonMainMenuContinueGame then
 		-- load game

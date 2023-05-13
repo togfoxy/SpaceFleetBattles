@@ -59,6 +59,7 @@ function constants.load()
 	ROSTER = {}
 	HANGER = {}
 	FLEET = {}					-- tracks the fleet on the planet map
+    PLANETS = {}                -- planets on the planet map
     POD_QUEUE = {}              -- a list of pods waiting to spawn. Box2D work around
     SCORE.friendsdead = 0       -- put here for documentation and to help me remember
     SCORE.enemiesdead = 0
