@@ -33,12 +33,12 @@ local function getUnassignedPilot()
 			return playerpilot
 		end
 	end
-	
+
 	-- code reaching this point means the playerpilot has been previously assigned. From here on, assign other based on health
 	table.sort(ROSTER, function(a, b)
 		return a.health > b.health
 	end)
-	
+
 	for i = 1, #ROSTER do
 		if ROSTER[i].vesselguid == nil and (ROSTER[i].isDead == false or ROSTER[i].isDead == nil then
 			return ROSTER[i]
@@ -74,8 +74,7 @@ local function getEmptyVessel()
 
 	for i = 1, #HANGER do
 		if HANGER[i].pilotguid == nil then
-
-			return vessel
+			return HANGER[i]
 		end
 	end
     print("No combat-ready vessel found")
@@ -130,6 +129,7 @@ local function loadBattleObjects()
                 -- end
 			else
 				-- run out of pilots and/or fighters. Break the loop and go to battle with whatever you have
+                print("Can't find combat ready pilots and/or fighters")
 				break
 			end
 		end
@@ -159,6 +159,7 @@ function battleroster.mousereleased(rx, ry, x, y, button)
     local clickedButtonID = buttons.getButtonID(rx, ry)
     if clickedButtonID == enum.buttonBattleRosterLaunch then
 		loadBattleObjects()
+
         cf.swapScreen(enum.sceneFight, SCREEN_STACK)
 	-- elseif clickedButtonID == enum.buttonMainMenuContinueGame then
 

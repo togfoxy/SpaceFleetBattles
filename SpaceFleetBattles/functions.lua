@@ -2,6 +2,7 @@ functions = {}
 
 function functions.loadImages()
     IMAGE[enum.imageExplosion] = love.graphics.newImage("assets/images/SmokeFireQuads.png")
+    IMAGE[enum.imageBulletSmoke] = love.graphics.newImage("assets/images/spr_smoke_strip24.png")
     IMAGE[enum.imageFightHUD] = love.graphics.newImage("assets/images/fighthud.png")
     IMAGE[enum.imageFightBG] = love.graphics.newImage("assets/images/background1.png")
     IMAGE[enum.imageEscapePod] = love.graphics.newImage("assets/images/pod.png")
@@ -22,6 +23,8 @@ function functions.loadImages()
     IMAGE[enum.imagePlanet12] = love.graphics.newImage("assets/images/planet12.png")
     IMAGE[enum.imagePlanet13] = love.graphics.newImage("assets/images/planet13.png")
     IMAGE[enum.imagePlanet14] = love.graphics.newImage("assets/images/planet14.png")
+
+    IMAGE[enum.imagePlanetBG] = love.graphics.newImage("assets/images/bd_space_seamless_fl1.png")
 
 end
 
@@ -60,7 +63,7 @@ function functions.createAnimation(Obj, animtype)
         table.insert(ANIMATIONS, anim)
     elseif animtype == enum.animSmoke then
         local grid = GRIDS[enum.gridExplosion]
-        local frames = grid('1-4', '1-2')
+        local frames = grid('1-4', '1-2')           -- cols then row
         local anim = anim8.newAnimation(frames, 0.15)
         anim.drawx = objx
         anim.drawy = objy + 5
@@ -69,6 +72,20 @@ function functions.createAnimation(Obj, animtype)
         anim.duration = 0.9 	-- seconds
         anim.type = animtype
         table.insert(ANIMATIONS, anim)
+    elseif animtype == enum.animBulletSmoke then
+        local grid = GRIDS[enum.gridBulletSmoke]
+        local frames = grid('12-24', 1)                   -- cols then rows
+        local anim = anim8.newAnimation(frames, 5)          -- frames, duration
+        anim.drawx = objx
+        anim.drawy = objy + 5
+        anim.angle = objangle
+        anim.attachtoobject = nil       -- put the actual object here to make the animation move with this object
+        anim.duration = 5 	-- seconds
+        anim.type = animtype
+        table.insert(ANIMATIONS, anim)
+
+print(inspect(ANIMATIONS))
+error()
     end
 end
 
@@ -269,7 +286,7 @@ function functions.applyDamage(victim, bullet)
         victim.lifetime = 0
         unitai.clearTarget(victim.guid)		-- remove this guid from everyone's target
         print("Unit exploded")
-		
+
 		--! play explosion sound here
 
         -- give kill credit
@@ -433,7 +450,67 @@ end
 function functions.initialiseFleet()
 	FLEET = {}
 	FLEET.sector = 1
-	
+    FLEET.movesleft = 0
+end
+
+function functions.initialsePlanets()
+    PLANETS = {}
+    for i = 1, 14 do
+        PLANETS[i] = {}
+        PLANETS[i].scale = love.math.random(4,6) / 10
+    end
+
+    local startx = 300
+    local starty = 400
+
+    PLANETS[1].x = startx       -- this is an easy way to shift and move the whole galaxy
+    PLANETS[1].y = starty
+    PLANETS[1].image = IMAGE[enum.imagePlanet1]
+    PLANETS[1].column = 1
+
+    PLANETS[2].x = startx + 200
+    PLANETS[2].y = starty - 150
+    PLANETS[2].image = IMAGE[enum.imagePlanet2]
+    PLANETS[3].x = startx + 200
+    PLANETS[3].y = starty + 150
+    PLANETS[3].image = IMAGE[enum.imagePlanet3]
+    PLANETS[4].x = startx + 400
+    PLANETS[4].y = starty - 300
+    PLANETS[4].image = IMAGE[enum.imagePlanet4]
+    PLANETS[5].x = startx + 400
+    PLANETS[5].y = starty - 0
+    PLANETS[5].image = IMAGE[enum.imagePlanet5]
+    PLANETS[6].x = startx + 400
+    PLANETS[6].y = starty + 300
+    PLANETS[6].image = IMAGE[enum.imagePlanet6]
+
+    PLANETS[7].x = startx + 600
+    PLANETS[7].y = starty - 150
+    PLANETS[7].image = IMAGE[enum.imagePlanet7]
+    PLANETS[8].x = startx + 600
+    PLANETS[8].y = starty + 150
+    PLANETS[8].image = IMAGE[enum.imagePlanet8]
+
+    PLANETS[9].x = startx + 800
+    PLANETS[9].y = starty - 300
+    PLANETS[9].image = IMAGE[enum.imagePlanet9]
+    PLANETS[10].x = startx + 800
+    PLANETS[10].y = starty - 0
+    PLANETS[10].image = IMAGE[enum.imagePlanet10]
+    PLANETS[11].x = startx + 800
+    PLANETS[11].y = starty + 300
+    PLANETS[11].image = IMAGE[enum.imagePlanet11]
+
+    PLANETS[12].x = startx + 1000
+    PLANETS[12].y = starty - 150
+    PLANETS[12].image = IMAGE[enum.imagePlanet12]
+    PLANETS[13].x = startx + 1000
+    PLANETS[13].y = starty + 150
+    PLANETS[13].image = IMAGE[enum.imagePlanet13]
+
+    PLANETS[14].x = startx + 1200
+    PLANETS[14].y = starty
+    PLANETS[14].image = IMAGE[enum.imagePlanet14]
 end
 
 function functions.getPlayerPilot()

@@ -10,26 +10,23 @@ end
 
 local function drawPlanets()
 
-    love.graphics.draw(IMAGE[enum.imagePlanet1], 200, 400, 0, 0.5, 0.5)
+    -- draw bg
+    love.graphics.draw(IMAGE[enum.imagePlanetBG], 0, 0, 0, 2, 2)
 
-    love.graphics.draw(IMAGE[enum.imagePlanet2], 400, 250, 0, 0.5, 0.5)
-    love.graphics.draw(IMAGE[enum.imagePlanet3], 400, 550, 0, 0.5, 0.5)
+    -- draw planets
+    for i = 1, #PLANETS do
+        love.graphics.draw(PLANETS[i].image, PLANETS[i].x, PLANETS[i].y, 0, PLANETS[i].scale, PLANETS[i].scale)
 
-    love.graphics.draw(IMAGE[enum.imagePlanet4], 600, 100, 0, 0.5, 0.5)
-    love.graphics.draw(IMAGE[enum.imagePlanet5], 600, 400, 0, 0.5, 0.5)
-    love.graphics.draw(IMAGE[enum.imagePlanet6], 600, 700, 0, 0.5, 0.5)
+    end
 
-    love.graphics.draw(IMAGE[enum.imagePlanet7], 800, 250, 0, 0.5, 0.5)
-    love.graphics.draw(IMAGE[enum.imagePlanet8], 800, 550, 0, 0.5, 0.5)
+    -- draw players fleet
+    local sector = FLEET.sector
+    local drawx = PLANETS[sector].x         -- this is top left corner of the planet
+    local drawy = PLANETS[sector].y
+    local scale = PLANETS[sector].scale
+    love.graphics.setColor(1,0,0,1)
+    love.graphics.rectangle("line", drawx+12, drawy + 12, 250 * scale, 250 * scale)
 
-    love.graphics.draw(IMAGE[enum.imagePlanet9], 1000, 100, 0, 0.5, 0.5)
-    love.graphics.draw(IMAGE[enum.imagePlanet10], 1000, 400, 0, 0.5, 0.5)
-    love.graphics.draw(IMAGE[enum.imagePlanet11], 1000, 700, 0, 0.5, 0.5)
-
-    love.graphics.draw(IMAGE[enum.imagePlanet12], 1200, 250, 0, 0.5, 0.5)
-    love.graphics.draw(IMAGE[enum.imagePlanet13], 1200, 550, 0, 0.5, 0.5)
-
-    love.graphics.draw(IMAGE[enum.imagePlanet14], 1400, 400, 0, 0.5, 0.5)
 
 
 end
