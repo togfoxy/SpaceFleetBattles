@@ -13,8 +13,7 @@ local function destroyObjects(dt)
             OBJECTS[i].lifetime = OBJECTS[i].lifetime - dt
             if OBJECTS[i].lifetime <= 0 then
 
-                if OBJECTS.fixture:getCategory() == enum.categoryEnemyBullet or OBJECTS.fixture:getCategory() == enum.categoryFriendlyBullet then
-
+                if OBJECTS[i].fixture:getCategory() == enum.categoryEnemyBullet or OBJECTS[i].fixture:getCategory() == enum.categoryFriendlyBullet then
                     fun.createAnimation(OBJECTS[i], enum.animBulletSmoke)
                 end
 
@@ -46,7 +45,11 @@ local function battleOver()
     end
     if isFriends == false or isFoes == false then
         -- one side is depleted
+
+        print(inspect(OBJECTS))
+
         return true
+
     else
         return false
     end

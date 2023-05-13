@@ -61,7 +61,7 @@ local function getEmptyVessel()
 
 	for i = 1, #HANGER do
 		if HANGER[i].pilotguid == nil then
-			return vessel
+			return HANGER[i]
 		end
 	end
     print("No combat-ready vessel found")
@@ -116,6 +116,7 @@ local function loadBattleObjects()
                 -- end
 			else
 				-- run out of pilots and/or fighters. Break the loop and go to battle with whatever you have
+                print("Can't find combat ready pilots and/or fighters")
 				break
 			end
 		end
@@ -145,6 +146,7 @@ function battleroster.mousereleased(rx, ry, x, y, button)
     local clickedButtonID = buttons.getButtonID(rx, ry)
     if clickedButtonID == enum.buttonBattleRosterLaunch then
 		loadBattleObjects()
+
         cf.swapScreen(enum.sceneFight, SCREEN_STACK)
 	-- elseif clickedButtonID == enum.buttonMainMenuContinueGame then
 

@@ -173,7 +173,7 @@ function love.load()
 
 	-- maybe move this to load image
 	GRIDS[enum.gridExplosion] = anim8.newGrid(16, 16, IMAGE[enum.imageExplosion]:getWidth(), IMAGE[enum.imageExplosion]:getHeight())
-	GRIDS[enum.gridBulletSmoke] = anim8.newGrid(32, 32, IMAGE[enum.imageSmoke]:getWidth(), IMAGE[enum.imageSmoke]:getHeight())
+	GRIDS[enum.gridBulletSmoke] = anim8.newGrid(32, 32, IMAGE[enum.imageBulletSmoke]:getWidth(), IMAGE[enum.imageBulletSmoke]:getHeight())
 end
 
 function love.draw()

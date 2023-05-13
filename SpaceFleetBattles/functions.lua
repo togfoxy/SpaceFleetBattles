@@ -2,7 +2,7 @@ functions = {}
 
 function functions.loadImages()
     IMAGE[enum.imageExplosion] = love.graphics.newImage("assets/images/SmokeFireQuads.png")
-    IMAGE[enum.imageSmoke] = love.graphics.newImage("assets/images/spr_smoke_strip24.png")
+    IMAGE[enum.imageBulletSmoke] = love.graphics.newImage("assets/images/spr_smoke_strip24.png")
     IMAGE[enum.imageFightHUD] = love.graphics.newImage("assets/images/fighthud.png")
     IMAGE[enum.imageFightBG] = love.graphics.newImage("assets/images/background1.png")
     IMAGE[enum.imageEscapePod] = love.graphics.newImage("assets/images/pod.png")
@@ -63,7 +63,7 @@ function functions.createAnimation(Obj, animtype)
         table.insert(ANIMATIONS, anim)
     elseif animtype == enum.animSmoke then
         local grid = GRIDS[enum.gridExplosion]
-        local frames = grid('1-4', '1-2')           -- rows then cols
+        local frames = grid('1-4', '1-2')           -- cols then row
         local anim = anim8.newAnimation(frames, 0.15)
         anim.drawx = objx
         anim.drawy = objy + 5
@@ -74,15 +74,18 @@ function functions.createAnimation(Obj, animtype)
         table.insert(ANIMATIONS, anim)
     elseif animtype == enum.animBulletSmoke then
         local grid = GRIDS[enum.gridBulletSmoke]
-        local frames = grid('1', '12-24')                   -- rows then cols
-        local anim = anim8.newAnimation(frames, 0.15)
+        local frames = grid('12-24', 1)                   -- cols then rows
+        local anim = anim8.newAnimation(frames, 5)          -- frames, duration
         anim.drawx = objx
         anim.drawy = objy + 5
         anim.angle = objangle
-        anim.attachtoobject = Obj       -- put the actual object here to make the animation move with this object
-        anim.duration = 0.9 	-- seconds
+        anim.attachtoobject = nil       -- put the actual object here to make the animation move with this object
+        anim.duration = 5 	-- seconds
         anim.type = animtype
         table.insert(ANIMATIONS, anim)
+
+print(inspect(ANIMATIONS))
+error()
     end
 end
 
