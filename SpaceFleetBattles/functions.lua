@@ -435,6 +435,7 @@ end
 function functions.initialiseFleet()
 	FLEET = {}
 	FLEET.sector = 1
+    FLEET.movesleft = 0
 end
 
 function functions.initialsePlanets()
