@@ -40,6 +40,18 @@ local function getUnassignedPilot()
 	end)
 
 	for i = 1, #ROSTER do
+		if ROSTER[i].vesselguid == nil and (ROSTER[i].isDead == false or ROSTER[i].isDead == nil then
+			return ROSTER[i]
+		end
+	end
+
+
+	-- code reaching this point means the playerpilot has been previously assigned. From here on, assign other based on health
+	table.sort(ROSTER, function(a, b)
+		return a.health > b.health
+	end)
+
+	for i = 1, #ROSTER do
 		if ROSTER[i].vesselguid == nil and (ROSTER[i].isDead == false or ROSTER[i].isDead == nil) then
 			return ROSTER[i]
 		end
@@ -47,6 +59,7 @@ local function getUnassignedPilot()
 
 	print("No combat-ready pilot found")
 	return nil
+
 
 end
 
