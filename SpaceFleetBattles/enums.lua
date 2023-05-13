@@ -78,12 +78,15 @@ function enums.load()
     enum.imagePlanet17 = 36
 
     enum.imagePlanetBG = 40
+    enum.imageSmoke = 41
 
 
     enum.gridExplosion = 1
+    enum.gridBulletSmoke = 2
 
     enum.animExplosion = 1
     enum.animSmoke = 2
+    enum.animBulletSmoke = 3
 
     enum.componentStructure = 1
     enum.componentThruster = 2

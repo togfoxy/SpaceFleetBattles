@@ -2,6 +2,7 @@ functions = {}
 
 function functions.loadImages()
     IMAGE[enum.imageExplosion] = love.graphics.newImage("assets/images/SmokeFireQuads.png")
+    IMAGE[enum.imageSmoke] = love.graphics.newImage("assets/images/spr_smoke_strip24.png")
     IMAGE[enum.imageFightHUD] = love.graphics.newImage("assets/images/fighthud.png")
     IMAGE[enum.imageFightBG] = love.graphics.newImage("assets/images/background1.png")
     IMAGE[enum.imageEscapePod] = love.graphics.newImage("assets/images/pod.png")
@@ -62,7 +63,18 @@ function functions.createAnimation(Obj, animtype)
         table.insert(ANIMATIONS, anim)
     elseif animtype == enum.animSmoke then
         local grid = GRIDS[enum.gridExplosion]
-        local frames = grid('1-4', '1-2')
+        local frames = grid('1-4', '1-2')           -- rows then cols
+        local anim = anim8.newAnimation(frames, 0.15)
+        anim.drawx = objx
+        anim.drawy = objy + 5
+        anim.angle = objangle
+        anim.attachtoobject = Obj       -- put the actual object here to make the animation move with this object
+        anim.duration = 0.9 	-- seconds
+        anim.type = animtype
+        table.insert(ANIMATIONS, anim)
+    elseif animtype == enum.animBulletSmoke then
+        local grid = GRIDS[enum.gridBulletSmoke]
+        local frames = grid('1', '12-24')                   -- rows then cols
         local anim = anim8.newAnimation(frames, 0.15)
         anim.drawx = objx
         anim.drawy = objy + 5
@@ -451,6 +463,7 @@ function functions.initialsePlanets()
     PLANETS[1].x = startx       -- this is an easy way to shift and move the whole galaxy
     PLANETS[1].y = starty
     PLANETS[1].image = IMAGE[enum.imagePlanet1]
+    PLANETS[1].column = 1
 
     PLANETS[2].x = startx + 200
     PLANETS[2].y = starty - 150
