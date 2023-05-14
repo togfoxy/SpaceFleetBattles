@@ -84,7 +84,7 @@ function beginContact(fixtureA, fixtureB, coll)
 	fun.applyDamage(victim, bullet)		-- assumes bullet hit fighter. Send in bullet to check if bullet belongs to player
 
 	-- play sounds if player is hit
-	if victim.guid == PLAYER_GUID then
+	if victim.guid == PLAYER_FIGHTER_GUID then
 		cf.playAudio(enum.audioBulletPing, false, true)
 	end
 end

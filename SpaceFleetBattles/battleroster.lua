@@ -30,6 +30,7 @@ local function getUnassignedPilot()
 		error()
 	else
 		if (playerpilot.vesselguid == nil and playerpilot.isDead == false) then
+            print("Player not assigned a vessel. Returning the pilot that is the player")
 			return playerpilot
 		end
 	end
@@ -109,11 +110,9 @@ local function loadBattleObjects()
                 -- print("Adding friendly fighter to OBJECTS: " .. thisfighter.guid)
 				table.insert(OBJECTS, thisfighter)		-- pilots go into fighters but they don't go into OBJECTS
 
-				--! I'm not sure why this code is here so I took it out.
-				--! Maybe there are logic checks for pilot/fighter guid being the same?
-                -- if pilot.isPlayer then
-                --     PLAYER_GUID = thisfighter.guid      --! can probably do this better
-                -- end
+                if pilot.isPlayer then
+                    PLAYER_FIGHTER_GUID = thisfighter.guid      --! can probably do this better
+                end
 			else
 				-- run out of pilots and/or fighters. Break the loop and go to battle with whatever you have
                 print("Can't find combat ready pilots and/or fighters")
