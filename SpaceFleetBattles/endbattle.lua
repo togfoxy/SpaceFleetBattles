@@ -6,53 +6,57 @@ endBattleHasLoaded = false
 
 function endbattle.draw()
 
-    love.graphics.setColor(1,1,1,0.5)
-    love.graphics.draw(IMAGE[enum.imageBattleRoster],0,0,0, 1,1)
+    love.graphics.setFont(FONT[enum.fontCorporate])
 
-	-- draw roster
+    love.graphics.setColor(1,1,1,0.25)
+    love.graphics.draw(IMAGE[enum.imageEndBattle],0,0,0, 0.75,0.75)
+
+    local playerpilot = fun.getPlayerPilot()
+    local playerfighter = fun.getObject(PLAYER_FIGHTER_GUID)
+
     local drawx = 100
     local drawy = 100
-    for i = 1, #ROSTER do
-        if ROSTER[i].isDead then
-            love.graphics.setColor(1,1,1,0.5)
-        else
-            love.graphics.setColor(1,1,1,1)
-        end
-        local txt = i .. ") " .. ROSTER[i].firstname .. " " .. ROSTER[i].lastname .. " " .. ROSTER[i].health .. " " .. ROSTER[i].missions .. " " .. ROSTER[i].kills .. " " .. ROSTER[i].ejections
-        love.graphics.print(txt, drawx, drawy)
-        drawy = drawy + 30
-    end
-
-	-- draw fighters in hanger
-    local drawx = 900
-    local drawy = 100
     love.graphics.setColor(1,1,1,1)
-    for i = 1, #HANGER do
-        local txt = i .. ") " .. string.sub(HANGER[i].guid, -2)
-        txt = txt .. " " .. HANGER[i].componentHealth[enum.componentStructure]
-        love.graphics.print(txt, drawx, drawy)
-        drawy = drawy + 30
+    if playerpilot.isDead then
+        print("Your pilot died honourably in battle. You will be assigned a new pilot.")
+        love.graphics.print("Your pilot died honourably in battle. You will be assigned a new pilot.", drawx, drawy)
+        drawy = drawy + 50
+    elseif playerfighter == nil then
+        love.graphics.print("Your fighter was destroyed in combat but you lived to fight another day.", drawx, drawy)
+        drawy = drawy + 50
+    else
+        love.graphics.print("You bravely confronted the enemy and brought your fighter home." , drawx, drawy)
+        drawy = drawy + 50
     end
 
-    -- love.graphics.setColor(1,1,1,1)
-    -- local txt = "Friendly ships lost: " .. SCORE.friendsdead
-    -- love.graphics.print(txt, 100, 100)
-    -- local txt = "Enemy ships destroyed: " .. SCORE.enemiesdead
-    -- love.graphics.print(txt, 100, 150)
-    --
-    -- if fun.isPlayerAlive() then
-    --     txt = "Player survived"
-    -- else
-    --     txt = "Player was lost in battle"
-    -- end
-    -- love.graphics.print(txt, 100, 200)
+    --! add personal stats here
+    love.graphics.print("Your pilot stats:", drawx, drawy)
+    drawy = drawy + 50
+    love.graphics.print("                                  Health  # Missions    # Kills     # Fighters lost", drawx, drawy)
+    drawy = drawy + 50
+
+    local txt = playerpilot.firstname .. " " .. playerpilot.lastname .. "           "
+    txt = txt .. playerpilot.health .. "                 " .. playerpilot.missions .. "                  " .. playerpilot.kills .. "                        " .. playerpilot.ejections
+
+    if playerpilot.isDead then
+        love.graphics.setColor(1,1,1,0.5)
+    else
+        love.graphics.setColor(1,1,1,1)
+    end
+    love.graphics.print(txt, drawx, drawy)
+    drawy = drawy + 50
+
+    --! add global score as well
+
+    love.graphics.setFont(FONT[enum.fontDefault])
+    buttons.drawButtons()
 end
 
 function endbattle.update(dt)
 
     if not endBattleHasLoaded then
         endBattleHasLoaded = true
-		
+
 		-- take pilots out of fighters
 		for k, pilot in pairs(ROSTER) do
 			pilot.vesselguid = nil
@@ -88,13 +92,13 @@ function endbattle.loadButtons()
     -- button for new game
     local mybutton = {}
     mybutton.x = (SCREEN_WIDTH / 2) - 75
-    mybutton.y = SCREEN_HEIGHT / 2 - 100
+    mybutton.y = SCREEN_HEIGHT / 2 +100
     mybutton.width = 175
     mybutton.height = 25
     mybutton.bgcolour = {169/255,169/255,169/255,1}
     mybutton.drawOutline = false
     mybutton.outlineColour = {1,1,1,1}
-    mybutton.label = "New game"
+    mybutton.label = "Next battle"
     mybutton.image = nil
     mybutton.imageoffsetx = 20
     mybutton.imageoffsety = 0
@@ -115,7 +119,7 @@ function endbattle.loadButtons()
     -- button for exit game
     local mybutton = {}
     mybutton.x = (SCREEN_WIDTH / 2) - 75
-    mybutton.y = SCREEN_HEIGHT / 2 + 150
+    mybutton.y = SCREEN_HEIGHT / 2 + 200
     mybutton.width = 175
     mybutton.height = 25
     mybutton.bgcolour = {169/255,169/255,169/255,1}
@@ -141,3 +145,41 @@ function endbattle.loadButtons()
 end
 
 return endbattle
+
+-- -- draw roster
+-- local drawx = 100
+-- local drawy = 100
+-- for i = 1, #ROSTER do
+--     if ROSTER[i].isDead then
+--         love.graphics.setColor(1,1,1,0.5)
+--     else
+--         love.graphics.setColor(1,1,1,1)
+--     end
+--     local txt = i .. ") " .. ROSTER[i].firstname .. " " .. ROSTER[i].lastname .. " " .. ROSTER[i].health .. " " .. ROSTER[i].missions .. " " .. ROSTER[i].kills .. " " .. ROSTER[i].ejections
+--     love.graphics.print(txt, drawx, drawy)
+--     drawy = drawy + 30
+-- end
+--
+-- -- draw fighters in hanger
+-- local drawx = 900
+-- local drawy = 100
+-- love.graphics.setColor(1,1,1,1)
+-- for i = 1, #HANGER do
+--     local txt = i .. ") " .. string.sub(HANGER[i].guid, -2)
+--     txt = txt .. " " .. HANGER[i].componentHealth[enum.componentStructure]
+--     love.graphics.print(txt, drawx, drawy)
+--     drawy = drawy + 30
+-- end
+--
+-- -- love.graphics.setColor(1,1,1,1)
+-- -- local txt = "Friendly ships lost: " .. SCORE.friendsdead
+-- -- love.graphics.print(txt, 100, 100)
+-- -- local txt = "Enemy ships destroyed: " .. SCORE.enemiesdead
+-- -- love.graphics.print(txt, 100, 150)
+-- --
+-- -- if fun.isPlayerAlive() then
+-- --     txt = "Player survived"
+-- -- else
+-- --     txt = "Player was lost in battle"
+-- -- end
+-- -- love.graphics.print(txt, 100, 200)

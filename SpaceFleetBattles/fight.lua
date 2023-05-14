@@ -18,10 +18,10 @@ local function destroyObjects(dt)
                 end
 
                 --! debugging
-                if OBJECTS[i].fixture:getCategory() == enum.categoryEnemyFighter or OBJECTS[i].fixture:getCategory() == enum.categoryFriendlyFighter then
-                    print("Fighter object destroyed")
-                    -- print(inspect(OBJECTS[1]))
-                end
+                -- if OBJECTS[i].fixture:getCategory() == enum.categoryEnemyFighter or OBJECTS[i].fixture:getCategory() == enum.categoryFriendlyFighter then
+                --     print("Fighter object destroyed")
+                --     -- print(inspect(OBJECTS[1]))
+                -- end
                 -- print("guid and object destroyed: " .. OBJECTS[i].guid)
                 OBJECTS[i].fixture:destroy()                --! check if mass changes
                 OBJECTS[i].body:destroy()
@@ -133,7 +133,7 @@ local function drawHUD()
         local drawlength = Obj.componentHealth[enum.componentAccelerator]
         love.graphics.rectangle("fill", 145, 143, drawlength, 10)
     else
-        print("Player not alive")
+        -- print("Player not alive")
     end
 
     -- draw the battle timer

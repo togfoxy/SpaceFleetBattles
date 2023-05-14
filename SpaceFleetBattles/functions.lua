@@ -9,6 +9,8 @@ function functions.loadImages()
     IMAGE[enum.imageMainMenu] = love.graphics.newImage("assets/images/1172814.jpg")
     IMAGE[enum.imageMainMenuBanner] = love.graphics.newImage("assets/images/mainmenutitle.png")
     IMAGE[enum.imageBattleRoster] = love.graphics.newImage("assets/images/207634_1920_1217.png")
+    IMAGE[enum.imageEndBattle] = love.graphics.newImage("assets/images/982225.jpg")
+
     IMAGE[enum.imagePlanet1] = love.graphics.newImage("assets/images/planet1.png")
     IMAGE[enum.imagePlanet2] = love.graphics.newImage("assets/images/planet2.png")
     IMAGE[enum.imagePlanet3] = love.graphics.newImage("assets/images/planet3.png")
@@ -154,7 +156,7 @@ local function createEscapePod(Obj)
     if Obj.guid == PLAYER_FIGHTER_GUID then
         guid = PLAYER_FIGHTER_GUID      -- POD inherits player fighter guid
     else
-        guid = cf.getGUID()
+        guid = cf.getGUID()             -- assigning a new guid effectively destroys the fighter from objects
     end
 	thisobject.fixture:setUserData(guid)
     thisobject.guid = guid
@@ -237,7 +239,7 @@ function functions.setTaskEject(Obj)
 end
 
 local function giveKillCredit(bullet)
-    -- give kill credit
+    -- give kill credit to the pilot
     local vesselguid = bullet.ownerObjectguid           -- this is the vessel that shot the bullet
     local vesselobj = fun.getObject(vesselguid)
     local pilotguid = vesselobj.pilotguid
@@ -281,11 +283,10 @@ function functions.applyDamage(victim, bullet)
         -- give kill credit
         giveKillCredit(bullet)
 
-        -- remove friendly pilots from roster
+        -- remove friendly pilots from roster by marking isDead
         local pilotguid = victim.pilotguid
         local pilotobj = fun.getPilot(pilotguid)
         if pilotobj ~= nil then pilotobj.isDead = true end
-        print("Adjusted roster: " .. inspect(ROSTER))
 
         -- remove fighter from hanger
         for i = #HANGER, 1, -1 do
@@ -383,7 +384,7 @@ function functions.getObject(guid)
 end
 
 function functions.isPlayerAlive()
-
+    -- this returns true if the players fighter is alive
     for i = 1, #OBJECTS do
         if OBJECTS[i].guid == PLAYER_FIGHTER_GUID then
             return true

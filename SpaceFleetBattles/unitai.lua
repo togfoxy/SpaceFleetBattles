@@ -64,7 +64,7 @@ local function setTaskRTB(Obj)
     end
     thisaction.desty = y
 	table.insert(Obj.actions, thisaction)
-    print("Setting action to RTB")
+    -- print("Setting action to RTB")
 end
 
 local function setTaskDestination(Obj, x, y)
@@ -292,7 +292,7 @@ local function createNewBullet(Obj, bullet)
     thisobject.guid = guid
 
     thisobject.squadCallsign = nil
-    thisobject.lifetime = 10            -- seconds
+    thisobject.lifetime = 5            -- seconds
     thisobject.ownerObjectguid = Obj.guid
 
     thisobject.body:setAngle(currentangle)
