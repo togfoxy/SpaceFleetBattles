@@ -75,17 +75,14 @@ function functions.createAnimation(Obj, animtype)
     elseif animtype == enum.animBulletSmoke then
         local grid = GRIDS[enum.gridBulletSmoke]
         local frames = grid('12-24', 1)                   -- cols then rows
-        local anim = anim8.newAnimation(frames, 5)          -- frames, duration
+        local anim = anim8.newAnimation(frames, 0.05)          -- frames, duration
         anim.drawx = objx
         anim.drawy = objy + 5
         anim.angle = objangle
         anim.attachtoobject = nil       -- put the actual object here to make the animation move with this object
-        anim.duration = 5 	-- seconds
+        anim.duration = 0.75 	-- seconds
         anim.type = animtype
         table.insert(ANIMATIONS, anim)
-
-print(inspect(ANIMATIONS))
-error()
     end
 end
 

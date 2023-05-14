@@ -340,6 +340,7 @@ function fight.draw()
         love.graphics.print(txt, drawx - 20, drawy + 10)
     end
 
+    -- animations are drawn in love.draw()
     -- cf.printAllPhysicsObjects(PHYSICSWORLD, 1)
     cam:detach()
 end
