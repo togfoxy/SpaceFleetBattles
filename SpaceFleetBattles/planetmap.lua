@@ -14,7 +14,7 @@ local function drawPlanets()
     love.graphics.draw(IMAGE[enum.imagePlanetBG], 0, 0, 0, 2, 2)
 
     -- draw planets
-    for i = 1, #PLANETS do
+    for i = 2, #PLANETS do
         love.graphics.draw(PLANETS[i].image, PLANETS[i].x, PLANETS[i].y, 0, PLANETS[i].scale, PLANETS[i].scale)
 
     end
@@ -39,6 +39,32 @@ function planetmap.draw()
 
 end
 
+function planetmap.loadPlanetClickSpots()
+
+    local startx = 300
+    local starty = 400
+
+    -- button for continue game
+    local mybutton = {}
+    -- mybutton.label = "Battle stations!"
+	mybutton.x = startx
+    mybutton.y = starty
+    mybutton.width = 175
+    mybutton.height = 175
+    mybutton.drawOutline = true
+    mybutton.outlineColour = {0.5,0.75,0.25,1}
+	mybutton.image = IMAGE[enum.imagePlanet1]
+    mybutton.imageoffsetx = 0
+    mybutton.imageoffsety = 0
+    mybutton.imagescalex = PLANETS[1].scale
+    mybutton.imagescaley = PLANETS[1].scale
+
+    mybutton.state = "on"
+    mybutton.visible = true
+    mybutton.scene = enum.scenePlanetMap               -- change and add to enum
+    mybutton.identifier = enum.buttonPlanetMapPlanet1     -- change and add to enum
+    table.insert(GUI_BUTTONS, mybutton) -- this adds the button to the global table
+end
 
 
 function planetmap.loadButtons()

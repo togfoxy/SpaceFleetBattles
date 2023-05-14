@@ -442,6 +442,9 @@ function functions.initialiseFleet()
 	FLEET = {}
 	FLEET.sector = 1
     FLEET.movesleft = 0
+
+    cf.saveTableToFile("fleet.dat", FLEET)
+
 end
 
 function functions.initialsePlanets()
@@ -502,6 +505,10 @@ function functions.initialsePlanets()
     PLANETS[14].x = startx + 1200
     PLANETS[14].y = starty
     PLANETS[14].image = IMAGE[enum.imagePlanet14]
+
+    planetmap.loadPlanetClickSpots()
+
+    cf.saveTableToFile("planets.dat", PLANETS)
 end
 
 function functions.getPilot(guid)

@@ -129,6 +129,8 @@ function love.mousereleased(x, y, button, isTouch)
 		battleroster.mousereleased(rx, ry, x, y, button)
 	elseif currentscene == enum.sceneMainMenu then
 		mainmenu.mousereleased(rx, ry, x, y, button)
+	elseif currentscene == enum.sceneEndBattle then
+		endbattle.mousereleased(rx, ry, x, y, button)
 	end
 end
 
