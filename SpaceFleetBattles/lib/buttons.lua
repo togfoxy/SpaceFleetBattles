@@ -70,7 +70,9 @@ function buttons.drawButtons()
 			-- draw the button
 
             -- draw the bg
-            love.graphics.setColor(button.bgcolour)
+			local bgcolour = button.bgcolour
+			if bgcolour == nil then bgcolour = {1,1,1,0}  end			-- alpah = 0 so colour doesn't matter
+            love.graphics.setColor(bgcolour)
             love.graphics.rectangle("fill", button.x, button.y, button.width, button.height)			-- drawx/y is the top left corner of the square
 
             -- draw the outline
@@ -86,7 +88,9 @@ function buttons.drawButtons()
 
 			-- draw the label
 			local labelxoffset = button.labelxoffset or 0
-            love.graphics.setColor(button.labelcolour)
+			local labelcolour = button.labelcolour
+			if labelcolour == nil then labelcolour = {1,1,1,0}  end			-- alpah = 0 so colour doesn't matter
+            love.graphics.setColor(labelcolour)
 			-- love.graphics.setFont(FONT[enum.fontDefault])        --! the font should be a setting and not hardcoded here
 			love.graphics.print(tostring(button.label), button.x + labelxoffset, button.y + 5)
 		end

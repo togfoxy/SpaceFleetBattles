@@ -16,6 +16,7 @@ function mainmenu.mousereleased(rx, ry, x, y, button)
 		-- load game
         ROSTER = cf.loadTableFromFile("roster.dat")         --! test what happens when file doesn't exist.
         HANGER = cf.loadTableFromFile("hanger.dat")
+        PLANETS = cf.loadTableFromFile("planets.dat")
 		-- swap to fight scene
         cf.addScreen(enum.scenePlanetMap, SCREEN_STACK)
 
