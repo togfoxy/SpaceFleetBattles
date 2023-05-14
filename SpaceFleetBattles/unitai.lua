@@ -401,6 +401,8 @@ local function updateUnitTask(Obj, squadorder, dt)
         -- do self-preservation checks firstly. Remember the ordering matters
         if Obj.componentHealth[enum.componentWeapon] <= 0 then
             setTaskRTB(Obj)
+        elseif Obj.componentHealth[enum.componentThruster] <= 0 and Obj.componentHealth[enum.componentWeapon] > 0 then
+            -- do nothing. Fall through to the action section below
         elseif Obj.componentHealth[enum.componentThruster] <= 50 then
             setTaskRTB(Obj)
         elseif Obj.componentHealth[enum.componentSideThruster] <= 25 then
@@ -417,8 +419,7 @@ local function updateUnitTask(Obj, squadorder, dt)
                 local targetguid
                 if Obj.forf == enum.forfFriend then
                     targetguid = getClosestFighter(Obj, enum.forfEnemy)        -- this OBJECTS guid or nil
-                end
-                if Obj.forf == enum.forfEnemy then
+                elseif Obj.forf == enum.forfEnemy then
                     targetguid = getClosestFighter(Obj, enum.forfFriend)       -- this OBJECTS guid or nil
                 end
                 if targetguid ~= nil then
