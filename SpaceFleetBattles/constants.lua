@@ -65,6 +65,7 @@ function constants.load()
     SCORE.enemiesdead = 0
 
     PLAYER_GUID = nil
+    PLAYER_FIGHTER_GUID = nil
 
     QUADS = {}		-- quads for animations
     GRIDS = {}		-- grids are used to load quads for anim8

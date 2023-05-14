@@ -131,7 +131,7 @@ local function turnToObjective(Obj, destx, desty, dt)
 
     Obj.body:setAngularVelocity(force)
 
-    if Obj.guid == PLAYER_GUID and txt ~= "" then
+    if Obj.guid == PLAYER_FIGHTER_GUID and txt ~= "" then
         -- print("Message: " .. txt)
     end
 end
@@ -195,15 +195,15 @@ local function adjustThrustEngaging2(Obj, dt)
 		local minheading = objfacing - 0.7853			-- 0.7 rads = 45 deg		-- should probably make these constants
 		local maxheading = objfacing + 0.7853
 		local targetfacing = targetObj.body:getAngle()
-		
+
 		local objx, objy = Obj.body:getPosition()
 		local targetx, targety = targetObj.body:getPosition()
-		
+
 		local dist = cf.getDistance(objx, objy, targetx, targety)
 		if (targetfacing >= minheading and targetfacing <= maxheading) and
 			targetObj.currentForwardThrust < Obj.currentForwardThrust and
 			dist <= 125 then
-			
+
 			-- set pilot thrust to target thrust
 			Obj.currentForwardThrust = Obj.currentForwardThrust - (Obj.maxDeacceleration * dt)
 			if Obj.currentForwardThrust < targetObj.currentForwardThrust then
@@ -211,13 +211,13 @@ local function adjustThrustEngaging2(Obj, dt)
 			end
 		else
 			-- move to full speed
-			Obj.currentForwardThrust = Obj.currentForwardThrust + (Obj.currentMaxAcceleration * dt)      
+			Obj.currentForwardThrust = Obj.currentForwardThrust + (Obj.currentMaxAcceleration * dt)
 		end
 	end
-	
+
 	-- ensuring thrust is not above max is checked in the parent function
 end
-			
+
 -- local function adjustThrustEngaging(Obj, dt)
 
     -- local objx, objy = Obj.body:getPosition()
@@ -248,7 +248,7 @@ end
                         -- end
                     -- else
                         -- -- unit is not behind target so max thrust
-                        -- Obj.currentForwardThrust = Obj.currentForwardThrust + (Obj.currentMaxAcceleration * dt)      
+                        -- Obj.currentForwardThrust = Obj.currentForwardThrust + (Obj.currentMaxAcceleration * dt)
 						-- --! should refactor all this
                     -- end
                 -- else
@@ -310,6 +310,7 @@ local function adjustThrust(Obj, dt)
 end
 
 local function createNewBullet(Obj, bullet)
+    -- input: Obj = the vessel creating the bullet
     -- input: bullet = true if bullet
 
     assert(bullet ~= nil)       -- ensure parameter is not nil
@@ -431,7 +432,7 @@ local function updateUnitTask(Obj, squadorder, dt)
     -- this adjusts targets or other goals based on the squad order
 
     assert(Obj ~= nil)
-	
+
     if Obj.actions[1] ~= nil then
         Obj.actions[1].cooldown = Obj.actions[1].cooldown - dt
         if Obj.actions[1].cooldown <= 0 then

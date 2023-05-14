@@ -45,11 +45,7 @@ local function battleOver()
     end
     if isFriends == false or isFoes == false then
         -- one side is depleted
-
-        print(inspect(OBJECTS))
-
         return true
-
     else
         return false
     end
@@ -112,7 +108,7 @@ local function drawHUD()
     love.graphics.draw(IMAGE[enum.imageFightHUD], 0, 0)
 
     if fun.isPlayerAlive() then
-        local Obj = fun.getObject(PLAYER_GUID)
+        local Obj = fun.getObject(PLAYER_FIGHTER_GUID)
         local barlength = 100       -- unnecessary but a reminder that the barlength is a convenient 100 pixels
         local barheight = 10
         love.graphics.setColor(0,1,0,0.3)
@@ -136,6 +132,8 @@ local function drawHUD()
         -- throttle bar (componentAccelerator)
         local drawlength = Obj.componentHealth[enum.componentAccelerator]
         love.graphics.rectangle("fill", 145, 143, drawlength, 10)
+    else
+        print("Player not alive")
     end
 
     -- draw the battle timer
@@ -207,7 +205,7 @@ function fight.draw()
                         error()
                     end
 
-                    if Obj.guid == PLAYER_GUID then
+                    if Obj.guid == PLAYER_FIGHTER_GUID then
                         love.graphics.setColor(1,1,0,1)
                     end
 
@@ -251,7 +249,7 @@ function fight.draw()
 
     -- draw target recticle for player 1
     if fun.isPlayerAlive() then
-        local Obj = fun.getObject(PLAYER_GUID)
+        local Obj = fun.getObject(PLAYER_FIGHTER_GUID)
         -- player still alive
         if Obj.actions ~= nil and Obj.actions[1] ~= nil then
             if Obj.actions[1].targetguid ~= nil then
@@ -269,10 +267,10 @@ function fight.draw()
     end
 
     -- draw yellow recticle if player is targeted
-    local playeristargeted = fun.unitIsTargeted(PLAYER_GUID)
+    local playeristargeted = fun.unitIsTargeted(PLAYER_FIGHTER_GUID)
     if playeristargeted then
         -- draw yellow recticle on player craft
-        local Obj = fun.getObject(PLAYER_GUID)
+        local Obj = fun.getObject(PLAYER_FIGHTER_GUID)              --! should probably move this line to top of function
         if Obj ~= nil and Obj.fixture:getCategory() ~= enum.categoryFriendlyPod then
             local objx = Obj.body:getX()
             local objy = Obj.body:getY()
@@ -284,7 +282,7 @@ function fight.draw()
 
     -- draw the menu if menu is open
     if showmenu and fun.isPlayerAlive() then
-        local Obj = fun.getObject(PLAYER_GUID)
+        local Obj = fun.getObject(PLAYER_FIGHTER_GUID)
         local drawx, drawy = res.toGame(Obj.body:getX(), Obj.body:getY()) -- need to convert physical to screen
 
         -- fill the menu box
@@ -328,7 +326,7 @@ function fight.draw()
     -- draw current action
     local txt
     if fun.isPlayerAlive() then
-        local Obj = fun.getObject(PLAYER_GUID)
+        local Obj = fun.getObject(PLAYER_FIGHTER_GUID)
         currentaction = fun.getTopAction(Obj)
         if currentaction ~= nil then
             txt = currentaction.action
@@ -379,7 +377,7 @@ function fight.update(dt)
     end
 
     if snapcamera then
-        local Obj = fun.getObject(PLAYER_GUID)
+        local Obj = fun.getObject(PLAYER_FIGHTER_GUID)
         if Obj ~= nil then
             TRANSLATEX = Obj.body:getX()
             TRANSLATEY = Obj.body:getY()

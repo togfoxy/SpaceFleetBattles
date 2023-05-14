@@ -122,14 +122,6 @@ function functions.getImpactedComponent(Obj)
     error()     -- should not reach this point
 end
 
-function functions.getPilot(guid)
-    -- scans the ROSTER for the provided guid. Returns nil if not found or foe guid provided
-    for i = 1, #ROSTER do
-        if ROSTER[i].guid == guid then return ROSTER[i] end
-    end
-    return nil
-end
-
 local function createEscapePod(Obj)
     -- Obj is the obj that is spawning/creating the pod. It assumed this Obj will soon be destroyed
 
@@ -159,8 +151,8 @@ local function createEscapePod(Obj)
     end
 
     local guid
-    if Obj.guid == PLAYER_GUID then
-        guid = PLAYER_GUID      -- POD inherits player guid
+    if Obj.guid == PLAYER_FIGHTER_GUID then
+        guid = PLAYER_FIGHTER_GUID      -- POD inherits player fighter guid
     else
         guid = cf.getGUID()
     end
@@ -306,7 +298,7 @@ function functions.applyDamage(victim, bullet)
         fun.createAnimation(victim, enum.animSmoke)
 
         -- play audio
-        if fun.isPlayerAlive() and bullet.ownerObjectguid == PLAYER_GUID then
+        if fun.isPlayerAlive() and bullet.ownerObjectguid == PLAYER_FIGHTER_GUID then
             -- this bullet is the players bullet. Make an audible
             cf.playAudio(enum.audioBulletHit, false, true)
         end
@@ -393,7 +385,7 @@ end
 function functions.isPlayerAlive()
 
     for i = 1, #OBJECTS do
-        if OBJECTS[i].guid == PLAYER_GUID then
+        if OBJECTS[i].guid == PLAYER_FIGHTER_GUID then
             return true
         end
     end
@@ -426,10 +418,11 @@ function functions.initialiseRoster()
 		thispilot.kills = 0
 		thispilot.missions = 0
 		thispilot.ejections = 0
-        thispilot.isDead = fase
+        thispilot.isDead = false
 		table.insert(ROSTER, thispilot)
 	end
 	ROSTER[1].isPlayer = true
+    PLAYER_GUID = ROSTER[1].guid
 end
 
 function functions.initialiseHanger()
@@ -510,8 +503,18 @@ function functions.initialsePlanets()
     PLANETS[14].image = IMAGE[enum.imagePlanet14]
 end
 
+function functions.getPilot(guid)
+    -- scans the ROSTER for the provided guid. Returns nil if not found or foe guid provided
+    -- NOTE: this is different to getPlayerPilot
+    for i = 1, #ROSTER do
+        if ROSTER[i].guid == guid then return ROSTER[i] end
+    end
+    return nil
+end
+
 function functions.getPlayerPilot()
 	-- scans ROSTER and returns the pilot object that is the player object or returns nil
+    -- NOTE: this is different to getPilot
 	for i = 1, #ROSTER do
 		if ROSTER[i].isPlayer then
 			return ROSTER[i]
