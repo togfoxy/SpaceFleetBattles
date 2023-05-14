@@ -59,6 +59,7 @@ function enums.load()
     enum.imageMainMenu = 5
     enum.imageMainMenuBanner = 6
     enum.imageBattleRoster = 7
+    enum.imageEndBattle = 8
     enum.imagePlanet1 = 20
     enum.imagePlanet2 = 21
     enum.imagePlanet3= 22

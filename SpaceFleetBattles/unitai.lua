@@ -44,17 +44,18 @@ local function getClosestFighter(thisObj, desiredforf)
 end
 
 local function setTaskRTB(Obj)
+    -- adds an RTB action to the end of the queue
     local thisaction = {}
 	thisaction.cooldown = 10
 	thisaction.action = enum.unitActionReturningToBase
 	thisaction.targetguid = nil
     if Obj.forf == enum.forfFriend then
-        thisaction.destx = FRIEND_START_X
+        thisaction.destx = FRIEND_START_X - 20
     elseif Obj.forf == enum.forfEnemy then
-        thisaction.destx = FOE_START_X
+        thisaction.destx = FOE_START_X + 20
     end
 
-    -- set a y value that is insider the boundary
+    -- set a y value that is insider the border
     local y = Obj.body:getY()
     if y < 0 then
         y = 100
@@ -63,7 +64,7 @@ local function setTaskRTB(Obj)
     end
     thisaction.desty = y
 	table.insert(Obj.actions, thisaction)
-    print("Setting action to RTB")
+    -- print("Setting action to RTB")
 end
 
 local function setTaskDestination(Obj, x, y)
@@ -218,60 +219,6 @@ local function adjustThrustEngaging2(Obj, dt)
 	-- ensuring thrust is not above max is checked in the parent function
 end
 
--- local function adjustThrustEngaging(Obj, dt)
-
-    -- local objx, objy = Obj.body:getPosition()
-    -- local objfacing = Obj.body:getAngle()
-    -- local targetObj = fun.getObject(Obj.actions[1].targetguid)
-    -- if targetObj ~= nil and isFighter(targetObj) then
-        -- -- print("alpha")
-        -- local targetx, targety = targetObj.body:getPosition()
-
-        -- if cf.isInFront(objx, objy, objfacing, targetx, targety) then
-            -- -- print("beta")
-            -- if targetObj.currentForwardThrust < Obj.currentForwardThrust then		-- is target moving slower than pilot?
-                -- -- print("charlie")
-                -- local dist = cf.getDistance(objx, objy, targetx, targety)
-                -- if dist <= 125 then
-                    -- -- print("delta")
-                    -- -- try to match speed if unit is behind target
-                    -- local minheading = objfacing - 0.7853			-- 0.7 rads = 45 deg		-- should probably make these constants
-                    -- local maxheading = objfacing + 0.7853
-                    -- local targetfacing = targetObj.body:getAngle()
-
-                    -- if targetfacing >= minheading and targetfacing <= maxheading then		--! check that the min/max thing converts to radians properly
-                        -- -- unit is behind the target. Try to match speed
-                        -- Obj.currentForwardThrust = Obj.currentForwardThrust - (Obj.maxDeacceleration * dt)
-                        -- if Obj.currentForwardThrust < targetObj.currentForwardThrust then
-                            -- -- print("echo")
-                            -- Obj.currentForwardThrust = targetObj.currentForwardThrust * (love.math.random(7,9) / 10)
-                        -- end
-                    -- else
-                        -- -- unit is not behind target so max thrust
-                        -- Obj.currentForwardThrust = Obj.currentForwardThrust + (Obj.currentMaxAcceleration * dt)
-						-- --! should refactor all this
-                    -- end
-                -- else
-                    -- -- print("foxtrot")
-                    -- -- max thrust needed
-                    -- Obj.currentForwardThrust = Obj.currentForwardThrust + (Obj.currentMaxAcceleration * dt)
-                -- end
-            -- else
-                -- -- print("golf")
-                -- -- max throttle
-                -- Obj.currentForwardThrust = Obj.currentForwardThrust + (Obj.currentMaxAcceleration * dt)
-            -- end
-        -- else
-            -- -- target is not in front or target is not a fighter. Assume full thrust is needed
-            -- -- print("Target is not in front so using full thrust.", objx, objy, objfacing, targetx, targety)
-            -- Obj.currentForwardThrust = Obj.currentForwardThrust + (Obj.currentMaxAcceleration * dt)
-        -- end
-    -- else
-        -- print("Engaging but no target. Killing current action")
-        -- Obj.actions[1].cooldown = 0
-    -- end
--- end
-
 local function adjustThrust(Obj, dt)
     -- move forward
     -- this shouldn't be called for bullets
@@ -345,7 +292,7 @@ local function createNewBullet(Obj, bullet)
     thisobject.guid = guid
 
     thisobject.squadCallsign = nil
-    thisobject.lifetime = 10            -- seconds
+    thisobject.lifetime = 5            -- seconds
     thisobject.ownerObjectguid = Obj.guid
 
     thisobject.body:setAngle(currentangle)
@@ -454,6 +401,8 @@ local function updateUnitTask(Obj, squadorder, dt)
         -- do self-preservation checks firstly. Remember the ordering matters
         if Obj.componentHealth[enum.componentWeapon] <= 0 then
             setTaskRTB(Obj)
+        elseif Obj.componentHealth[enum.componentThruster] <= 0 and Obj.componentHealth[enum.componentWeapon] > 0 then
+            -- do nothing. Fall through to the action section below
         elseif Obj.componentHealth[enum.componentThruster] <= 50 then
             setTaskRTB(Obj)
         elseif Obj.componentHealth[enum.componentSideThruster] <= 25 then
@@ -470,8 +419,7 @@ local function updateUnitTask(Obj, squadorder, dt)
                 local targetguid
                 if Obj.forf == enum.forfFriend then
                     targetguid = getClosestFighter(Obj, enum.forfEnemy)        -- this OBJECTS guid or nil
-                end
-                if Obj.forf == enum.forfEnemy then
+                elseif Obj.forf == enum.forfEnemy then
                     targetguid = getClosestFighter(Obj, enum.forfFriend)       -- this OBJECTS guid or nil
                 end
                 if targetguid ~= nil then
@@ -484,16 +432,26 @@ local function updateUnitTask(Obj, squadorder, dt)
                     table.insert(Obj.actions, thisorder)
                     -- print("Setting action = engage")
                 else
-                    -- trying to engage but no target found.
-                    if not unitIsTargeted and Obj.body:getY() < 0 and targetguid == nil then
-                        -- move back inside the battle map
-                        setTaskDestination(Obj, Obj.body:getX(), 100)
-                    elseif not unitIsTargeted and Obj.body:getY() > SCREEN_HEIGHT and targetguid == nil then
-                        -- move back inside the battle map
-                        setTaskDestination(Obj, Obj.body:getX(), SCREEN_HEIGHT - 100)
-                    else
-                        -- no target found and still inside map. Allow code to fall through to RTB
+                    -- trying to engage but no target found
+                    -- move inside map borders if necesary
+                    if not unitIsTargeted and targetguid == nil then
+                        local destx = Obj.body:getX()       -- default values to be overwritten
+                        local desty = Obj.body:getY()
+                        if desty < 0 then desty = 100 end
+                        if desty > SCREEN_HEIGHT then desty = SCREEN_HEIGHT - 100 end
+                        if Obj.forf == enum.forfFriend then
+                            if destx < FRIEND_START_X then destx = FRIEND_START_X + 100 end
+                        elseif Obj.forf == enum.forfEnemy then
+                            if destx > FOE_START_X then destx = FOE_START_X - 100 end
+                        else
+                            error()
+                        end
+
+                        if destx ~= Obj.body:getX() or desty ~= Obj.body:getY() then
+                            setTaskDestination(Obj, destx, desty)
+                        end
                     end
+
                     print("Stacking orders: return to battle and RTB")
                     setTaskRTB(Obj)     -- this is an instance of stacking orders
                 end
