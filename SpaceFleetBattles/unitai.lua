@@ -50,12 +50,12 @@ local function setTaskRTB(Obj)
 	thisaction.action = enum.unitActionReturningToBase
 	thisaction.targetguid = nil
     if Obj.forf == enum.forfFriend then
-        thisaction.destx = FRIEND_START_X
+        thisaction.destx = FRIEND_START_X - 20
     elseif Obj.forf == enum.forfEnemy then
-        thisaction.destx = FOE_START_X
+        thisaction.destx = FOE_START_X + 20
     end
 
-    -- set a y value that is insider the boundary
+    -- set a y value that is insider the border
     local y = Obj.body:getY()
     if y < 0 then
         y = 100
