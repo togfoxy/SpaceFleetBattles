@@ -1,12 +1,31 @@
 planetmap = {}
 
-function planetmap.mousereleased(rx, ry, x, y, button)
+local function getPlanetClicked(x, y)
+	-- determine which planet is clicked, if any.
 
-    local clickedButtonID = buttons.getButtonID(rx, ry)
-    if clickedButtonID == enum.buttonPlanetMapBattleStations then
-        cf.swapScreen(enum.sceneBattleRoster, SCREEN_STACK)
-    end
+	local closestdist = 9999999
+	local closetindex = nil
+	for i = 1, #PLANETS do
+		local dist = cf.getDistance(x, y, PLANETS[i].x, PLANETS[i].y)
+		if dist < closestdist then
+			closestdist = dist
+			closetindex = i
+		end
+	end
+	if closestdist <= 40 then
+		return closetindex
+	else
+		return nil
+	end
 end
+
+local function adjustResourceLevels()
+
+	local currentsector = FLEET.sector
+
+end
+
+
 
 local function drawPlanets()
 
@@ -14,21 +33,51 @@ local function drawPlanets()
     love.graphics.draw(IMAGE[enum.imagePlanetBG], 0, 0, 0, 2, 2)
 
     -- draw planets
-    for i = 2, #PLANETS do
-        love.graphics.draw(PLANETS[i].image, PLANETS[i].x, PLANETS[i].y, 0, PLANETS[i].scale, PLANETS[i].scale)
+    for i = 1, #PLANETS do
+		love.graphics.setColor(1,1,1,1)
+        love.graphics.draw(PLANETS[i].image, PLANETS[i].x, PLANETS[i].y, 0, PLANETS[i].scale, PLANETS[i].scale, 150, 150)
 
+		love.graphics.setColor(1,0,0,1)
+		love.graphics.circle("fill", PLANETS[i].x, PLANETS[i].y, 5)
     end
 
     -- draw players fleet
-    local sector = FLEET.sector
+	local sector
+	if FLEET.newSector == nil then
+		sector = FLEET.sector
+	else
+		sector = FLEET.newSector
+	end
+
     local drawx = PLANETS[sector].x         -- this is top left corner of the planet
     local drawy = PLANETS[sector].y
     local scale = PLANETS[sector].scale
     love.graphics.setColor(1,0,0,1)
-    love.graphics.rectangle("line", drawx+12, drawy + 12, 250 * scale, 250 * scale)
+    love.graphics.rectangle("line", drawx - 75, drawy - 75, 250 * scale, 250 * scale)
 
+end
 
-
+function planetmap.mousereleased(rx, ry, x, y, button)
+    local clickedButtonID = buttons.getButtonID(rx, ry)
+    if clickedButtonID == enum.buttonPlanetMapBattleStations then
+		if FLEET.newSector ~= nil then
+			FLEET.sector = FLEET.newSector
+		end
+		adjustResourceLevels()
+        cf.swapScreen(enum.sceneBattleRoster, SCREEN_STACK)
+	else
+		local planetclicked = getPlanetClicked(rx, ry)
+		if planetclicked ~= nil then
+			local currentsector = FLEET.sector
+			local requestedmoves = PLANETS[planetclicked].column - PLANETS[currentsector].column
+			if requestedmoves <= FLEET.movesLeft and requestedmoves >= -1 then
+				-- move to new sector
+				FLEET.newSector = planetclicked
+			else
+				--! make an error sound or something like that
+			end
+		end
+    end
 end
 
 function planetmap.draw()
@@ -38,34 +87,6 @@ function planetmap.draw()
     buttons.drawButtons()
 
 end
-
-function planetmap.loadPlanetClickSpots()
-
-    local startx = 300
-    local starty = 400
-
-    -- button for continue game
-    local mybutton = {}
-    -- mybutton.label = "Battle stations!"
-	mybutton.x = startx
-    mybutton.y = starty
-    mybutton.width = 175
-    mybutton.height = 175
-    mybutton.drawOutline = true
-    mybutton.outlineColour = {0.5,0.75,0.25,1}
-	mybutton.image = IMAGE[enum.imagePlanet1]
-    mybutton.imageoffsetx = 0
-    mybutton.imageoffsety = 0
-    mybutton.imagescalex = PLANETS[1].scale
-    mybutton.imagescaley = PLANETS[1].scale
-
-    mybutton.state = "on"
-    mybutton.visible = true
-    mybutton.scene = enum.scenePlanetMap               -- change and add to enum
-    mybutton.identifier = enum.buttonPlanetMapPlanet1     -- change and add to enum
-    table.insert(GUI_BUTTONS, mybutton) -- this adds the button to the global table
-end
-
 
 function planetmap.loadButtons()
                                                 -- ensure loadButtons() is called in love.load()

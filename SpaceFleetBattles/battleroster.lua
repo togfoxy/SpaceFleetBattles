@@ -2,6 +2,7 @@ battleroster = {}
 
 local function initialiseSquadList()
 	-- the squad list is the master list of call signs made available to each battle
+	SQUAD_LIST = {}				-- the master list of callsigns
     local index = 1
     for i = 65, 90 do
         for j = 1, 9 do
@@ -69,75 +70,105 @@ local function getEmptyVessel()
 	return nil
 end
 
+local function addPilotandFighterToBattle(thispilot, thisfighter, thiscallsign)
+	-- put the pilot and fighter together and add to battle (OBJECTS)
+	-- NOTE: for friendly pilots only
+				
+	thisfighter.pilotguid = thispilot.guid
+	thisfighter.squadCallsign = thiscallsign
+	thisfighter.isLaunched = true                   -- puts it into the batlespace
+	fighter.createFighterBody(thisfighter)          -- creates a physical body
+	local x, y = fun.getLaunchXY(enum.forfFriend)
+	thisfighter.body:setPosition(x, y)
+
+	assert(thisfighter.guid ~= nil)
+
+	thispilot.vesselguid = thisfighter.guid
+	thispilot.missions = thispilot.missions + 1
+
+	-- load fighter into objects
+	table.insert(OBJECTS, thisfighter)		-- pilots go into fighters but they don't go into OBJECTS
+
+	if thispilot.isPlayer then
+		PLAYER_FIGHTER_GUID = thisfighter.guid      --! can probably do this better
+	end
+end
+
 local function loadBattleObjects()
 	-- this assigns pilots to fighters and loads up all the objects needed for battle
 
 	OBJECTS = {}				-- these are the objects that go to battle
-	SQUAD_LIST = {}				-- the master list of callsigns
 	initialiseSquadList()		-- load all the callsigns
     commanderAI = {}
     squadAI = {}
 
 	-- do friendly fleet first
+	local livingroster = fun.getActivePilotCount()
+	local numfriendlyfighters = math.min(livingroster, #HANGER)				--! the roster/hanger needs to go up and down based on battle results and planet sectors	
+	if numfriendlyfighters > 12 then numfriendlyfighters = 12 end
+	
+	-- establish the correct amount of friendly squads
+	local callsign = {}
 	for i = 1, FRIEND_SQUADRON_COUNT do
 		local thiscallsign = getUniqueCallsign()
         squadAI[thiscallsign] = {}
         squadAI[thiscallsign].forf = enum.forfFriend
         squadAI[thiscallsign].orders = {}
-		for j = 1, FRIEND_SHIPS_PER_SQUADRON do
-			-- get an unassigned pilot from roster (starting with player) or nil
-			local pilot = getUnassignedPilot()		-- preferences player pilot. Returns nil if failed to find any pilot
-
-			-- get an unassigned fighter from hanger, in sequence, or nil
-			local thisfighter = getEmptyVessel()
-
-            -- check if pilot has a fighter
-			if pilot ~= nil and thisfighter ~= nil then
-				-- assign pilot to fighter and assign fighter to pilot
-				thisfighter.pilotguid = pilot.guid
-				thisfighter.squadCallsign = thiscallsign
-                thisfighter.isLaunched = true                   -- puts it into the batlespace
-                fighter.createFighterBody(thisfighter)          -- creates a physical body
-                local x, y = functions.getLaunchXY(enum.forfFriend)
-                thisfighter.body:setPosition(x, y)
-
-                assert(thisfighter.guid ~= nil)
-
-				pilot.vesselguid = thisfighter.guid
-                pilot.missions = pilot.missions + 1
-
-				-- load fighter into objects
-                -- print("Adding friendly fighter to OBJECTS: " .. thisfighter.guid)
-				table.insert(OBJECTS, thisfighter)		-- pilots go into fighters but they don't go into OBJECTS
-
-                if pilot.isPlayer then
-                    PLAYER_FIGHTER_GUID = thisfighter.guid      --! can probably do this better
-                end
-			else
-				-- run out of pilots and/or fighters. Break the loop and go to battle with whatever you have
-                print("Can't find combat ready pilots and/or fighters")
-				break
-			end
-		end
+		table.insert(callsign, thiscallsign)
 	end
 
-	-- now load enemy squadrons
-    for i = 1, FOE_SQUADRON_COUNT do
+	local callsignindex = 1		-- flip flops between 1 and 2 to shuffle assignments between two squads
+	for i = 1, numfriendlyfighters do
+	
+		-- get an unassigned pilot from roster (starting with player) or nil
+		local pilot = getUnassignedPilot()		-- preferences player pilot. Returns nil if failed to find any pilot
+	
+		-- get an unassigned fighter from hanger, in sequence, or nil
+		local thisfighter = getEmptyVessel()	
+	
+		-- check if pilot has a fighter
+		if pilot ~= nil and thisfighter ~= nil then
+			-- assign pilot to fighter and assign fighter to pilot
+			addPilotandFighterToBattle(pilot, thisfighter, callsign[callsignindex])
+			
+			-- toggle the callsignindex to ensure fighters are allocated to squads evenly
+			if callsignindex == 1 then callsignindex = 2
+			elseif callsignindex == 2 then callsignindex = 1
+			else error() 
+			end
+		else
+			-- run out of pilots and/or fighters. Break the loop and go to battle with whatever you have
+			print("Can't find combat ready pilots and/or fighters")
+			break
+		end	
+	end
+
+	local numenemyfighters = math.min(FOE_FIGHTER_COUNT, FOE_PILOT_COUNT)
+	if numenemyfighters > 12 then numenemyfighters = 12 end		--! this code is here but not yet utilised
+
+	-- establish the correct amount of enemy squads
+	local callsign = {}
+	for i = 1, FOE_SQUADRON_COUNT do
 		local thiscallsign = getUniqueCallsign()
         squadAI[thiscallsign] = {}
-        squadAI[thiscallsign].forf = enum.forfEnemy
+        squadAI[thiscallsign].forf = enum.forfFriend
         squadAI[thiscallsign].orders = {}
-
-        for j = 1, FOE_SHIPS_PER_SQUADRON do
-			local thisfighter = fighter.createFighter(enum.forfEnemy)
-			thisfighter.squadCallsign = thiscallsign
-            assert(thisfighter.guid ~= nil)
-            -- print("Adding enemy fighter to OBJECTS: " .. thisfighter.guid)
-			table.insert(OBJECTS, thisfighter)					-- enemy fighters have no crew
-		end
+		table.insert(callsign, thiscallsign)
 	end
 
-    endBattleHasLoaded = false
+	callsignindex = 1		-- flip flops between 1 and 2 to shuffle assignments between two squads
+	for i = 1, numenemyfighters do
+		local thisfighter = fighter.createFighter(enum.forfEnemy)
+		thisfighter.squadCallsign = callsign[callsignindex]
+		assert(thisfighter.guid ~= nil)
+		table.insert(OBJECTS, thisfighter)					-- enemy fighters have no crew
+		
+		-- toggle the callsignindex to ensure fighters are allocated to squads evenly
+		if callsignindex == 1 then callsignindex = 2
+		elseif callsignindex == 2 then callsignindex = 1
+		else error()
+		end
+	end
 end
 
 function battleroster.mousereleased(rx, ry, x, y, button)
@@ -146,6 +177,7 @@ function battleroster.mousereleased(rx, ry, x, y, button)
     if clickedButtonID == enum.buttonBattleRosterLaunch then
 		loadBattleObjects()
 
+		endBattleHasLoaded = false
         cf.swapScreen(enum.sceneFight, SCREEN_STACK)
 	-- elseif clickedButtonID == enum.buttonMainMenuContinueGame then
 
@@ -192,6 +224,15 @@ function battleroster.draw()
 	buttons.drawButtons()
 end
 
+function battleroster.update(dt)
+
+	if not endBattleHasLoaded then
+		endBattleHasLoaded = true
+				
+	end
+
+end
+
 function battleroster.loadButtons()
 
     -- button for continue game
@@ -223,4 +264,5 @@ function battleroster.loadButtons()
 
 
 end
+
 return battleroster

@@ -176,6 +176,7 @@ function love.load()
 	-- maybe move this to load image
 	GRIDS[enum.gridExplosion] = anim8.newGrid(16, 16, IMAGE[enum.imageExplosion]:getWidth(), IMAGE[enum.imageExplosion]:getHeight())
 	GRIDS[enum.gridBulletSmoke] = anim8.newGrid(32, 32, IMAGE[enum.imageBulletSmoke]:getWidth(), IMAGE[enum.imageBulletSmoke]:getHeight())
+
 end
 
 function love.draw()
@@ -209,18 +210,18 @@ function love.draw()
 		elseif animation.type == enum.animBulletSmoke then
 			-- different offset
 			animation:draw(IMAGE[enum.imageBulletSmoke], drawx, drawy, animation.angle, 0.5, 0.5, 10, 10)
-
 		end
 	end
 
     res.stop()
 end
 
-
 function love.update(dt)
 	local currentscene = cf.currentScreenName(SCREEN_STACK)
 	if currentscene == enum.sceneFight then
         fight.update(dt)
+	elseif currentscene == enum.sceneBattleRoster then
+		battleroster.update(dt)
 	elseif currentscene == enum.sceneEndBattle then
 		endbattle.update(dt)
 	end

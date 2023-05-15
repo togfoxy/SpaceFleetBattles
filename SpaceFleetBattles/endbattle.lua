@@ -2,7 +2,7 @@ endbattle = {}
 -- NOTE: Squad list is initialised in the battle roster
 endBattleHasLoaded = false
 
-function planetmap.mousereleased(rx, ry, x, y, button)
+function endbattle.mousereleased(rx, ry, x, y, button)
 
     local clickedButtonID = buttons.getButtonID(rx, ry)
     if clickedButtonID == enum.buttonEndBattleNewGame then
@@ -11,7 +11,6 @@ function planetmap.mousereleased(rx, ry, x, y, button)
         cf.removeScreen(SCREEN_STACK)
     end
 end
-
 
 function endbattle.draw()
 
@@ -38,7 +37,7 @@ function endbattle.draw()
         drawy = drawy + 50
     end
 
-    --! add personal stats here
+    -- personal pilot stats here
     love.graphics.print("Your pilot stats:", drawx, drawy)
     drawy = drawy + 50
     love.graphics.print("                                  Health  # Missions    # Kills     # Fighters lost", drawx, drawy)
@@ -56,6 +55,8 @@ function endbattle.draw()
     drawy = drawy + 50
 
     --! add global score as well
+	print(inspect(SCORE))
+	error()
 
     love.graphics.setFont(FONT[enum.fontDefault])
     buttons.drawButtons()

@@ -36,8 +36,11 @@ function constants.load()
     FRIEND_START_X = 0      			-- left side of screen
     FOE_START_X = SCREEN_WIDTH * 2		-- right side of screen
 
-    FRIEND_FIGHTER_COUNT = 24		-- not actually a constant
-    FRIEND_PILOT_COUNT = 24			-- not actually a constant
+    FRIEND_FIGHTER_COUNT = 24 - 6		-- used to initalise the hanger. The -6 is to offset the homeworld +6
+    FRIEND_PILOT_COUNT = 24 - 6		-- used to initialise the hanger. The -6 is to offset the homeworld +6
+
+	FOE_FIGHTER_COUNT = 24			-- these aren't really constants
+	FOE_PILOT_COUNT = 24			-- these aren't really constants
 
 	FRIEND_SQUADRON_COUNT = 2		-- not a constant and changes for each battle
     FRIEND_SHIPS_PER_SQUADRON = 6	-- not a constant and changes for each battle
@@ -62,7 +65,9 @@ function constants.load()
     PLANETS = {}                -- planets on the planet map
     POD_QUEUE = {}              -- a list of pods waiting to spawn. Box2D work around
     SCORE.friendsdead = 0       -- put here for documentation and to help me remember
+	SCORE.friendsEjected = 0
     SCORE.enemiesdead = 0
+	SCORE.enemiesEjected = 0
 
     PLAYER_GUID = nil
     PLAYER_FIGHTER_GUID = nil
@@ -71,6 +76,10 @@ function constants.load()
     GRIDS = {}		-- grids are used to load quads for anim8
     FRAMES = {}		-- frames within the grid. Used by anim8
     ANIMATIONS = {}	-- holds all anim8 animations
+
+	battleRosterHasLoaded = false
+	fightsceneHasLoaded = false
+	endBattleHasLoaded = false
 
 
 
