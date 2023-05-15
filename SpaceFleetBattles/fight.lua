@@ -1,6 +1,6 @@
 fight = {}
 
-fightsceneHasLoaded = false
+
 local pause = false
 local snapcamera = true
 local showmenu = false
@@ -357,7 +357,9 @@ function fight.update(dt)
 
         SCORE = {}
         SCORE.friendsdead = 0
+		SCORE.friendsEjected = 0
         SCORE.enemiesdead = 0
+		SCORE.enemiesEjected = 0
 
         RTB_TIMER = 0
         BATTLE_TIMER = 0
@@ -385,6 +387,7 @@ function fight.update(dt)
     end
 
     if battleOver() or BATTLE_TIMER > BATTLE_TIMER_LIMIT then
+		fightsceneHasLoaded = false
         cf.swapScreen(enum.sceneEndBattle, SCREEN_STACK)
     end
 

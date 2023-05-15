@@ -185,7 +185,6 @@ local function adjustAngle(Obj, dt)
     end
 end
 
-
 local function adjustThrustEngaging2(Obj, dt)
 
 	local targetObj = fun.getObject(Obj.actions[1].targetguid)

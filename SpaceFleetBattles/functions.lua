@@ -355,12 +355,18 @@ function functions.applyDamage(victim, bullet)
 
         -- see if ejects or applies wobble
         if (victim.componentHealth[enum.componentStructure] <= 35 ) then
-            -- eject is a bit of a dice roll
+            -- eject is a dice roll
             local rndnum = love.math.random(1, 35)
             if rndnum > victim.componentHealth[enum.componentStructure] then       -- more damage = more chance of eject
                 fun.setTaskEject(victim)
                 -- give kill credit
                 giveKillCredit(bullet)
+
+				if victim.forf == enum.forfFriend then
+					SCORE.friendsEjected = SCORE.friendsEjected + 1
+				elseif victim.forf == enum.forfEnemy then
+					SCORE.enemiesEjected = SCORE.enemiesEjected + 1
+				end
             end
         end
 
@@ -441,7 +447,8 @@ end
 function functions.initialiseFleet()
 	FLEET = {}
 	FLEET.sector = 1
-    FLEET.movesleft = 0
+	FLEET.newSector = nil			-- use this as a way to capture original and final sector
+    FLEET.movesLeft = 1
 
     cf.saveTableToFile("fleet.dat", FLEET)
 
@@ -449,66 +456,86 @@ end
 
 function functions.initialsePlanets()
     PLANETS = {}
+
+    -- set a random scale into the planets table
     for i = 1, 14 do
         PLANETS[i] = {}
         PLANETS[i].scale = love.math.random(4,6) / 10
     end
 
-    local startx = 300
-    local starty = 400
+    local startx = 425
+    local starty = 525
 
     PLANETS[1].x = startx       -- this is an easy way to shift and move the whole galaxy
     PLANETS[1].y = starty
-    PLANETS[1].image = IMAGE[enum.imagePlanet1]
     PLANETS[1].column = 1
 
     PLANETS[2].x = startx + 200
     PLANETS[2].y = starty - 150
-    PLANETS[2].image = IMAGE[enum.imagePlanet2]
+	PLANETS[2].column = 2
     PLANETS[3].x = startx + 200
     PLANETS[3].y = starty + 150
-    PLANETS[3].image = IMAGE[enum.imagePlanet3]
+	PLANETS[3].column = 2
+
     PLANETS[4].x = startx + 400
     PLANETS[4].y = starty - 300
-    PLANETS[4].image = IMAGE[enum.imagePlanet4]
+	PLANETS[4].column = 3
     PLANETS[5].x = startx + 400
     PLANETS[5].y = starty - 0
-    PLANETS[5].image = IMAGE[enum.imagePlanet5]
+	PLANETS[5].column = 3
     PLANETS[6].x = startx + 400
     PLANETS[6].y = starty + 300
-    PLANETS[6].image = IMAGE[enum.imagePlanet6]
+	PLANETS[6].column = 3
 
     PLANETS[7].x = startx + 600
     PLANETS[7].y = starty - 150
-    PLANETS[7].image = IMAGE[enum.imagePlanet7]
+	PLANETS[7].column = 4
     PLANETS[8].x = startx + 600
     PLANETS[8].y = starty + 150
-    PLANETS[8].image = IMAGE[enum.imagePlanet8]
-
+	PLANETS[8].column = 4
     PLANETS[9].x = startx + 800
     PLANETS[9].y = starty - 300
-    PLANETS[9].image = IMAGE[enum.imagePlanet9]
+ 	PLANETS[9].column = 5
     PLANETS[10].x = startx + 800
     PLANETS[10].y = starty - 0
-    PLANETS[10].image = IMAGE[enum.imagePlanet10]
+	PLANETS[10].column = 5
     PLANETS[11].x = startx + 800
     PLANETS[11].y = starty + 300
-    PLANETS[11].image = IMAGE[enum.imagePlanet11]
+	PLANETS[11].column = 5
 
     PLANETS[12].x = startx + 1000
     PLANETS[12].y = starty - 150
-    PLANETS[12].image = IMAGE[enum.imagePlanet12]
+ 	PLANETS[12].column = 6
     PLANETS[13].x = startx + 1000
     PLANETS[13].y = starty + 150
-    PLANETS[13].image = IMAGE[enum.imagePlanet13]
+	PLANETS[13].column = 6
 
     PLANETS[14].x = startx + 1200
     PLANETS[14].y = starty
-    PLANETS[14].image = IMAGE[enum.imagePlanet14]
-
-    planetmap.loadPlanetClickSpots()
+	PLANETS[14].column = 7
 
     cf.saveTableToFile("planets.dat", PLANETS)
+
+    PLANETS[1].image = IMAGE[enum.imagePlanet1]
+
+    PLANETS[2].image = IMAGE[enum.imagePlanet2]
+    PLANETS[3].image = IMAGE[enum.imagePlanet3]
+
+    PLANETS[4].image = IMAGE[enum.imagePlanet4]
+    PLANETS[5].image = IMAGE[enum.imagePlanet5]
+    PLANETS[6].image = IMAGE[enum.imagePlanet6]
+
+    PLANETS[7].image = IMAGE[enum.imagePlanet7]
+    PLANETS[8].image = IMAGE[enum.imagePlanet8]
+
+    PLANETS[9].image = IMAGE[enum.imagePlanet9]
+    PLANETS[10].image = IMAGE[enum.imagePlanet10]
+    PLANETS[11].image = IMAGE[enum.imagePlanet11]
+
+    PLANETS[12].image = IMAGE[enum.imagePlanet12]
+    PLANETS[13].image = IMAGE[enum.imagePlanet13]
+
+    PLANETS[14].image = IMAGE[enum.imagePlanet14]
 end
 
 function functions.getPilot(guid)
@@ -562,6 +589,17 @@ function functions.getTopAction(Obj)
         end
     end
     return nil
+end
+
+function functions.getActivePilotCount()
+	-- scans the roster and counts the number of pilots not dead
+	local result = 0
+	for i = 1, #ROSTER do
+		if not ROSTER[i].isDead then
+			result = result + 1
+		end
+	end
+	return result
 end
 
 return functions
