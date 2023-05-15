@@ -60,6 +60,8 @@ function enums.load()
     enum.imageMainMenuBanner = 6
     enum.imageBattleRoster = 7
     enum.imageEndBattle = 8
+    enum.imageCrosshairsHasTarget = 9
+    enum.imageCrosshairsIsTarget = 10
     enum.imagePlanet1 = 20
     enum.imagePlanet2 = 21
     enum.imagePlanet3= 22

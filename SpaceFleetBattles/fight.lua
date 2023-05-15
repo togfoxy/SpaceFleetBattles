@@ -259,8 +259,9 @@ function fight.draw()
                     local drawx = enemy.body:getX()
                     local drawy = enemy.body:getY()
 
-                    love.graphics.setColor(1,0,0,1)
-                    love.graphics.circle("line", drawx, drawy, 10)
+                    love.graphics.setColor(1,0,0,0.75)
+                    -- love.graphics.circle("line", drawx, drawy, 10)
+                    love.graphics.draw(IMAGE[enum.imageCrosshairsHasTarget], drawx, drawy, 0, 0.75, 0.75, 30, 30)
                 end
             end
         end
@@ -274,9 +275,12 @@ function fight.draw()
         if Obj ~= nil and Obj.fixture:getCategory() ~= enum.categoryFriendlyPod then
             local objx = Obj.body:getX()
             local objy = Obj.body:getY()
-            local linelength = 12
-            love.graphics.setColor(1, 0.5, 0, 1)
-            love.graphics.line(objx, objy - linelength, objx + linelength, objy + linelength, objx - linelength, objy + linelength, objx, objy - linelength)
+            -- local linelength = 12
+            -- love.graphics.setColor(1, 0.5, 0, 1)
+            -- love.graphics.line(objx, objy - linelength, objx + linelength, objy + linelength, objx - linelength, objy + linelength, objx, objy - linelength)
+
+            love.graphics.setColor(1, 0.5, 0, 0.75)
+            love.graphics.draw(IMAGE[enum.imageCrosshairsIsTarget], objx, objy, 0, 0.75, 0.75, 35, 30)
         end
     end
 
