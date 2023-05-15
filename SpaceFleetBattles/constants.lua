@@ -80,8 +80,7 @@ function constants.load()
 	battleRosterHasLoaded = false
 	fightsceneHasLoaded = false
 	endBattleHasLoaded = false
-
-
+    
 
 end
 

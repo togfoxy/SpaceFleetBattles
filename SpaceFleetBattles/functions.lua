@@ -448,7 +448,7 @@ function functions.initialiseFleet()
 	FLEET = {}
 	FLEET.sector = 1
 	FLEET.newSector = nil			-- use this as a way to capture original and final sector
-    FLEET.movesLeft = 1
+    FLEET.movesLeft = 0
 
     cf.saveTableToFile("fleet.dat", FLEET)
 
@@ -530,28 +530,8 @@ function functions.initialsePlanets()
 	PLANETS[14].column = 7
     PLANETS[14].tooltip = "-3 pilot / -3 fighter"
 
-    cf.saveTableToFile("planets.dat", PLANETS)
-
-    PLANETS[1].image = IMAGE[enum.imagePlanet1]
-
-    PLANETS[2].image = IMAGE[enum.imagePlanet2]
-    PLANETS[3].image = IMAGE[enum.imagePlanet3]
-
-    PLANETS[4].image = IMAGE[enum.imagePlanet4]
-    PLANETS[5].image = IMAGE[enum.imagePlanet5]
-    PLANETS[6].image = IMAGE[enum.imagePlanet6]
-
-    PLANETS[7].image = IMAGE[enum.imagePlanet7]
-    PLANETS[8].image = IMAGE[enum.imagePlanet8]
-
-    PLANETS[9].image = IMAGE[enum.imagePlanet9]
-    PLANETS[10].image = IMAGE[enum.imagePlanet10]
-    PLANETS[11].image = IMAGE[enum.imagePlanet11]
-
-    PLANETS[12].image = IMAGE[enum.imagePlanet12]
-    PLANETS[13].image = IMAGE[enum.imagePlanet13]
-
-    PLANETS[14].image = IMAGE[enum.imagePlanet14]
+    cf.saveTableToFile("planets.dat", PLANETS)          -- planets are unique each game so store that here
+    fun.loadImagesIntoPlanets()         -- loads images into the PLANETS table
 end
 
 function functions.getPilot(guid)
@@ -616,6 +596,30 @@ function functions.getActivePilotCount()
 		end
 	end
 	return result
+end
+
+function functions.loadImagesIntoPlanets()
+
+    PLANETS[1].image = IMAGE[enum.imagePlanet1]
+
+    PLANETS[2].image = IMAGE[enum.imagePlanet2]
+    PLANETS[3].image = IMAGE[enum.imagePlanet3]
+
+    PLANETS[4].image = IMAGE[enum.imagePlanet4]
+    PLANETS[5].image = IMAGE[enum.imagePlanet5]
+    PLANETS[6].image = IMAGE[enum.imagePlanet6]
+
+    PLANETS[7].image = IMAGE[enum.imagePlanet7]
+    PLANETS[8].image = IMAGE[enum.imagePlanet8]
+
+    PLANETS[9].image = IMAGE[enum.imagePlanet9]
+    PLANETS[10].image = IMAGE[enum.imagePlanet10]
+    PLANETS[11].image = IMAGE[enum.imagePlanet11]
+
+    PLANETS[12].image = IMAGE[enum.imagePlanet12]
+    PLANETS[13].image = IMAGE[enum.imagePlanet13]
+
+    PLANETS[14].image = IMAGE[enum.imagePlanet14]
 end
 
 return functions
