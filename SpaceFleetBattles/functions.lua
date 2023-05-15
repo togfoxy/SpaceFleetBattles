@@ -11,6 +11,9 @@ function functions.loadImages()
     IMAGE[enum.imageBattleRoster] = love.graphics.newImage("assets/images/207634_1920_1217.png")
     IMAGE[enum.imageEndBattle] = love.graphics.newImage("assets/images/982225.jpg")
 
+    IMAGE[enum.imageCrosshairsHasTarget] = love.graphics.newImage("assets/images/image0017.png")
+    IMAGE[enum.imageCrosshairsIsTarget] = love.graphics.newImage("assets/images/image0018.png")
+
     IMAGE[enum.imagePlanet1] = love.graphics.newImage("assets/images/planet1.png")
     IMAGE[enum.imagePlanet2] = love.graphics.newImage("assets/images/planet2.png")
     IMAGE[enum.imagePlanet3] = love.graphics.newImage("assets/images/planet3.png")
