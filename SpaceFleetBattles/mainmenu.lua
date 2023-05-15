@@ -9,14 +9,24 @@ function mainmenu.mousereleased(rx, ry, x, y, button)
 		fun.initialiseRoster()
 		fun.initialiseHanger()
 		fun.initialiseFleet()
-        fun.initialsePlanets()
+        fun.initialsePlanets()      -- also saves to file
+
+        cf.saveTableToFile("fleet.dat", FLEET)
+        cf.saveTableToFile("roster.dat", ROSTER)
+        cf.saveTableToFile("hanger.dat", HANGER)
+        -- planets is saved after creation but before images are loaded
+
 		cf.addScreen(enum.scenePlanetMap, SCREEN_STACK)
 
 	elseif clickedButtonID == enum.buttonMainMenuContinueGame then
 		-- load game
         ROSTER = cf.loadTableFromFile("roster.dat")         --! test what happens when file doesn't exist.
         HANGER = cf.loadTableFromFile("hanger.dat")
-        PLANETS = cf.loadTableFromFile("planets.dat")
+        PLANETS = cf.loadTableFromFile("planets.dat")       -- planets change size so store that here
+        FLEET = cf.loadTableFromFile("fleet.dat")
+
+        fun.loadImagesIntoPlanets()         -- loads images into the PLANETS table
+
 		-- swap to fight scene
         cf.addScreen(enum.scenePlanetMap, SCREEN_STACK)
 

@@ -55,8 +55,7 @@ function endbattle.draw()
     drawy = drawy + 50
 
     --! add global score as well
-	print(inspect(SCORE))
-	error()
+
 
     love.graphics.setFont(FONT[enum.fontDefault])
     buttons.drawButtons()
@@ -87,6 +86,8 @@ function endbattle.update(dt)
         end
 
         cf.saveTableToFile("hanger.dat", HANGER)
+
+    	print(inspect(SCORE))
     end
 end
 
