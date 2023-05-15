@@ -25,21 +25,26 @@ local function adjustResourceLevels()
 
 end
 
-
-
 local function drawPlanets()
 
     -- draw bg
     love.graphics.draw(IMAGE[enum.imagePlanetBG], 0, 0, 0, 2, 2)
 
     -- draw planets
+	love.graphics.setFont(FONT[enum.fontMedium])
     for i = 1, #PLANETS do
+		-- draw the planet image
 		love.graphics.setColor(1,1,1,1)
         love.graphics.draw(PLANETS[i].image, PLANETS[i].x, PLANETS[i].y, 0, PLANETS[i].scale, PLANETS[i].scale, 150, 150)
 
+		-- draw the resources text
+		love.graphics.print(PLANETS[i].tooltip, PLANETS[i].x, PLANETS[i].y - 75)
+
+		-- add a dot for debugging purposes
 		love.graphics.setColor(1,0,0,1)
 		love.graphics.circle("fill", PLANETS[i].x, PLANETS[i].y, 5)
     end
+	love.graphics.setFont(FONT[enum.fontDefault])
 
     -- draw players fleet
 	local sector

@@ -36,8 +36,8 @@ function constants.load()
     FRIEND_START_X = 0      			-- left side of screen
     FOE_START_X = SCREEN_WIDTH * 2		-- right side of screen
 
-    FRIEND_FIGHTER_COUNT = 24 - 6		-- used to initalise the hanger. The -6 is to offset the homeworld +6
-    FRIEND_PILOT_COUNT = 24 - 6		-- used to initialise the hanger. The -6 is to offset the homeworld +6
+    FRIEND_FIGHTER_COUNT = 24 - 3		-- used to initalise the hanger. The -6 is to offset the homeworld +6
+    FRIEND_PILOT_COUNT = 24 - 3		-- used to initialise the hanger. The -6 is to offset the homeworld +6
 
 	FOE_FIGHTER_COUNT = 24			-- these aren't really constants
 	FOE_PILOT_COUNT = 24			-- these aren't really constants

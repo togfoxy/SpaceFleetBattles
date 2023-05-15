@@ -461,6 +461,7 @@ function functions.initialsePlanets()
     for i = 1, 14 do
         PLANETS[i] = {}
         PLANETS[i].scale = love.math.random(4,6) / 10
+        PLANETS[i].tooltip = ""
     end
 
     local startx = 425
@@ -469,50 +470,65 @@ function functions.initialsePlanets()
     PLANETS[1].x = startx       -- this is an easy way to shift and move the whole galaxy
     PLANETS[1].y = starty
     PLANETS[1].column = 1
+    PLANETS[1].tooltip = "+3 pilot / +3 fighter"
 
     PLANETS[2].x = startx + 200
     PLANETS[2].y = starty - 150
 	PLANETS[2].column = 2
+    PLANETS[2].tooltip = "+2 pilot"
     PLANETS[3].x = startx + 200
     PLANETS[3].y = starty + 150
 	PLANETS[3].column = 2
+    PLANETS[3].tooltip = "+2 fighter"
 
     PLANETS[4].x = startx + 400
     PLANETS[4].y = starty - 300
 	PLANETS[4].column = 3
+    PLANETS[4].tooltip = "+1 fighter"
     PLANETS[5].x = startx + 400
     PLANETS[5].y = starty - 0
 	PLANETS[5].column = 3
+    PLANETS[5].tooltip = "+1 pilot"
     PLANETS[6].x = startx + 400
     PLANETS[6].y = starty + 300
 	PLANETS[6].column = 3
+    PLANETS[6].tooltip = "+1 fighter"
 
     PLANETS[7].x = startx + 600
     PLANETS[7].y = starty - 150
 	PLANETS[7].column = 4
+    -- PLANETS[7].tooltip = "+1 pilot"
     PLANETS[8].x = startx + 600
     PLANETS[8].y = starty + 150
 	PLANETS[8].column = 4
+    -- PLANETS[8].tooltip = "+1 fighter"
+
     PLANETS[9].x = startx + 800
     PLANETS[9].y = starty - 300
  	PLANETS[9].column = 5
+    PLANETS[9].tooltip = "-1 fighter"
     PLANETS[10].x = startx + 800
     PLANETS[10].y = starty - 0
 	PLANETS[10].column = 5
+    PLANETS[10].tooltip = "-1 pilot"
     PLANETS[11].x = startx + 800
     PLANETS[11].y = starty + 300
 	PLANETS[11].column = 5
+    PLANETS[11].tooltip = "-1 fighter"
 
     PLANETS[12].x = startx + 1000
     PLANETS[12].y = starty - 150
  	PLANETS[12].column = 6
+    PLANETS[12].tooltip = "-2 pilot"
     PLANETS[13].x = startx + 1000
     PLANETS[13].y = starty + 150
 	PLANETS[13].column = 6
+    PLANETS[13].tooltip = "-2 fighter"
 
     PLANETS[14].x = startx + 1200
     PLANETS[14].y = starty
 	PLANETS[14].column = 7
+    PLANETS[14].tooltip = "-3 pilot / -3 fighter"
 
     cf.saveTableToFile("planets.dat", PLANETS)
 
