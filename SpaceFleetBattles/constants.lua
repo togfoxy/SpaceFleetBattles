@@ -48,9 +48,9 @@ function constants.load()
     FOE_SHIPS_PER_SQUADRON = 6
 
     RTB_TIMER = 0
-    RTB_TIMER_LIMIT = 60 * 5        -- commander will RTB after this time limit
+    RTB_TIMER_LIMIT = 60 * 4        -- commander will RTB after this time limit
     BATTLE_TIMER = 0
-    BATTLE_TIMER_LIMIT = 60 * 6     -- game will assume a stalemate and end at this piont
+    BATTLE_TIMER_LIMIT = RTB_TIMER_LIMIT + 45     -- game will assume a stalemate and end at this piont
 
     OBJECTS = {}            -- table of items
     SQUADS = {}             -- a list of squad guids
@@ -80,7 +80,7 @@ function constants.load()
 	battleRosterHasLoaded = false
 	fightsceneHasLoaded = false
 	endBattleHasLoaded = false
-    
+
 
 end
 
