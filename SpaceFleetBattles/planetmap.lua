@@ -79,7 +79,6 @@ function planetmap.mousereleased(rx, ry, x, y, button)
 				-- move to new sector
 				FLEET.newSector = planetclicked
 			else
-				--! make an error sound or something like that
 				cf.playAudio(enum.audioMouseClick, false, true)		-- stream, static
 			end
 		end
