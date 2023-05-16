@@ -19,10 +19,53 @@ local function getPlanetClicked(x, y)
 	end
 end
 
+local function createPilotFighter(numpilots, numfighters, forf)
+	-- a helper function to cut down on lines of code
+	-- input: number of pilots to add to roster
+	-- input: number of fighters to add to roster
+	-- input: forf value
+	for i = 1, numpilots do
+		local thispilot = fun.createNewPilot()
+		table.insert(ROSTER, thispilot)
+	end
+	for i = 1, numfighters do
+		local fighter = fighter.createHangerFighter(forf)
+		fighter.isLaunched = false
+		table.insert(HANGER, fighter)
+	end
+end
+
 local function adjustResourceLevels()
+	-- remember that resource levels only adjust the gloal supply. It doesn't change how many fighters are in the battle
+	-- unless your supply goes below the maximum for the battle
 
 	local currentsector = FLEET.sector
-
+	if currentsector == 1 then
+		createPilotFighter(3,3, enum.forfFriend)
+	elseif currentsector == 2 then
+		createPilotFighter(2,0, enum.forfFriend)		-- pilot / fighter
+	elseif currentsector == 3 then
+		createPilotFighter(0,2, enum.forfFriend)
+	elseif currentsector == 4 then
+		createPilotFighter(0,1, enum.forfFriend)
+	elseif currentsector == 5 then
+		createPilotFighter(1,0, enum.forfFriend)
+	elseif currentsector == 6 then
+		createPilotFighter(0,1, enum.forfFriend)
+	elseif currentsector == 9 then
+		FOE_FIGHTER_COUNT = FOE_FIGHTER_COUNT + 1
+	elseif currentsector == 10 then
+		FOE_PILOT_COUNT = FOE_PILOT_COUNT + 1
+	elseif currentsector == 11 then
+		FOE_FIGHTER_COUNT = FOE_FIGHTER_COUNT + 1
+	elseif currentsector == 12 then
+		FOE_PILOT_COUNT = FOE_PILOT_COUNT + 2
+	elseif currentsector == 13 then
+		FOE_FIGHTER_COUNT = FOE_FIGHTER_COUNT + 2
+	elseif currentsector == 14 then
+		FOE_FIGHTER_COUNT = FOE_FIGHTER_COUNT + 3
+		FOE_PILOT_COUNT = FOE_PILOT_COUNT + 3
+	end
 end
 
 local function drawPlanets()

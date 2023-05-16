@@ -277,6 +277,8 @@ function functions.applyDamage(victim, bullet)
 		fun.createAnimation(victim, enum.animExplosion)
         if victim.forf == enum.forfFriend then
             SCORE.friendsdead = SCORE.friendsdead + 1
+            FOE_FIGHTER_COUNT = FOE_FIGHTER_COUNT - 1
+            FOE_PILOT_COUNT = FOE_PILOT_COUNT - 1
         elseif victim.forf == enum.forfEnemy then
             SCORE.enemiesdead = SCORE.enemiesdead + 1
         end
@@ -419,19 +421,25 @@ function functions.unitIsTargeted(guid)
     return false
 end
 
+function functions.createNewPilot()
+    -- retun a pilot object
+    local thispilot = {}
+    thispilot.guid = cf.getGUID()
+    thispilot.firstname = "Bob"
+    thispilot.lastname = "Starbuck"
+    thispilot.health = 100
+    thispilot.vesselguid = nil
+    thispilot.kills = 0
+    thispilot.missions = 0
+    thispilot.ejections = 0
+    thispilot.isDead = false
+    return thispilot
+end
+
 function functions.initialiseRoster()
 	ROSTER = {}
 	for i = 1, FRIEND_PILOT_COUNT do
-		local thispilot = {}
-		thispilot.guid = cf.getGUID()
-		thispilot.firstname = "Bob"
-		thispilot.lastname = "Starbuck"
-		thispilot.health = 100
-		thispilot.vesselguid = nil
-		thispilot.kills = 0
-		thispilot.missions = 0
-		thispilot.ejections = 0
-        thispilot.isDead = false
+		local thispilot = fun.createNewPilot()
 		table.insert(ROSTER, thispilot)
 	end
 	ROSTER[1].isPlayer = true

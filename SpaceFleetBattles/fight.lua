@@ -391,6 +391,7 @@ function fight.update(dt)
     end
 
     if battleOver() or BATTLE_TIMER > BATTLE_TIMER_LIMIT then
+        --! add fleet movement points based on win (+1) or loss (-1)
 		fightsceneHasLoaded = false
         cf.swapScreen(enum.sceneEndBattle, SCREEN_STACK)
     end
