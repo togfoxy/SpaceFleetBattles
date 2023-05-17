@@ -141,6 +141,7 @@ local function adjustAngle(Obj, dt)
 
     assert(Obj.body:isBullet() == false)
 
+	-- ensure angle is within 0 -> 2 PI
     while Obj.body:getAngle() > (math.pi * 2) do
         -- print("Angle was: " .. Obj.body:getAngle())
         Obj.body:setAngle(Obj.body:getAngle() - (math.pi * 2))
@@ -152,12 +153,11 @@ local function adjustAngle(Obj, dt)
         -- print("Angle now: " .. Obj.body:getAngle())
     end
 
-    local bearingrad
+	local objx, objy = Obj.body:getPosition()
 
     -- turn to destination if one exists
     if Obj.actions[1] ~= nil and Obj.actions[1].destx ~= nil then
         -- move to destination
-        local objx, objy = Obj.body:getPosition()
         local destx = Obj.actions[1].destx
         local desty = Obj.actions[1].desty
         local disttodest = cf.getDistance(objx, objy, destx, desty)
@@ -170,7 +170,6 @@ local function adjustAngle(Obj, dt)
 
     -- turn to target if one exists
     elseif Obj.actions[1] ~= nil and Obj.actions[1].targetguid ~= nil then
-        local x1, y1 = Obj.body:getPosition()           --! can refactor this code
         local enemyobject = fun.getObject(Obj.actions[1].targetguid)
         if enemyobject == nil or enemyobject.body:isDestroyed() then
             -- somehow, the target is no longer legitimate
@@ -458,7 +457,7 @@ local function updateUnitTask(Obj, squadorder, dt)
                     setTaskRTB(Obj)
                 -- print("Unit task: RTB")
             else
-                --! no squad order or unexpected squad order
+                -- no squad order or unexpected squad order
                 Obj.actions[1] = nil
                 print("No squad order available for this unit")
             end
@@ -471,7 +470,7 @@ function unitai.update(dt)
     -- update the unit based on orders broadcasted in squadAI
 
     local squadorder
-    for k = #OBJECTS, 1, -1 do          --! this backwards thing is unnecessary
+    for k = #OBJECTS, 1, -1 do
         Obj = OBJECTS[k]
         local callsign = Obj.squadCallsign
         local objcategory = Obj.fixture:getCategory()
@@ -497,19 +496,6 @@ function unitai.update(dt)
             -- must be a bullet. Do nothing
         end
     end
-    --! debugging only
-    -- if OBJECTS[1].actions ~= nil then
-    --     if OBJECTS[1].actions[1].targetguid ~= nil then
-    --         local targetguid = OBJECTS[1].actions[1].targetguid
-    --         local targetObj = fun.getObject(targetguid)
-    --         if targetObj == nil then
-    --             OBJECTS[1].actions[1].cooldown = 0
-    --         else
-    --             local cat = targetObj.fixture:getCategory()
-    --             -- print("Object 1 target type = " .. cat)
-    --         end
-    --     end
-    -- end
 end
 
 return unitai

@@ -90,7 +90,7 @@ local function addPilotandFighterToBattle(thispilot, thisfighter, thiscallsign)
 	table.insert(OBJECTS, thisfighter)		-- pilots go into fighters but they don't go into OBJECTS
 
 	if thispilot.isPlayer then
-		PLAYER_FIGHTER_GUID = thisfighter.guid      --! can probably do this better
+		PLAYER_FIGHTER_GUID = thisfighter.guid
 	end
 end
 
@@ -104,7 +104,7 @@ local function loadBattleObjects()
 
 	-- do friendly fleet first
 	local livingroster = fun.getActivePilotCount()
-	local numfriendlyfighters = math.min(livingroster, #HANGER)				--! the roster/hanger needs to go up and down based on battle results and planet sectors
+	local numfriendlyfighters = math.min(livingroster, #HANGER)
 	if numfriendlyfighters > 12 then numfriendlyfighters = 12 end
 
 	-- establish the correct amount of friendly squads
@@ -144,7 +144,7 @@ local function loadBattleObjects()
 	end
 
 	local numenemyfighters = math.min(FOE_FIGHTER_COUNT, FOE_PILOT_COUNT)
-	if numenemyfighters > 12 then numenemyfighters = 12 end		--! this code is here but not yet utilised
+	if numenemyfighters > 12 then numenemyfighters = 12 end
 
 	-- establish the correct amount of enemy squads
 	local callsign = {}

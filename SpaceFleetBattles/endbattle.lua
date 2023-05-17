@@ -56,7 +56,6 @@ function endbattle.draw()
 
     --! add global score as well
 
-
     love.graphics.setFont(FONT[enum.fontDefault])
     buttons.drawButtons()
 end

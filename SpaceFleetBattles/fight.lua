@@ -17,13 +17,7 @@ local function destroyObjects(dt)
                     fun.createAnimation(OBJECTS[i], enum.animBulletSmoke)
                 end
 
-                --! debugging
-                -- if OBJECTS[i].fixture:getCategory() == enum.categoryEnemyFighter or OBJECTS[i].fixture:getCategory() == enum.categoryFriendlyFighter then
-                --     print("Fighter object destroyed")
-                --     -- print(inspect(OBJECTS[1]))
-                -- end
-                -- print("guid and object destroyed: " .. OBJECTS[i].guid)
-                OBJECTS[i].fixture:destroy()                --! check if mass changes
+                OBJECTS[i].fixture:destroy()
                 OBJECTS[i].body:destroy()
                 table.remove(OBJECTS, i)
             end
@@ -74,17 +68,16 @@ function fight.mousemoved(x, y, dx, dy)
         snapcamera = false
         TRANSLATEX = TRANSLATEX - dx
         TRANSLATEY = TRANSLATEY - dy
-    end
-end
-
-function fight.mousereleased(rx, ry, x, y, button)
-    if button == 1 then
-        if fun.isPlayerAlive() then
+	else
+		-- check for mouse over the player then display menu
+		if fun.isPlayerAlive() then
             -- see if player unit is clicked
-            local objscreenx, objscreeny = cam:toScreen(OBJECTS[1].body:getX(), OBJECTS[1].body:getY()) -- need to convert physical to screen
+			local Obj = fun.getObject(PLAYER_FIGHTER_GUID)
+            local objscreenx, objscreeny = cam:toScreen(Obj.body:getX(), Obj.body:getY()) -- need to convert physical to screen
             local dist = cf.getDistance(rx, ry, objscreenx, objscreeny)
+
             if dist <= 20 then
-                -- player unit is clicked
+                -- player unit is moused over
                 showmenu = not showmenu
                 if showmenu then
                     pause = true
@@ -92,13 +85,37 @@ function fight.mousereleased(rx, ry, x, y, button)
                     pause = false
                 end
             else
-                -- if clicking off the menu then turn off menu
+                -- if mousing off the menu then turn off menu
                 if showmenu then
                     showmenu = false
                     pause = false
                 end
             end
         end
+    end
+end
+
+function fight.mousereleased(rx, ry, x, y, button)
+    if button == 1 then
+		-- menu appears during mouse over. This is to check if menu is clicked
+		if fun.isPlayerAlive() then
+            -- see if player unit is clicked
+			local Obj = fun.getObject(PLAYER_FIGHTER_GUID)
+			local objx, objy = res.toGame(Obj.body:getX(), Obj.body:getY()) -- need to convert physical to screen
+            local objscreenx, objscreeny = cam:toScreen(objx, objy) -- need to convert physical to screen
+	
+			-- check if mouse click is on menu 
+			--! these numbers are made up. Need to work out real numbers
+			if objscreenx >= objx and objscreenx <= objx + 30 and objscreeny >= objy and objscreeny <= objy + 50 then
+				-- engage has been clicked
+				print("Engage!"
+			elseif if objscreenx >= objx and objscreenx <= objx + 30 and objscreeny >= objy + 51 and objscreeny <= objy + 70 then
+				print("RTB")
+			elseif if objscreenx >= objx and objscreenx <= objx + 30 and objscreeny >= objy  + 71 and objscreeny <= objy + 100 then
+				print("Eject!")
+				
+			end
+		end
     end
 end
 
@@ -148,11 +165,70 @@ local function drawHUD()
     love.graphics.setFont(FONT[enum.fontDefault])
 end
 
+local function drawMenu()
+
+	local Obj = fun.getObject(PLAYER_FIGHTER_GUID)
+	local drawx, drawy = res.toGame(Obj.body:getX(), Obj.body:getY()) -- need to convert physical to screen
+
+	-- fill the menu box
+	local menuwidth = 150
+	love.graphics.setColor(0.5, 0.5, 0.5, 1)
+	love.graphics.rectangle("fill", drawx, drawy, menuwidth, 75, 10, 10)
+
+	-- draw an outline
+	love.graphics.setColor(1,1,1,1)
+	love.graphics.rectangle("line", drawx, drawy, menuwidth, 75, 10, 10)
+
+	-- draw squad orders an a line
+	local squadcallsign = Obj.squadCallsign
+	local orderenum = squadAI[squadcallsign].orders[1].order
+	if orderenum == enum.squadOrdersEngage then
+		txt = "Squad: engage"
+	elseif orderenum == enum.squadOrdersReturnToBase then
+		txt = "Squad: return to base"
+	end
+
+	love.graphics.setColor(0,0,0,1)
+	love.graphics.print(txt, drawx + 5, drawy)
+	love.graphics.setColor(1,1,1,1)
+	love.graphics.line(drawx, drawy + 15, drawx + menuwidth, drawy + 15)
+
+	-- draw current action and a line
+	actionenum = Obj.actions[1].action
+	if actionenum == enum.unitActionEngaging then
+		txt = "Engaging"
+	elseif actionenum == enum.unitActionReturningToBase then
+		txt = "Returning to base"
+	elseif actionenum == enum.unitActionEject then
+		txt = "Ejecting!"
+	elseif actionenum == enum.unitActionReturningToBase then
+		txt = "Moving to destination"
+	end
+	if txt ~= nil then
+		love.graphics.setColor(0,0,0,1)
+		love.graphics.print(txt, drawx + 5, drawy + 18)
+		love.graphics.setColor(1,1,1,1)
+		love.graphics.line(drawx, drawy + 36, drawx + menuwidth, drawy + 36)
+	end
+
+	-- draw the list of actions the player can issue
+	--! check the x and y's draw correctly
+	love.graphics.setColor(0,0,0,1)
+	txt = "Engage"
+	love.graphics.print(txt, drawx + 5, drawy + 25)
+	txt = "Return to base"
+	love.graphics.print(txt, drawx + 5, drawy + 40)
+	txt = "Eject!"
+	love.graphics.print(txt, drawx + 5, drawy + 65)
+end
+
 function fight.draw()
 
     drawHUD()       -- do this before the attach
 
     cam:attach()
+	
+	local playerfighter = fun.getObject(PLAYER_FIGHTER_GUID)
 
     -- draw BG
     love.graphics.setColor(1,1,1,0.25)
@@ -169,7 +245,6 @@ function fight.draw()
         local objy = Obj.body:getY()
         local drawx = objx
         local drawy = objy
-        local cat = Obj.fixture:getCategory()               --! probably not used
 
         -- draw callsign first
         -- if Obj.squadCallsign ~= nil then
@@ -212,13 +287,10 @@ function fight.draw()
                     love.graphics.polygon("fill", points)
                 elseif shape:typeOf("CircleShape") then
                     --
-                    local drawx, drawy = Obj.body:getWorldPoints(shape:getPoint())
-                    drawx = drawx
-                    drawy = drawy
+                    local bodyx, bodyy = Obj.body:getWorldPoints(shape:getPoint())
                     local radius = shape:getRadius()
-                    radius = radius
                     love.graphics.setColor(1, 0, 0, 1)
-                    love.graphics.circle("line", drawx, drawy, radius)
+                    love.graphics.circle("line", bodyx, bodyy, radius)
                 else
                     error()
                 end
@@ -249,12 +321,11 @@ function fight.draw()
 
     -- draw target recticle for player 1
     if fun.isPlayerAlive() then
-        local Obj = fun.getObject(PLAYER_FIGHTER_GUID)
         -- player still alive
-        if Obj.actions ~= nil and Obj.actions[1] ~= nil then
-            if Obj.actions[1].targetguid ~= nil then
-                local guid = Obj.actions[1].targetguid
-                local enemy = fun.getObject(guid)
+        if playerfighter.actions ~= nil and playerfighter.actions[1] ~= nil then
+            if playerfighter.actions[1].targetguid ~= nil then
+                local targetguid = playerfighter.actions[1].targetguid
+                local enemy = fun.getObject(targetguid)
                 if enemy ~= nil and not enemy.body:isDestroyed() then
                     local drawx = enemy.body:getX()
                     local drawy = enemy.body:getY()
@@ -271,10 +342,9 @@ function fight.draw()
     local playeristargeted = fun.unitIsTargeted(PLAYER_FIGHTER_GUID)
     if playeristargeted then
         -- draw yellow recticle on player craft
-        local Obj = fun.getObject(PLAYER_FIGHTER_GUID)              --! should probably move this line to top of function
-        if Obj ~= nil and Obj.fixture:getCategory() ~= enum.categoryFriendlyPod then
-            local objx = Obj.body:getX()
-            local objy = Obj.body:getY()
+        if playerfighter ~= nil and playerfighter.fixture:getCategory() ~= enum.categoryFriendlyPod then
+            local objx = playerfighter.body:getX()
+            local objy = playerfighter.body:getY()
             -- local linelength = 12
             -- love.graphics.setColor(1, 0.5, 0, 1)
             -- love.graphics.line(objx, objy - linelength, objx + linelength, objy + linelength, objx - linelength, objy + linelength, objx, objy - linelength)
@@ -286,64 +356,24 @@ function fight.draw()
 
     -- draw the menu if menu is open
     if showmenu and fun.isPlayerAlive() then
-        local Obj = fun.getObject(PLAYER_FIGHTER_GUID)
-        local drawx, drawy = res.toGame(Obj.body:getX(), Obj.body:getY()) -- need to convert physical to screen
-
-        -- fill the menu box
-        local menuwidth = 150
-        love.graphics.setColor(0.5, 0.5, 0.5, 1)
-        love.graphics.rectangle("fill", drawx, drawy, menuwidth, 75, 10, 10)
-
-        -- draw an outline
-        love.graphics.setColor(1,1,1,1)
-        love.graphics.rectangle("line", drawx, drawy, menuwidth, 75, 10, 10)
-
-        -- draw squad orders an a line
-        local squadcallsign = Obj.squadCallsign
-        local orderenum = squadAI[squadcallsign].orders[1].order
-        if orderenum == enum.squadOrdersEngage then
-            txt = "Squad: engage"
-        elseif orderenum == enum.squadOrdersReturnToBase then
-            txt = "Squad: return to base"
-        end
-
-        love.graphics.setColor(0,0,0,1)
-        love.graphics.print(txt, drawx + 5, drawy)
-        love.graphics.setColor(1,1,1,1)
-        love.graphics.line(drawx, drawy + 15, drawx + menuwidth, drawy + 15)
-
-        -- draw current action and a line
-        actionenum = Obj.actions[1].action
-        if actionenum == enum.unitActionEngaging then
-            txt = "Engaging"
-        elseif actionenum == enum.unitActionReturningToBase then
-            txt = "Returning to base"
-        end
-        if txt ~= nil then
-            love.graphics.setColor(0,0,0,1)
-            love.graphics.print(txt, drawx + 5, drawy + 18)
-            love.graphics.setColor(1,1,1,1)
-            love.graphics.line(drawx, drawy + 36, drawx + menuwidth, drawy + 36)
-        end
+		drawMenu()
     end
 
     -- draw current action
     local txt
-    if fun.isPlayerAlive() then
-        local Obj = fun.getObject(PLAYER_FIGHTER_GUID)
-        currentaction = fun.getTopAction(Obj)
+    -- if fun.isPlayerAlive() then
+        currentaction = fun.getTopAction(playerfighter)
         if currentaction ~= nil then
             txt = currentaction.action
         else
             txt = "None"
         end
-        local drawx, drawy = res.toGame(Obj.body:getX(), Obj.body:getY()) -- need to convert physical to screen
+        local drawx, drawy = res.toGame(playerfighter.body:getX(), playerfighter.body:getY()) -- need to convert physical to screen
         love.graphics.setColor(1,1,1,1)
         love.graphics.print(txt, drawx - 20, drawy + 10)
-    end
+    -- end
 
     -- animations are drawn in love.draw()
-    -- cf.printAllPhysicsObjects(PHYSICSWORLD, 1)
     cam:detach()
 end
 
@@ -355,7 +385,7 @@ function fight.update(dt)
         commanderAI[1].forf = enum.forfFriend
         commanderAI[2] = {}
         commanderAI[2].forf = enum.forfEnemy
-        --! neutral commander?
+        -- neutral commander things go here
 
 		local playerfighter = fun.getPlayerPilot()
 
@@ -367,6 +397,10 @@ function fight.update(dt)
 
         RTB_TIMER = 0
         BATTLE_TIMER = 0
+		
+		snapcamera = true
+		pause = false
+		showmenu = false
     end
 
     if not pause then
