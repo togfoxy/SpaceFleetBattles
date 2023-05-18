@@ -90,30 +90,38 @@ function fight.mousereleased(rx, ry, x, y, button)
 		-- menu appears during mouse over. This is to check if menu is clicked
 		if fun.isPlayerAlive() then
             -- see if player unit is clicked
-            local Obj = fun.getObject(PLAYER_FIGHTER_GUID)
-            local objscreenx, objscreeny = cam:toScreen(Obj.body:getX(), Obj.body:getY()) -- need to convert physical to screen
+            local Obj = fun.getObject(PLAYER_FIGHTER_GUID)              -- get the hanger object with physics body
+            local objx, objy = Obj.body:getPosition()                   -- get the physics x/y
+            local robjx, robjy = res.toGame(objx, objy)                 -- scale that to the current resolution
+            local crobjx, crobjy = cam:toScreen(robjx, robjy)           -- convert that to the screen
+            local xadj = (rx - crobjx) / ZOOMFACTOR                     -- do a diff and apply the zoom
+            local yadj = (ry - crobjy) / ZOOMFACTOR
+            -- print(cf.getDistance(x, y, crobjx, crobjy) / ZOOMFACTOR)
+            -- print(cf.getDistance(rx, ry, crobjx, crobjy) / ZOOMFACTOR)       -- going to use this one for now
+            -- print((rx - crobjx) / ZOOMFACTOR, (ry - crobjy) / ZOOMFACTOR)
+            -- print(xadj, yadj)
 
-            local dist = cf.getDistance(x, y, objscreenx, objscreeny)
-
-            if dist > 150 then
+            local dist = cf.getDistance(rx, ry, crobjx, crobjy) / ZOOMFACTOR
+            if dist > 250 then
                 -- player unit is moused over
                 showmenu = false
                 pause = false
             end
 
-            if x >= objscreenx and x <= objscreenx + 200 and y >= objscreeny + 36 and y <= objscreeny + 55 then
+            if xadj >= -5 and xadj <= 205 and yadj >= 40 and yadj <= 60 then
 				-- engage has been clicked
 				print("Engage!")
-			elseif x >= objscreenx and x <= objscreenx + 200 and y >= objscreeny + 56 and y <= objscreeny + 75 then
+                showmenu = false
+                pause = false
+			elseif xadj >= -5 and xadj <= 205 and yadj >= 60 and yadj <= 80 then
 				print("RTB")
-			elseif x >= objscreenx and x <= objscreenx + 200 and y >= objscreeny + 76 and y <= objscreeny + 96 then
+                showmenu = false
+                pause = false
+			elseif xadj >= -5 and xadj <= 205 and yadj >= 80 and yadj <= 100 then
 				print("Eject!")
+                showmenu = false
+                pause = false
 			end
-
-            print(x, y, objscreenx, objscreeny)
-            -- love.graphics.rectangle("line", objx, objy + 36, 200, 20)
-            -- love.graphics.rectangle("line", objx, objy + 56, 200, 20)
-            -- love.graphics.rectangle("line", objx, objy + 76, 200, 20)
 		end
     end
 end
@@ -224,13 +232,12 @@ local function drawMenu()
 	love.graphics.print(txt, drawx + 5, drawy + 80)
 
     -- debugging menu
-    love.graphics.setColor(1,0,0,1)
-    local Obj = fun.getObject(PLAYER_FIGHTER_GUID)
-    local objx, objy = res.toGame(Obj.body:getX(), Obj.body:getY())
-
-    love.graphics.rectangle("line", objx, objy + 36, 200, 20)
-    love.graphics.rectangle("line", objx, objy + 56, 200, 20)
-    love.graphics.rectangle("line", objx, objy + 76, 200, 20)
+    -- love.graphics.setColor(1,0,0,1)
+    -- local Obj = fun.getObject(PLAYER_FIGHTER_GUID)
+    -- local objx, objy = res.toGame(Obj.body:getX(), Obj.body:getY())
+    -- love.graphics.rectangle("line", objx, objy + 36, 200, 20)
+    -- love.graphics.rectangle("line", objx, objy + 56, 200, 20)
+    -- love.graphics.rectangle("line", objx, objy + 76, 200, 20)
 
 end
 
