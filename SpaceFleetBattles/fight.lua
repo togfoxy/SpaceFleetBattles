@@ -74,22 +74,12 @@ function fight.mousemoved(x, y, dx, dy)
             -- see if player unit is clicked
 			local Obj = fun.getObject(PLAYER_FIGHTER_GUID)
             local objscreenx, objscreeny = cam:toScreen(Obj.body:getX(), Obj.body:getY()) -- need to convert physical to screen
-            local dist = cf.getDistance(rx, ry, objscreenx, objscreeny)
+            local dist = cf.getDistance(x, y, objscreenx, objscreeny)
 
-            if dist <= 20 then
+            if dist <= 30 then
                 -- player unit is moused over
-                showmenu = not showmenu
-                if showmenu then
-                    pause = true
-                else
-                    pause = false
-                end
-            else
-                -- if mousing off the menu then turn off menu
-                if showmenu then
-                    showmenu = false
-                    pause = false
-                end
+                showmenu = true
+                pause = true
             end
         end
     end
@@ -100,20 +90,37 @@ function fight.mousereleased(rx, ry, x, y, button)
 		-- menu appears during mouse over. This is to check if menu is clicked
 		if fun.isPlayerAlive() then
             -- see if player unit is clicked
-			local Obj = fun.getObject(PLAYER_FIGHTER_GUID)
-			local objx, objy = res.toGame(Obj.body:getX(), Obj.body:getY()) -- need to convert physical to screen
-            local objscreenx, objscreeny = cam:toScreen(objx, objy) -- need to convert physical to screen
-	
-			-- check if mouse click is on menu 
-			--! these numbers are made up. Need to work out real numbers
-			if objscreenx >= objx and objscreenx <= objx + 30 and objscreeny >= objy and objscreeny <= objy + 50 then
+            local Obj = fun.getObject(PLAYER_FIGHTER_GUID)              -- get the hanger object with physics body
+            local objx, objy = Obj.body:getPosition()                   -- get the physics x/y
+            local robjx, robjy = res.toGame(objx, objy)                 -- scale that to the current resolution
+            local crobjx, crobjy = cam:toScreen(robjx, robjy)           -- convert that to the screen
+            local xadj = (rx - crobjx) / ZOOMFACTOR                     -- do a diff and apply the zoom
+            local yadj = (ry - crobjy) / ZOOMFACTOR
+            -- print(cf.getDistance(x, y, crobjx, crobjy) / ZOOMFACTOR)
+            -- print(cf.getDistance(rx, ry, crobjx, crobjy) / ZOOMFACTOR)       -- going to use this one for now
+            -- print((rx - crobjx) / ZOOMFACTOR, (ry - crobjy) / ZOOMFACTOR)
+            -- print(xadj, yadj)
+
+            local dist = cf.getDistance(rx, ry, crobjx, crobjy) / ZOOMFACTOR
+            if dist > 250 then
+                -- player unit is moused over
+                showmenu = false
+                pause = false
+            end
+
+            if xadj >= -5 and xadj <= 205 and yadj >= 40 and yadj <= 60 then
 				-- engage has been clicked
-				print("Engage!"
-			elseif if objscreenx >= objx and objscreenx <= objx + 30 and objscreeny >= objy + 51 and objscreeny <= objy + 70 then
+				print("Engage!")
+                showmenu = false
+                pause = false
+			elseif xadj >= -5 and xadj <= 205 and yadj >= 60 and yadj <= 80 then
 				print("RTB")
-			elseif if objscreenx >= objx and objscreenx <= objx + 30 and objscreeny >= objy  + 71 and objscreeny <= objy + 100 then
+                showmenu = false
+                pause = false
+			elseif xadj >= -5 and xadj <= 205 and yadj >= 80 and yadj <= 100 then
 				print("Eject!")
-				
+                showmenu = false
+                pause = false
 			end
 		end
     end
@@ -171,13 +178,14 @@ local function drawMenu()
 	local drawx, drawy = res.toGame(Obj.body:getX(), Obj.body:getY()) -- need to convert physical to screen
 
 	-- fill the menu box
-	local menuwidth = 150
+	local menuwidth = 200
+    local menuheight = 100
 	love.graphics.setColor(0.5, 0.5, 0.5, 1)
-	love.graphics.rectangle("fill", drawx, drawy, menuwidth, 75, 10, 10)
+	love.graphics.rectangle("fill", drawx, drawy, menuwidth, menuheight, 10, 10)
 
 	-- draw an outline
 	love.graphics.setColor(1,1,1,1)
-	love.graphics.rectangle("line", drawx, drawy, menuwidth, 75, 10, 10)
+	love.graphics.rectangle("line", drawx, drawy, menuwidth, menuheight, 10, 10)
 
 	-- draw squad orders an a line
 	local squadcallsign = Obj.squadCallsign
@@ -194,32 +202,43 @@ local function drawMenu()
 	love.graphics.line(drawx, drawy + 15, drawx + menuwidth, drawy + 15)
 
 	-- draw current action and a line
-	actionenum = Obj.actions[1].action
-	if actionenum == enum.unitActionEngaging then
-		txt = "Engaging"
-	elseif actionenum == enum.unitActionReturningToBase then
-		txt = "Returning to base"
-	elseif actionenum == enum.unitActionEject then
-		txt = "Ejecting!"
-	elseif actionenum == enum.unitActionReturningToBase then
-		txt = "Moving to destination"
-	end
-	if txt ~= nil then
-		love.graphics.setColor(0,0,0,1)
-		love.graphics.print(txt, drawx + 5, drawy + 18)
-		love.graphics.setColor(1,1,1,1)
-		love.graphics.line(drawx, drawy + 36, drawx + menuwidth, drawy + 36)
-	end
+	actionenum = functions.getTopAction(Obj)
+    if actionenum ~= nil then
+    	if actionenum == enum.unitActionEngaging then
+    		txt = "Currently: engaging"
+    	elseif actionenum == enum.unitActionReturningToBase then
+    		txt = "Currently: returning to base"
+    	elseif actionenum == enum.unitActionEject then
+    		txt = "Currently: ejecting!"
+    	elseif actionenum == enum.unitActionReturningToBase then
+    		txt = "Currently: moving to destination"
+    	end
+    	if txt ~= nil then
+    		love.graphics.setColor(0,0,0,1)
+    		love.graphics.print(txt, drawx + 5, drawy + 18)
+    		love.graphics.setColor(1,1,1,1)
+    		love.graphics.line(drawx, drawy + 36, drawx + menuwidth, drawy + 36)
+    	end
+    end
 
 	-- draw the list of actions the player can issue
 	--! check the x and y's draw correctly
 	love.graphics.setColor(0,0,0,1)
-	txt = "Engage"
-	love.graphics.print(txt, drawx + 5, drawy + 25)
-	txt = "Return to base"
+	txt = "New action: engage"
 	love.graphics.print(txt, drawx + 5, drawy + 40)
-	txt = "Eject!"
-	love.graphics.print(txt, drawx + 5, drawy + 65)
+	txt = "New action: return to base"
+	love.graphics.print(txt, drawx + 5, drawy + 60)
+	txt = "New action: eject!"
+	love.graphics.print(txt, drawx + 5, drawy + 80)
+
+    -- debugging menu
+    -- love.graphics.setColor(1,0,0,1)
+    -- local Obj = fun.getObject(PLAYER_FIGHTER_GUID)
+    -- local objx, objy = res.toGame(Obj.body:getX(), Obj.body:getY())
+    -- love.graphics.rectangle("line", objx, objy + 36, 200, 20)
+    -- love.graphics.rectangle("line", objx, objy + 56, 200, 20)
+    -- love.graphics.rectangle("line", objx, objy + 76, 200, 20)
+
 end
 
 function fight.draw()
@@ -227,7 +246,7 @@ function fight.draw()
     drawHUD()       -- do this before the attach
 
     cam:attach()
-	
+
 	local playerfighter = fun.getObject(PLAYER_FIGHTER_GUID)
 
     -- draw BG
@@ -397,7 +416,7 @@ function fight.update(dt)
 
         RTB_TIMER = 0
         BATTLE_TIMER = 0
-		
+
 		snapcamera = true
 		pause = false
 		showmenu = false
