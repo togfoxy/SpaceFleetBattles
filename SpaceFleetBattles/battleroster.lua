@@ -187,41 +187,74 @@ function battleroster.mousereleased(rx, ry, x, y, button)
     end
 end
 
-function battleroster.draw()
-
-    love.graphics.setColor(1,1,1,0.5)
-    love.graphics.draw(IMAGE[enum.imageBattleRoster],0,0,0, 1,1)
-
-	-- draw roster
-    local drawx = 100
+local function drawRoster()
+	-- font is set in main draw()
+	local drawx = 100
     local drawy = 100
+
+	love.graphics.setColor(1,1,1,1)
+
+	love.graphics.print("Pilot", drawx, drawy)
+	love.graphics.print("Health", drawx + 200, drawy)
+	love.graphics.print("# Missions", drawx + 285, drawy)
+	love.graphics.print("# Kills", drawx + 425, drawy)
+	love.graphics.print("# Fighters lost", drawx + 510, drawy)
+	drawy = drawy + 30
+
     for i = 1, #ROSTER do
         if ROSTER[i].isDead then
             love.graphics.setColor(1,1,1,0.5)
         else
             love.graphics.setColor(1,1,1,1)
         end
-        local txt = i .. ") " .. ROSTER[i].firstname .. " " .. ROSTER[i].lastname .. " " .. ROSTER[i].health .. " " .. ROSTER[i].missions .. " " .. ROSTER[i].kills .. " " .. ROSTER[i].ejections
-        love.graphics.print(txt, drawx, drawy)
-        drawy = drawy + 30
+
+		local txt = ROSTER[i].firstname .. " " .. ROSTER[i].lastname
+		love.graphics.print(txt, drawx, drawy)
+
+		love.graphics.print(ROSTER[i].health, drawx + 220, drawy)
+		love.graphics.print(ROSTER[i].missions, drawx + 350, drawy)
+		love.graphics.print(ROSTER[i].kills, drawx + 455, drawy)
+		love.graphics.print(ROSTER[i].ejections, drawx + 590, drawy)
+		drawy = drawy + 30
     end
 
-	-- draw fighters in hanger
-    local drawx = 900
+end
+
+local function drawHanger()
+	-- font is set in main draw()
+	local drawx = 900
     local drawy = 100
-    love.graphics.setColor(1,1,1,1)
+
+	love.graphics.setColor(1,1,1,1)
+	love.graphics.print("Fighter ID", drawx, drawy)
+	love.graphics.print("Structure", drawx + 250, drawy)
+	drawy = drawy + 30
+
     for i = 1, #HANGER do
-        local txt = i .. ") " .. string.sub(HANGER[i].guid, -2)
-        txt = txt .. " " .. HANGER[i].componentHealth[enum.componentStructure]
-        love.graphics.print(txt, drawx, drawy)
+		love.graphics.print(string.sub(HANGER[i].guid, -4), drawx + 25, drawy)
+		love.graphics.print(HANGER[i].componentHealth[enum.componentStructure], drawx + 280, drawy)
         drawy = drawy + 30
     end
+end
+
+function battleroster.draw()
+
+    love.graphics.setColor(1,1,1,0.5)
+    love.graphics.draw(IMAGE[enum.imageBattleRoster],0,0,0, 1,1)
+
+	love.graphics.setFont(FONT[enum.fontCorporate])
+	-- draw roster
+	drawRoster()
+
+	-- draw fighters in hanger
+	drawHanger()
 
 	-- provide some way to specify how many squadrons to launch
 	-- how many fighters per squadron
 	-- find some way to re-order fighters launched
 	-- fighters that are not launched will be slowly repaired
 
+	love.graphics.setFont(FONT[enum.fontDefault])
 	buttons.drawButtons()
 end
 
