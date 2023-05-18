@@ -188,7 +188,7 @@ function battleroster.mousereleased(rx, ry, x, y, button)
 end
 
 local function drawRoster()
-
+	-- font is set in main draw()
 	local drawx = 100
     local drawy = 100
 
@@ -200,7 +200,6 @@ local function drawRoster()
 	love.graphics.print("# Kills", drawx + 425, drawy)
 	love.graphics.print("# Fighters lost", drawx + 510, drawy)
 	drawy = drawy + 30
-
 
     for i = 1, #ROSTER do
         if ROSTER[i].isDead then
@@ -221,6 +220,23 @@ local function drawRoster()
 
 end
 
+local function drawHanger()
+	-- font is set in main draw()
+	local drawx = 900
+    local drawy = 100
+
+	love.graphics.setColor(1,1,1,1)
+	love.graphics.print("Fighter ID", drawx, drawy)
+	love.graphics.print("Structure", drawx + 250, drawy)
+	drawy = drawy + 30
+
+    for i = 1, #HANGER do
+		love.graphics.print(string.sub(HANGER[i].guid, -4), drawx + 25, drawy)
+		love.graphics.print(HANGER[i].componentHealth[enum.componentStructure], drawx + 280, drawy)
+        drawy = drawy + 30
+    end
+end
+
 function battleroster.draw()
 
     love.graphics.setColor(1,1,1,0.5)
@@ -231,15 +247,7 @@ function battleroster.draw()
 	drawRoster()
 
 	-- draw fighters in hanger
-    local drawx = 900
-    local drawy = 100
-    love.graphics.setColor(1,1,1,1)
-    for i = 1, #HANGER do
-        local txt = i .. ") " .. string.sub(HANGER[i].guid, -2)
-        txt = txt .. " " .. HANGER[i].componentHealth[enum.componentStructure]
-        love.graphics.print(txt, drawx, drawy)
-        drawy = drawy + 30
-    end
+	drawHanger()
 
 	-- provide some way to specify how many squadrons to launch
 	-- how many fighters per squadron
