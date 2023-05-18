@@ -187,24 +187,48 @@ function battleroster.mousereleased(rx, ry, x, y, button)
     end
 end
 
-function battleroster.draw()
+local function drawRoster()
 
-    love.graphics.setColor(1,1,1,0.5)
-    love.graphics.draw(IMAGE[enum.imageBattleRoster],0,0,0, 1,1)
-
-	-- draw roster
-    local drawx = 100
+	local drawx = 100
     local drawy = 100
+
+	love.graphics.setColor(1,1,1,1)
+
+	love.graphics.print("Pilot", drawx, drawy)
+	love.graphics.print("Health", drawx + 200, drawy)
+	love.graphics.print("# Missions", drawx + 285, drawy)
+	love.graphics.print("# Kills", drawx + 425, drawy)
+	love.graphics.print("# Fighters lost", drawx + 510, drawy)
+	drawy = drawy + 30
+
+
     for i = 1, #ROSTER do
         if ROSTER[i].isDead then
             love.graphics.setColor(1,1,1,0.5)
         else
             love.graphics.setColor(1,1,1,1)
         end
-        local txt = i .. ") " .. ROSTER[i].firstname .. " " .. ROSTER[i].lastname .. " " .. ROSTER[i].health .. " " .. ROSTER[i].missions .. " " .. ROSTER[i].kills .. " " .. ROSTER[i].ejections
-        love.graphics.print(txt, drawx, drawy)
-        drawy = drawy + 30
+
+		local txt = ROSTER[i].firstname .. " " .. ROSTER[i].lastname
+		love.graphics.print(txt, drawx, drawy)
+
+		love.graphics.print(ROSTER[i].health, drawx + 220, drawy)
+		love.graphics.print(ROSTER[i].missions, drawx + 350, drawy)
+		love.graphics.print(ROSTER[i].kills, drawx + 455, drawy)
+		love.graphics.print(ROSTER[i].ejections, drawx + 590, drawy)
+		drawy = drawy + 30
     end
+
+end
+
+function battleroster.draw()
+
+    love.graphics.setColor(1,1,1,0.5)
+    love.graphics.draw(IMAGE[enum.imageBattleRoster],0,0,0, 1,1)
+
+	love.graphics.setFont(FONT[enum.fontCorporate])
+	-- draw roster
+	drawRoster()
 
 	-- draw fighters in hanger
     local drawx = 900
@@ -222,6 +246,7 @@ function battleroster.draw()
 	-- find some way to re-order fighters launched
 	-- fighters that are not launched will be slowly repaired
 
+	love.graphics.setFont(FONT[enum.fontDefault])
 	buttons.drawButtons()
 end
 
