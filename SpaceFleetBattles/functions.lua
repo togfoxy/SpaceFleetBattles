@@ -311,60 +311,10 @@ function functions.applyDamage(victim, bullet)
             -- this bullet is the players bullet. Make an audible
             cf.playAudio(enum.audioBulletHit, false, true)
         end
-
-        -- apply a small evasion wobble if trying to RTB
-        local action = fun.getTopAction(victim)
-        local thisaction = {}
-        if action ~= nil and action.action == enum.unitActionReturningToBase then
-            -- been hit while RTB. Try to evade.
-			-- insert an action at the TOP of the queue
-            if victim.forf == enum.forfFriend then
-                -- set a destination random degrees from current location
-                local objx, objy = victim.body:getPosition()
-                local rndangle = love.math.random(-45, 45)
-                local destx, desty = cf.addVectorToPoint(objx,objy,(270 + rndangle),300)
-
-                thisaction.cooldown = 3
-                thisaction.action = enum.unitActionMoveToDest
-                thisaction.targetguid = nil
-                thisaction.destx = destx
-                thisaction.desty = desty
-            elseif victim.forf == enum.forfEnemy then
-                local x = FOE_START_X
-                local y = love.math.random(0, SCREEN_HEIGHT)
-
-                thisaction.cooldown = 3
-                thisaction.action = enum.unitActionMoveToDest
-                thisaction.targetguid = nil
-                thisaction.destx = x
-                thisaction.desty = y
-            end
-
-            table.insert(victim.actions, 1, thisaction)
-            -- print("Evasive force applied")
-        else
-            -- not ejecting and not RTB. Unit is still in the fight
-            if victim.componentHealth[enum.componentWeapon] <= 0 then
-                victim.actions = {}         -- significant trauma. get a new task
-            end
-            if victim.componentHealth[enum.componentThruster] <= 50 then
-                victim.actions = {}         -- significant trauma. get a new task
-            end
-            if victim.componentHealth[enum.componentSideThruster] <= 50 then
-                victim.actions = {}         -- significant trauma. get a new task
-            end
-            if victim.componentHealth[enum.componentAccelerator] <= 25 then
-                victim.actions = {}         -- significant trauma. get a new task
-            end
-            if victim.componentHealth[enum.componentStructure] <= 33 then
-                victim.actions = {}         -- significant trauma. get a new task
-            end
-        end
-
-        -- see if ejects or applies wobble
-        if (victim.componentHealth[enum.componentStructure] <= 35 ) then
-            -- eject is a dice roll
-            local rndnum = love.math.random(1, 35)
+		
+		-- see if ejects
+		local rndnum = love.math.random(1, 35)	-- ejection is a dice roll
+		if victim.componentHealth[enum.componentStructure] <= 35 and rndnum > victim.componentHealth[enum.componentStructure] then
             if rndnum > victim.componentHealth[enum.componentStructure] then       -- more damage = more chance of eject
                 fun.setTaskEject(victim)
                 -- give kill credit
@@ -375,14 +325,64 @@ function functions.applyDamage(victim, bullet)
 				elseif victim.forf == enum.forfEnemy then
 					SCORE.enemiesEjected = SCORE.enemiesEjected + 1
 				end
-            end
-        end
+			end
+		else
+			-- not dead and not ejecting
+			-- apply a small evasion wobble if trying to RTB
+			local action = fun.getTopAction(victim)
+			local thisaction = {}
+			if action ~= nil and action.action == enum.unitActionReturningToBase then
+				-- been hit while RTB. Try to evade.
+				-- insert an action at the TOP of the queue
+				if victim.forf == enum.forfFriend then
+					-- set a destination random degrees from current location
+					local objx, objy = victim.body:getPosition()
+					local rndangle = love.math.random(-45, 45)
+					local destx, desty = cf.addVectorToPoint(objx,objy,(270 + rndangle),300)
 
-        -- adjust object performance after receiving battle damage
-        victim.currentMaxForwardThrust = victim.maxForwardThrust * (victim.componentHealth[enum.componentThruster] / 100)
-        victim.currentMaxAcceleration = victim.maxAcceleration * (victim.componentHealth[enum.componentAccelerator] / 100)
-        victim.currentSideThrust = victim.maxSideThrust * (victim.componentHealth[enum.componentSideThruster] / 100)
+					thisaction.cooldown = 3
+					thisaction.action = enum.unitActionMoveToDest
+					thisaction.targetguid = nil
+					thisaction.destx = destx
+					thisaction.desty = desty
+				elseif victim.forf == enum.forfEnemy then
+					local x = FOE_START_X
+					local y = love.math.random(0, SCREEN_HEIGHT)
 
+					thisaction.cooldown = 3
+					thisaction.action = enum.unitActionMoveToDest
+					thisaction.targetguid = nil
+					thisaction.destx = x
+					thisaction.desty = y
+				end
+
+				table.insert(victim.actions, 1, thisaction)
+				-- print("Evasive force applied")
+			else
+				-- not dead and not ejecting and not RTB
+				-- Unit is still in the fight. Clear action queue if traumatic damage taken
+				if victim.componentHealth[enum.componentWeapon] <= 0 then
+					victim.actions = {}         -- significant trauma. get a new task
+				end
+				if victim.componentHealth[enum.componentThruster] <= 50 then
+					victim.actions = {}         -- significant trauma. get a new task
+				end
+				if victim.componentHealth[enum.componentSideThruster] <= 50 then
+					victim.actions = {}         -- significant trauma. get a new task
+				end
+				if victim.componentHealth[enum.componentAccelerator] <= 25 then
+					victim.actions = {}         -- significant trauma. get a new task
+				end
+				if victim.componentHealth[enum.componentStructure] <= 33 then
+					victim.actions = {}         -- significant trauma. get a new task
+				end
+			end
+		end
+	
+		-- adjust object performance after receiving battle damage
+		victim.currentMaxForwardThrust = victim.maxForwardThrust * (victim.componentHealth[enum.componentThruster] / 100)
+		victim.currentMaxAcceleration = victim.maxAcceleration * (victim.componentHealth[enum.componentAccelerator] / 100)
+		victim.currentSideThrust = victim.maxSideThrust * (victim.componentHealth[enum.componentSideThruster] / 100)
 	end
 end
 

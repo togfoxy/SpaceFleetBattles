@@ -54,7 +54,7 @@ function endbattle.draw()
     love.graphics.print(txt, drawx, drawy)
     drawy = drawy + 50
 
-    --! add global score as well
+    --! add enemy fleet count here
 
     love.graphics.setFont(FONT[enum.fontDefault])
     buttons.drawButtons()

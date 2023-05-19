@@ -54,6 +54,16 @@ function commanderai.update(dt)
                 thisorder.order = enum.commanderOrdersReturnToBase
                 table.insert(commanderAI[i].orders, thisorder)
                 print("Commander orders: RTB")
+				if ratio <= 0.66 then
+					-- this commander has lost the battle
+					if commanderAI[i].forf == enum.forfFriend then
+						FLEET.movesLeft = -1			--! test
+					elseif commanderAI[i].forf == enum.forfEnemy then
+						FLEET.movesLeft = 1			--! test
+					else
+						error()
+					end
+				end
             end
         else
             -- this commander has at least one order. Do nothing.

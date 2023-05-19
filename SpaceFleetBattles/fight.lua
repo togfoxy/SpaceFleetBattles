@@ -1,10 +1,8 @@
 fight = {}
 
-
 local pause = false
 local snapcamera = true
 local showmenu = false
-
 
 local function destroyObjects(dt)
 
@@ -111,14 +109,20 @@ function fight.mousereleased(rx, ry, x, y, button)
             if xadj >= -5 and xadj <= 205 and yadj >= 40 and yadj <= 60 then
 				-- engage has been clicked
 				print("Engage!")
+				Obj.actions = {}
+				unitai.setTaskEngage(Obj, 15)			-- parameters = Obj and cooldown (defaults to 5 seconds if nil)
                 showmenu = false
                 pause = false
 			elseif xadj >= -5 and xadj <= 205 and yadj >= 60 and yadj <= 80 then
 				print("RTB")
+				Obj.actions = {}
+				unitai.setTaskRTB(Obj)
                 showmenu = false
                 pause = false
 			elseif xadj >= -5 and xadj <= 205 and yadj >= 80 and yadj <= 100 then
 				print("Eject!")
+				Obj.actions = {}
+				fun.setTaskEject(Obj)
                 showmenu = false
                 pause = false
 			end
@@ -202,7 +206,8 @@ local function drawMenu()
 	love.graphics.line(drawx, drawy + 15, drawx + menuwidth, drawy + 15)
 
 	-- draw current action and a line
-	actionenum = functions.getTopAction(Obj)
+	local actionenum = functions.getTopAction(Obj)
+    txt = ""
     if actionenum ~= nil then
     	if actionenum == enum.unitActionEngaging then
     		txt = "Currently: engaging"
@@ -213,7 +218,7 @@ local function drawMenu()
     	elseif actionenum == enum.unitActionReturningToBase then
     		txt = "Currently: moving to destination"
     	end
-    	if txt ~= nil then
+    	if txt ~= "" then
     		love.graphics.setColor(0,0,0,1)
     		love.graphics.print(txt, drawx + 5, drawy + 18)
     		love.graphics.setColor(1,1,1,1)
@@ -222,7 +227,6 @@ local function drawMenu()
     end
 
 	-- draw the list of actions the player can issue
-	--! check the x and y's draw correctly
 	love.graphics.setColor(0,0,0,1)
 	txt = "New action: engage"
 	love.graphics.print(txt, drawx + 5, drawy + 40)
@@ -326,7 +330,7 @@ function fight.draw()
         -- end
 
         -- draw the velocity indicator (purple line)
-        -- local linx, liny = Obj.body:getLinearVelocity( )        --! a lot of duplicate code here. Can be cleand up
+        -- local linx, liny = Obj.body:getLinearVelocity( )
         -- linx = linx * 2
         -- liny = liny * 2
         -- local objx, objy = Obj.body:getPosition( )
@@ -380,7 +384,7 @@ function fight.draw()
 
     -- draw current action
     local txt
-    -- if fun.isPlayerAlive() then
+    if fun.isPlayerAlive() then
         currentaction = fun.getTopAction(playerfighter)
         if currentaction ~= nil then
             txt = currentaction.action
@@ -390,7 +394,7 @@ function fight.draw()
         local drawx, drawy = res.toGame(playerfighter.body:getX(), playerfighter.body:getY()) -- need to convert physical to screen
         love.graphics.setColor(1,1,1,1)
         love.graphics.print(txt, drawx - 20, drawy + 10)
-    -- end
+    end
 
     -- animations are drawn in love.draw()
     cam:detach()
@@ -444,7 +448,7 @@ function fight.update(dt)
     end
 
     if battleOver() or BATTLE_TIMER > BATTLE_TIMER_LIMIT then
-        --! add fleet movement points based on win (+1) or loss (-1)
+        -- fleet movement points is added/subtracted in the commanderai file
 		fightsceneHasLoaded = false
         cf.swapScreen(enum.sceneEndBattle, SCREEN_STACK)
     end

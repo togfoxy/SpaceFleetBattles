@@ -43,7 +43,7 @@ local function getClosestFighter(thisObj, desiredforf)
     end
 end
 
-local function setTaskRTB(Obj)
+function unitai.setTaskRTB(Obj)
     -- adds an RTB action to the end of the queue
     local thisaction = {}
 	thisaction.cooldown = 10
@@ -78,6 +78,58 @@ local function setTaskDestination(Obj, x, y)
 	thisaction.desty = y
 	table.insert(Obj.actions, thisaction)
     print("Setting action to provided destination")
+end
+
+function unitai.setTaskEngage(Obj, cooldown)
+	-- manipulates the action stack by adding an 'engage' action to the bottom of the stack if target found
+	-- if target not found then move inside map border then RTB (stacks orders)
+	-- input: Obj = fighter
+	-- input: cooldown = action cooldown. Will default to 5 seconds if nil/not provided
+
+	if cooldown == nil then cooldown = 5 end
+
+	local targetguid
+	local unitIsTargeted = fun.unitIsTargeted(Obj.guid)
+	
+	if Obj.forf == enum.forfFriend then
+		targetguid = getClosestFighter(Obj, enum.forfEnemy)        -- this OBJECTS guid or nil
+	elseif Obj.forf == enum.forfEnemy then
+		targetguid = getClosestFighter(Obj, enum.forfFriend)       -- this OBJECTS guid or nil
+	end
+	if targetguid ~= nil then
+		local thisorder = {}
+		thisorder.action = enum.unitActionEngaging
+		thisorder.cooldown = cooldown
+		thisorder.destx = nil
+		thisorder.desty = nil
+		thisorder.targetguid = targetguid
+		table.insert(Obj.actions, thisorder)
+		-- print("Setting action = engage")
+	else
+		-- trying to engage but no target found
+		-- move inside map borders if necesary
+		if not unitIsTargeted and targetguid == nil then
+			local destx = Obj.body:getX()       -- default values to be overwritten
+			local desty = Obj.body:getY()
+			if desty < 0 then desty = 100 end
+			if desty > SCREEN_HEIGHT then desty = SCREEN_HEIGHT - 100 end
+			if Obj.forf == enum.forfFriend then
+				if destx < FRIEND_START_X then destx = FRIEND_START_X + 100 end			--! I suspect this +100 business interferes with the RTB routine
+			elseif Obj.forf == enum.forfEnemy then
+				if destx > FOE_START_X then destx = FOE_START_X - 100 end
+			else
+				error()
+			end
+
+			if destx ~= Obj.body:getX() or desty ~= Obj.body:getY() then
+				setTaskDestination(Obj, destx, desty)
+			end
+		end
+
+		print("Stacking orders: return to battle and then RTB")
+		unitai.setTaskRTB(Obj)     -- this is an instance of stacking orders
+	end
+
 end
 
 local function isFighter(Obj)
@@ -388,8 +440,7 @@ local function updateUnitTask(Obj, squadorder, dt)
     -- if #Obj.actions <= 0 then
 	if Obj.actions[1] == nil then
         -- try to find a new action
-
-        local unitIsTargeted = fun.unitIsTargeted(Obj.guid)
+        
         local toporder = fun.getTopAction(Obj)
         local targetguid
         if toporder ~= nil then
@@ -398,63 +449,26 @@ local function updateUnitTask(Obj, squadorder, dt)
 
         -- do self-preservation checks firstly. Remember the ordering matters
         if Obj.componentHealth[enum.componentWeapon] <= 0 then
-            setTaskRTB(Obj)
+            unitai.setTaskRTB(Obj)
         elseif Obj.componentHealth[enum.componentThruster] <= 0 and Obj.componentHealth[enum.componentWeapon] > 0 then
             -- do nothing. Fall through to the action section below
         elseif Obj.componentHealth[enum.componentThruster] <= 50 then
-            setTaskRTB(Obj)
+            unitai.setTaskRTB(Obj)
         elseif Obj.componentHealth[enum.componentSideThruster] <= 25 then
-            setTaskRTB(Obj)
+            unitai.setTaskRTB(Obj)
         elseif Obj.componentHealth[enum.componentAccelerator] <= 25 then
-            setTaskRTB(Obj)
+            unitai.setTaskRTB(Obj)
         elseif Obj.componentHealth[enum.componentStructure] <= 50 then
-            setTaskRTB(Obj)
+            unitai.setTaskRTB(Obj)
         end
 
         if #Obj.actions <= 0 then
+		
     		-- after the self-preservation bits, take direction from current squad orders
             if squadorder == enum.squadOrdersEngage then
-                local targetguid
-                if Obj.forf == enum.forfFriend then
-                    targetguid = getClosestFighter(Obj, enum.forfEnemy)        -- this OBJECTS guid or nil
-                elseif Obj.forf == enum.forfEnemy then
-                    targetguid = getClosestFighter(Obj, enum.forfFriend)       -- this OBJECTS guid or nil
-                end
-                if targetguid ~= nil then
-                    local thisorder = {}
-                    thisorder.action = enum.unitActionEngaging
-                    thisorder.cooldown = 5
-                    thisorder.destx = nil
-                    thisorder.desty = nil
-                    thisorder.targetguid = targetguid
-                    table.insert(Obj.actions, thisorder)
-                    -- print("Setting action = engage")
-                else
-                    -- trying to engage but no target found
-                    -- move inside map borders if necesary
-                    if not unitIsTargeted and targetguid == nil then
-                        local destx = Obj.body:getX()       -- default values to be overwritten
-                        local desty = Obj.body:getY()
-                        if desty < 0 then desty = 100 end
-                        if desty > SCREEN_HEIGHT then desty = SCREEN_HEIGHT - 100 end
-                        if Obj.forf == enum.forfFriend then
-                            if destx < FRIEND_START_X then destx = FRIEND_START_X + 100 end
-                        elseif Obj.forf == enum.forfEnemy then
-                            if destx > FOE_START_X then destx = FOE_START_X - 100 end
-                        else
-                            error()
-                        end
-
-                        if destx ~= Obj.body:getX() or desty ~= Obj.body:getY() then
-                            setTaskDestination(Obj, destx, desty)
-                        end
-                    end
-
-                    print("Stacking orders: return to battle and RTB")
-                    setTaskRTB(Obj)     -- this is an instance of stacking orders
-                end
+				unitai.setTaskEngage(Obj)
             elseif squadorder == enum.squadOrdersReturnToBase then
-                    setTaskRTB(Obj)
+				unitai.setTaskRTB(Obj)
                 -- print("Unit task: RTB")
             else
                 -- no squad order or unexpected squad order

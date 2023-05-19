@@ -112,6 +112,7 @@ function planetmap.mousereleased(rx, ry, x, y, button)
 			FLEET.sector = FLEET.newSector
 		end
 		adjustResourceLevels()
+		FLEET.movesLeft = 0
         cf.swapScreen(enum.sceneBattleRoster, SCREEN_STACK)
 	else
 		local planetclicked = getPlanetClicked(rx, ry)
