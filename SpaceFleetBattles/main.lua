@@ -93,9 +93,9 @@ function endContact(a, b, coll)
 end
 
 function love.keyreleased( key, scancode )
-	if key == "escape" then
-		cf.removeScreen(SCREEN_STACK)
-	end
+	-- if key == "escape" then
+	-- 	cf.removeScreen(SCREEN_STACK)
+	-- end
 
 	local currentscene = cf.currentScreenName(SCREEN_STACK)
 	if currentscene == enum.sceneFight then

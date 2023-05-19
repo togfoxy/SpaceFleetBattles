@@ -46,6 +46,14 @@ end
 function fight.keyreleased(key, scancode)
     if key == "space" then pause = not pause end
     if key == "c" then snapcamera = not snapcamera end
+    if key == "escape" then
+        if showmenu then
+            showmenu = false
+            pause = false
+        else
+            love.event.quit()
+        end
+    end
 end
 
 function fight.wheelmoved(x, y)
@@ -293,8 +301,15 @@ function fight.draw()
                 love.graphics.draw(IMAGE[enum.imageEscapePod], drawx, drawy, 1.5707, 0.35, 0.35)      -- 1.57 radians = 90 degrees
             elseif objtype == enum.categoryFriendlyFighter then
                 love.graphics.setColor(1,1,1,1)
+
+                love.graphics.setColor(1,1,1,1)
                 local angle = Obj.body:getAngle()           -- radians
                 love.graphics.draw(IMAGE[enum.imageFighterFriend], objx, objy, angle, 0.15, 0.15, 75, 50)
+
+                if Obj.guid == PLAYER_FIGHTER_GUID then
+                    -- draw recticle that shows player vessel
+                    love.graphics.draw(IMAGE[enum.imageCrosshairPlayer], objx, objy, 0, 0.75, 0.75, 35, 30)
+                end
             elseif objtype == enum.categoryEnemyFighter then
                 love.graphics.setColor(1,1,1,1)
                 local angle = Obj.body:getAngle()           -- radians
@@ -397,18 +412,19 @@ function fight.draw()
     end
 
     -- draw current action
-    local txt
-    if fun.isPlayerAlive() then
-        currentaction = fun.getTopAction(playerfighter)
-        if currentaction ~= nil then
-            txt = currentaction.action
-        else
-            txt = "None"
-        end
-        local drawx, drawy = res.toGame(playerfighter.body:getX(), playerfighter.body:getY()) -- need to convert physical to screen
-        love.graphics.setColor(1,1,1,1)
-        love.graphics.print(txt, drawx - 20, drawy + 10)
-    end
+    -- debug only
+    -- local txt
+    -- if fun.isPlayerAlive() then
+    --     currentaction = fun.getTopAction(playerfighter)
+    --     if currentaction ~= nil then
+    --         txt = currentaction.action
+    --     else
+    --         txt = "None"
+    --     end
+    --     local drawx, drawy = res.toGame(playerfighter.body:getX(), playerfighter.body:getY()) -- need to convert physical to screen
+    --     love.graphics.setColor(1,1,1,1)
+    --     love.graphics.print(txt, drawx - 20, drawy + 10)
+    -- end
 
     -- animations are drawn in love.draw()
     cam:detach()

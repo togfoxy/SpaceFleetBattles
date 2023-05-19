@@ -13,6 +13,7 @@ function functions.loadImages()
 
     IMAGE[enum.imageCrosshairsHasTarget] = love.graphics.newImage("assets/images/image0017.png")
     IMAGE[enum.imageCrosshairsIsTarget] = love.graphics.newImage("assets/images/image0018.png")
+    IMAGE[enum.imageCrosshairPlayer] = love.graphics.newImage("assets/images/crosshair_me.png")
 
     IMAGE[enum.imagePlanet1] = love.graphics.newImage("assets/images/planet1.png")
     IMAGE[enum.imagePlanet2] = love.graphics.newImage("assets/images/planet2.png")
