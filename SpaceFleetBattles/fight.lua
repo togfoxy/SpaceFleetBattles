@@ -46,6 +46,14 @@ end
 function fight.keyreleased(key, scancode)
     if key == "space" then pause = not pause end
     if key == "c" then snapcamera = not snapcamera end
+    if key == "escape" then
+        if showmenu then
+            showmenu = false
+            pause = false
+        else
+            love.event.quit()
+        end
+    end
 end
 
 function fight.wheelmoved(x, y)
@@ -193,7 +201,10 @@ local function drawMenu()
 
 	-- draw squad orders an a line
 	local squadcallsign = Obj.squadCallsign
-	local orderenum = squadAI[squadcallsign].orders[1].order
+    local orderenum     -- might remain nil
+    if squadAI[squadcallsign].orders ~= nil and squadAI[squadcallsign].orders[1] ~= nil then
+        orderenum = squadAI[squadcallsign].orders[1].order
+    end
 	if orderenum == enum.squadOrdersEngage then
 		txt = "Squad: engage"
 	elseif orderenum == enum.squadOrdersReturnToBase then
@@ -288,6 +299,21 @@ function fight.draw()
             if objtype == enum.categoryFriendlyPod or objtype == enum.categoryEnemyPod then
                 love.graphics.setColor(1,1,1,1)
                 love.graphics.draw(IMAGE[enum.imageEscapePod], drawx, drawy, 1.5707, 0.35, 0.35)      -- 1.57 radians = 90 degrees
+            elseif objtype == enum.categoryFriendlyFighter then
+                love.graphics.setColor(1,1,1,1)
+
+                love.graphics.setColor(1,1,1,1)
+                local angle = Obj.body:getAngle()           -- radians
+                love.graphics.draw(IMAGE[enum.imageFighterFriend], objx, objy, angle, 0.15, 0.15, 75, 50)
+
+                if Obj.guid == PLAYER_FIGHTER_GUID then
+                    -- draw recticle that shows player vessel
+                    love.graphics.draw(IMAGE[enum.imageCrosshairPlayer], objx, objy, 0, 0.75, 0.75, 35, 30)
+                end
+            elseif objtype == enum.categoryEnemyFighter then
+                love.graphics.setColor(1,1,1,1)
+                local angle = Obj.body:getAngle()           -- radians
+                love.graphics.draw(IMAGE[enum.imageFighterFoe], objx, objy, angle, 0.10, 0.15, 130, 70)
             else
                 local shape = fixture:getShape()
                 if shape:typeOf("PolygonShape") then
@@ -307,7 +333,10 @@ function fight.draw()
                         love.graphics.setColor(1,1,0,1)
                     end
 
+
+
                     love.graphics.polygon("fill", points)
+
                 elseif shape:typeOf("CircleShape") then
                     --
                     local bodyx, bodyy = Obj.body:getWorldPoints(shape:getPoint())
@@ -340,6 +369,18 @@ function fight.draw()
         -- local pointyscaled = (objy + liny)
         -- love.graphics.setColor(1,0,1,1)
         -- love.graphics.line(objxscaled, objyscaled, pointxscaled, pointyscaled)
+
+        -- print current action
+        -- debug only
+        currentaction = fun.getTopAction(Obj)     -- receives an object
+        if currentaction ~= nil then
+            txt = currentaction.action
+        else
+            txt = "None"
+        end
+        local drawx, drawy = res.toGame(objx, objy) -- need to convert physical to screen
+        love.graphics.setColor(1,1,1,1)
+        love.graphics.print(txt, drawx - 20, drawy + 10)
     end
 
     -- draw target recticle for player 1
@@ -380,20 +421,6 @@ function fight.draw()
     -- draw the menu if menu is open
     if showmenu and fun.isPlayerAlive() then
 		drawMenu()
-    end
-
-    -- draw current action
-    local txt
-    if fun.isPlayerAlive() then
-        currentaction = fun.getTopAction(playerfighter)
-        if currentaction ~= nil then
-            txt = currentaction.action
-        else
-            txt = "None"
-        end
-        local drawx, drawy = res.toGame(playerfighter.body:getX(), playerfighter.body:getY()) -- need to convert physical to screen
-        love.graphics.setColor(1,1,1,1)
-        love.graphics.print(txt, drawx - 20, drawy + 10)
     end
 
     -- animations are drawn in love.draw()

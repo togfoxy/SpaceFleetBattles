@@ -13,6 +13,7 @@ function functions.loadImages()
 
     IMAGE[enum.imageCrosshairsHasTarget] = love.graphics.newImage("assets/images/image0017.png")
     IMAGE[enum.imageCrosshairsIsTarget] = love.graphics.newImage("assets/images/image0018.png")
+    IMAGE[enum.imageCrosshairPlayer] = love.graphics.newImage("assets/images/crosshair_me.png")
 
     IMAGE[enum.imagePlanet1] = love.graphics.newImage("assets/images/planet1.png")
     IMAGE[enum.imagePlanet2] = love.graphics.newImage("assets/images/planet2.png")
@@ -30,6 +31,9 @@ function functions.loadImages()
     IMAGE[enum.imagePlanet14] = love.graphics.newImage("assets/images/planet14.png")
 
     IMAGE[enum.imagePlanetBG] = love.graphics.newImage("assets/images/bd_space_seamless_fl1.png")
+
+    IMAGE[enum.imageFighterFriend] = love.graphics.newImage("assets/images/blueships1_128x94.png")
+    IMAGE[enum.imageFighterFoe] = love.graphics.newImage("assets/images/spshipsprite.png")
 
 end
 
@@ -311,7 +315,7 @@ function functions.applyDamage(victim, bullet)
             -- this bullet is the players bullet. Make an audible
             cf.playAudio(enum.audioBulletHit, false, true)
         end
-		
+
 		-- see if ejects
 		local rndnum = love.math.random(1, 35)	-- ejection is a dice roll
 		if victim.componentHealth[enum.componentStructure] <= 35 and rndnum > victim.componentHealth[enum.componentStructure] then
@@ -378,7 +382,7 @@ function functions.applyDamage(victim, bullet)
 				end
 			end
 		end
-	
+
 		-- adjust object performance after receiving battle damage
 		victim.currentMaxForwardThrust = victim.maxForwardThrust * (victim.componentHealth[enum.componentThruster] / 100)
 		victim.currentMaxAcceleration = victim.maxAcceleration * (victim.componentHealth[enum.componentAccelerator] / 100)
@@ -591,7 +595,8 @@ end
 function functions.getTopAction(Obj)
     -- return the top most action table that includes the action type and cooldown etc
     assert(Obj ~= nil)
-    if #Obj.actions > 0 then
+
+    if Obj.actions ~= nil and #Obj.actions > 0 then
         if Obj.actions[1] ~= nil then
             if Obj.actions[1].action ~= nil then
                 return Obj.actions[1]

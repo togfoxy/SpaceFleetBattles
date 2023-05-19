@@ -63,6 +63,7 @@ function enums.load()
     enum.imageEndBattle = 8
     enum.imageCrosshairsHasTarget = 9
     enum.imageCrosshairsIsTarget = 10
+    enum.imageCrosshairPlayer = 11
     enum.imagePlanet1 = 20
     enum.imagePlanet2 = 21
     enum.imagePlanet3= 22
@@ -83,6 +84,9 @@ function enums.load()
 
     enum.imagePlanetBG = 40
     enum.imageBulletSmoke = 41
+
+    enum.imageFighterFriend = 45
+    enum.imageFighterFoe = 46
 
 
     enum.gridExplosion = 1
