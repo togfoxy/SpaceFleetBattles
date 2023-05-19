@@ -54,8 +54,7 @@ function endbattle.draw()
     love.graphics.print(txt, drawx, drawy)
     drawy = drawy + 50
 
-    --! add global score as well
-
+    --! add enemy fllet count here
 
     love.graphics.setFont(FONT[enum.fontDefault])
     buttons.drawButtons()
