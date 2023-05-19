@@ -193,7 +193,10 @@ local function drawMenu()
 
 	-- draw squad orders an a line
 	local squadcallsign = Obj.squadCallsign
-	local orderenum = squadAI[squadcallsign].orders[1].order
+    local orderenum     -- might remain nil
+    if squadAI[squadcallsign].orders[1] ~= nil then
+        orderenum = squadAI[squadcallsign].orders[1].order
+    end
 	if orderenum == enum.squadOrdersEngage then
 		txt = "Squad: engage"
 	elseif orderenum == enum.squadOrdersReturnToBase then
@@ -288,6 +291,11 @@ function fight.draw()
             if objtype == enum.categoryFriendlyPod or objtype == enum.categoryEnemyPod then
                 love.graphics.setColor(1,1,1,1)
                 love.graphics.draw(IMAGE[enum.imageEscapePod], drawx, drawy, 1.5707, 0.35, 0.35)      -- 1.57 radians = 90 degrees
+            elseif objtype == enum.categoryFriendlyFighter then
+                love.graphics.setColor(1,1,1,1)
+                local angle = Obj.body:getAngle()           -- radians
+                love.graphics.draw(IMAGE[enum.imageFighterFriend], objx, objy, angle, 0.15, 0.15, 75, 50)
+
             else
                 local shape = fixture:getShape()
                 if shape:typeOf("PolygonShape") then
@@ -308,6 +316,7 @@ function fight.draw()
                     end
 
                     love.graphics.polygon("fill", points)
+
                 elseif shape:typeOf("CircleShape") then
                     --
                     local bodyx, bodyy = Obj.body:getWorldPoints(shape:getPoint())

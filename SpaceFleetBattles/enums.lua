@@ -84,6 +84,8 @@ function enums.load()
     enum.imagePlanetBG = 40
     enum.imageBulletSmoke = 41
 
+    enum.imageFighterFriend = 45
+
 
     enum.gridExplosion = 1
     enum.gridBulletSmoke = 2

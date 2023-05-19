@@ -31,6 +31,8 @@ function functions.loadImages()
 
     IMAGE[enum.imagePlanetBG] = love.graphics.newImage("assets/images/bd_space_seamless_fl1.png")
 
+    IMAGE[enum.imageFighterFriend] = love.graphics.newImage("assets/images/blueships1_128x94.png")
+
 end
 
 function functions.loadFonts()
@@ -311,7 +313,7 @@ function functions.applyDamage(victim, bullet)
             -- this bullet is the players bullet. Make an audible
             cf.playAudio(enum.audioBulletHit, false, true)
         end
-		
+
 		-- see if ejects
 		local rndnum = love.math.random(1, 35)	-- ejection is a dice roll
 		if victim.componentHealth[enum.componentStructure] <= 35 and rndnum > victim.componentHealth[enum.componentStructure] then
@@ -378,7 +380,7 @@ function functions.applyDamage(victim, bullet)
 				end
 			end
 		end
-	
+
 		-- adjust object performance after receiving battle damage
 		victim.currentMaxForwardThrust = victim.maxForwardThrust * (victim.componentHealth[enum.componentThruster] / 100)
 		victim.currentMaxAcceleration = victim.maxAcceleration * (victim.componentHealth[enum.componentAccelerator] / 100)
