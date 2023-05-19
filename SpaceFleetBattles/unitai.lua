@@ -478,8 +478,10 @@ local function updateUnitTask(Obj, squadorder, dt)
         end
 
         print(squadorder)
-        assert(#Obj.actions > 0)
+
     end
+
+    assert(#Obj.actions > 0)
 end
 
 function unitai.update(dt)
