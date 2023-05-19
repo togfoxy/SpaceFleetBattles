@@ -90,7 +90,7 @@ function unitai.setTaskEngage(Obj, cooldown)
 
 	local targetguid
 	local unitIsTargeted = fun.unitIsTargeted(Obj.guid)
-	
+
 	if Obj.forf == enum.forfFriend then
 		targetguid = getClosestFighter(Obj, enum.forfEnemy)        -- this OBJECTS guid or nil
 	elseif Obj.forf == enum.forfEnemy then
@@ -440,7 +440,7 @@ local function updateUnitTask(Obj, squadorder, dt)
     -- if #Obj.actions <= 0 then
 	if Obj.actions[1] == nil then
         -- try to find a new action
-        
+
         local toporder = fun.getTopAction(Obj)
         local targetguid
         if toporder ~= nil then
@@ -463,7 +463,7 @@ local function updateUnitTask(Obj, squadorder, dt)
         end
 
         if #Obj.actions <= 0 then
-		
+
     		-- after the self-preservation bits, take direction from current squad orders
             if squadorder == enum.squadOrdersEngage then
 				unitai.setTaskEngage(Obj)
@@ -476,6 +476,9 @@ local function updateUnitTask(Obj, squadorder, dt)
                 print("No squad order available for this unit")
             end
         end
+
+        print(squadorder)
+        assert(#Obj.actions > 0)
     end
 end
 

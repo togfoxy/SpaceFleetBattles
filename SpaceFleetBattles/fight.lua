@@ -202,7 +202,7 @@ local function drawMenu()
 	-- draw squad orders an a line
 	local squadcallsign = Obj.squadCallsign
     local orderenum     -- might remain nil
-    if squadAI[squadcallsign].orders[1] ~= nil then
+    if squadAI[squadcallsign].orders ~= nil and squadAI[squadcallsign].orders[1] ~= nil then
         orderenum = squadAI[squadcallsign].orders[1].order
     end
 	if orderenum == enum.squadOrdersEngage then
@@ -369,6 +369,18 @@ function fight.draw()
         -- local pointyscaled = (objy + liny)
         -- love.graphics.setColor(1,0,1,1)
         -- love.graphics.line(objxscaled, objyscaled, pointxscaled, pointyscaled)
+
+        -- print current action
+        -- debug only
+        currentaction = fun.getTopAction(Obj)     -- receives an object
+        if currentaction ~= nil then
+            txt = currentaction.action
+        else
+            txt = "None"
+        end
+        local drawx, drawy = res.toGame(objx, objy) -- need to convert physical to screen
+        love.graphics.setColor(1,1,1,1)
+        love.graphics.print(txt, drawx - 20, drawy + 10)
     end
 
     -- draw target recticle for player 1
@@ -410,21 +422,6 @@ function fight.draw()
     if showmenu and fun.isPlayerAlive() then
 		drawMenu()
     end
-
-    -- draw current action
-    -- debug only
-    -- local txt
-    -- if fun.isPlayerAlive() then
-    --     currentaction = fun.getTopAction(playerfighter)
-    --     if currentaction ~= nil then
-    --         txt = currentaction.action
-    --     else
-    --         txt = "None"
-    --     end
-    --     local drawx, drawy = res.toGame(playerfighter.body:getX(), playerfighter.body:getY()) -- need to convert physical to screen
-    --     love.graphics.setColor(1,1,1,1)
-    --     love.graphics.print(txt, drawx - 20, drawy + 10)
-    -- end
 
     -- animations are drawn in love.draw()
     cam:detach()

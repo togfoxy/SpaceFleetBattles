@@ -64,10 +64,10 @@ function squadai.update(dt)
         end
 
         --! I have no idea how this can happen sometimes but it happens
-        -- if not (squad.orders[1] ~= nil) then
-        --     print(inspect(squad.orders))
-        -- end
-        -- assert(squad.orders[1] ~= nil)
+        if not (squad.orders[1] ~= nil) then
+            print(inspect(squad.orders))
+        end
+        assert(squad.orders[1] ~= nil)
     end
 end
 

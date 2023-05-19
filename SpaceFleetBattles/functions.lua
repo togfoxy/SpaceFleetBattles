@@ -595,7 +595,8 @@ end
 function functions.getTopAction(Obj)
     -- return the top most action table that includes the action type and cooldown etc
     assert(Obj ~= nil)
-    if #Obj.actions > 0 then
+
+    if Obj.actions ~= nil and #Obj.actions > 0 then
         if Obj.actions[1] ~= nil then
             if Obj.actions[1].action ~= nil then
                 return Obj.actions[1]
