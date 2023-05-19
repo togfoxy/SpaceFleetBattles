@@ -32,6 +32,7 @@ function functions.loadImages()
     IMAGE[enum.imagePlanetBG] = love.graphics.newImage("assets/images/bd_space_seamless_fl1.png")
 
     IMAGE[enum.imageFighterFriend] = love.graphics.newImage("assets/images/blueships1_128x94.png")
+    IMAGE[enum.imageFighterFoe] = love.graphics.newImage("assets/images/spshipsprite.png")
 
 end
 

@@ -295,7 +295,10 @@ function fight.draw()
                 love.graphics.setColor(1,1,1,1)
                 local angle = Obj.body:getAngle()           -- radians
                 love.graphics.draw(IMAGE[enum.imageFighterFriend], objx, objy, angle, 0.15, 0.15, 75, 50)
-
+            elseif objtype == enum.categoryEnemyFighter then
+                love.graphics.setColor(1,1,1,1)
+                local angle = Obj.body:getAngle()           -- radians
+                love.graphics.draw(IMAGE[enum.imageFighterFoe], objx, objy, angle, 0.10, 0.15, 130, 70)
             else
                 local shape = fixture:getShape()
                 if shape:typeOf("PolygonShape") then
@@ -314,6 +317,8 @@ function fight.draw()
                     if Obj.guid == PLAYER_FIGHTER_GUID then
                         love.graphics.setColor(1,1,0,1)
                     end
+
+
 
                     love.graphics.polygon("fill", points)
 
