@@ -21,7 +21,10 @@ lovelyToasts = require 'lib.lovelyToasts'
 anim8 = require 'lib.anim8'
 -- https://github.com/kikito/anim8
 
--- these are core modules
+InputField = require 'lib.InputField'
+-- https://github.com/ReFreezed/InputField/tree/3.3.1
+
+-- these are core modules that appear in most projects
 require 'lib.buttons'
 require 'enums'
 require 'constants'
@@ -92,14 +95,26 @@ end
 function endContact(a, b, coll)
 end
 
-function love.keyreleased( key, scancode )
-	-- if key == "escape" then
-	-- 	cf.removeScreen(SCREEN_STACK)
-	-- end
+function love.keypressed(key, scancode, isrepeat)
+	local currentscene = cf.currentScreenName(SCREEN_STACK)
+	if currentscene == enum.sceneMainMenu then
+		mainmenu.keypressed(key, scancode, isRepeat)
+	end
+end
 
+function love.textinput(text)
+	local currentscene = cf.currentScreenName(SCREEN_STACK)
+	if currentscene == enum.sceneMainMenu then
+		mainmenu.textinput(text)
+	end
+end
+
+function love.keyreleased( key, scancode )
 	local currentscene = cf.currentScreenName(SCREEN_STACK)
 	if currentscene == enum.sceneFight then
 		fight.keyreleased(key, scancode)
+	elseif currentscene == enum.sceneMainMenu then
+		mainmenu.keyreleased(key, scancode)
 	end
 end
 
@@ -107,6 +122,8 @@ function love.wheelmoved(x, y)
 	local currentscene = cf.currentScreenName(SCREEN_STACK)
 	if currentscene == enum.sceneFight then
 		fight.wheelmoved(x, y)
+	elseif currentscene == enum.sceneMainMenu then
+		mainmenu.wheelmoved(x,y)
 	end
 end
 
@@ -114,6 +131,8 @@ function love.mousemoved(x, y, dx, dy, istouch )
 	local currentscene = cf.currentScreenName(SCREEN_STACK)
 	if currentscene == enum.sceneFight then
 		fight.mousemoved(x, y, dx, dy)
+	elseif currentscene == enum.sceneMainMenu then
+		mainmenu.mousemoved(x, y, dx, dy)
 	end
 end
 
@@ -131,6 +150,15 @@ function love.mousereleased(x, y, button, isTouch)
 		mainmenu.mousereleased(rx, ry, x, y, button)
 	elseif currentscene == enum.sceneEndBattle then
 		endbattle.mousereleased(rx, ry, x, y, button)
+	end
+end
+
+function love.mousepressed(x, y, button, isTouch)
+	local rx, ry = res.toGame(x,y)
+	local currentscene = cf.currentScreenName(SCREEN_STACK)
+
+	if currentscene == enum.sceneMainMenu then
+		mainmenu.mousepressed(rx, ry, x, y, button, isTouch)
 	end
 end
 
