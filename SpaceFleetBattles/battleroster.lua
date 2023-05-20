@@ -24,7 +24,7 @@ end
 
 local function getUnassignedPilot()
 	-- this function only works when called during battle roster
-	-- this functin will throw an error if called during battle because the player pilot might be dead or RTB
+	-- this function will throw an error if called during battle because the player pilot might be dead or RTB
 	-- assign the player pilot first
 	local playerpilot = fun.getPlayerPilot()			-- returns the pilot object that is the player
 	if playerpilot == nil then

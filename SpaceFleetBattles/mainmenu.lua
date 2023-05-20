@@ -51,6 +51,9 @@ function mainmenu.mousereleased(rx, ry, x, y, button)
         		fun.initialiseFleet()
                 fun.initialsePlanets()      -- also saves to file
 
+                ROSTER[1].firstname = playername
+                ROSTER[1].lastname = playername
+
                 cf.saveTableToFile("fleet.dat", FLEET)
                 cf.saveTableToFile("roster.dat", ROSTER)
                 cf.saveTableToFile("hanger.dat", HANGER)
