@@ -105,7 +105,7 @@ end
 function love.textinput(text)
 	local currentscene = cf.currentScreenName(SCREEN_STACK)
 	if currentscene == enum.sceneMainMenu then
-		mainmenu.keytextinput(text)
+		mainmenu.textinput(text)
 	end
 end
 
