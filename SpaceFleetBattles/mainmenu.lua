@@ -1,9 +1,35 @@
 mainmenu = {}
 
+local field = InputField("Initial text.")
+local fieldX = 80
+local fieldY = 50
+
+function mainmenu.keyreleased(key, scancode)
+    if key == "escape" then
+        print("Hi")
+		cf.removeScreen(SCREEN_STACK)
+	end
+end
+
+function mainmenu.keypressed(key, scancode, isRepeat)
+	field:keypressed(key, isRepeat)
+end
+
+function mainmenu.keytextinput(text)
+    field:textinput(text)
+end
+
+function mainmenu.mousepressed(rx, ry, x, y, button, isTouch)
+    field:mousepressed(rx - fieldX, ry - fieldY, button, isTouch)         -- not sure if the isTouch works as intended
+end
+
+function mainmenu.mousemoved(x, y, dx, dy)
+    field:mousemoved(x-fieldX, y-fieldY)        --! needs to be rx/ry?
+end
+
 function mainmenu.mousereleased(rx, ry, x, y, button)
 
     local clickedButtonID = buttons.getButtonID(rx, ry)
-
     if clickedButtonID == enum.buttonMainMenuNewGame then
 		-- initialise game
 		fun.initialiseRoster()
@@ -17,7 +43,6 @@ function mainmenu.mousereleased(rx, ry, x, y, button)
         -- planets is saved after creation but before images are loaded
 
 		cf.addScreen(enum.scenePlanetMap, SCREEN_STACK)
-
 	elseif clickedButtonID == enum.buttonMainMenuContinueGame then
 		-- load game
         ROSTER = cf.loadTableFromFile("roster.dat")         --! test what happens when file doesn't exist.
@@ -29,11 +54,16 @@ function mainmenu.mousereleased(rx, ry, x, y, button)
 
 		-- swap to fight scene
         cf.addScreen(enum.scenePlanetMap, SCREEN_STACK)
-
-
     elseif clickedButtonID == enum.buttonMainMenuExitGame then
         love.event.quit()
     end
+
+    field:mousereleased(rx - fieldX, ry - fieldY, button)
+
+end
+
+function mainmenu.wheelmoved(x,y)
+    field:wheelmoved(x, y)
 end
 
 function mainmenu.draw()
@@ -41,6 +71,19 @@ function mainmenu.draw()
     love.graphics.draw(IMAGE[enum.imageMainMenu], 0, 0)
     love.graphics.draw(IMAGE[enum.imageMainMenuBanner], 250, 25, 0, 1.5, 1.5)
 
+    -- draw text field
+    love.graphics.setColor(0, 0, 1)
+	for _, x, y, w, h in field:eachSelection() do
+		love.graphics.rectangle("fill", fieldX+x, fieldY+y, w, h)
+	end
+
+	love.graphics.setColor(1, 1, 1)
+	for _, text, x, y in field:eachVisibleLine() do
+		love.graphics.print(text, fieldX+x, fieldY+y)
+	end
+
+	local x, y, h = field:getCursorLayout()
+	love.graphics.rectangle("fill", fieldX+x, fieldY+y, 1, h)
 
     buttons.drawButtons()
 end
