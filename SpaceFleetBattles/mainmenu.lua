@@ -1,23 +1,36 @@
 mainmenu = {}
 
+local playername = "Fox"
+
+function mainmenu.keyreleased(key, scancode)
+    if key == "escape" then
+		cf.removeScreen(SCREEN_STACK)
+	end
+end
+
 function mainmenu.mousereleased(rx, ry, x, y, button)
 
     local clickedButtonID = buttons.getButtonID(rx, ry)
 
     if clickedButtonID == enum.buttonMainMenuNewGame then
-		-- initialise game
-		fun.initialiseRoster()
-		fun.initialiseHanger()
-		fun.initialiseFleet()
-        fun.initialsePlanets()      -- also saves to file
+        if playername == "" then
+            -- can't start a new game unless a player name is provided
 
-        cf.saveTableToFile("fleet.dat", FLEET)
-        cf.saveTableToFile("roster.dat", ROSTER)
-        cf.saveTableToFile("hanger.dat", HANGER)
-        -- planets is saved after creation but before images are loaded
 
-		cf.addScreen(enum.scenePlanetMap, SCREEN_STACK)
+        else
+    		-- initialise game
+    		fun.initialiseRoster()
+    		fun.initialiseHanger()
+    		fun.initialiseFleet()
+            fun.initialsePlanets()      -- also saves to file
 
+            cf.saveTableToFile("fleet.dat", FLEET)
+            cf.saveTableToFile("roster.dat", ROSTER)
+            cf.saveTableToFile("hanger.dat", HANGER)
+            -- planets is saved after creation but before images are loaded
+
+    		cf.addScreen(enum.scenePlanetMap, SCREEN_STACK)
+        end
 	elseif clickedButtonID == enum.buttonMainMenuContinueGame then
 		-- load game
         ROSTER = cf.loadTableFromFile("roster.dat")         --! test what happens when file doesn't exist.
@@ -40,6 +53,11 @@ function mainmenu.draw()
 
     love.graphics.draw(IMAGE[enum.imageMainMenu], 0, 0)
     love.graphics.draw(IMAGE[enum.imageMainMenuBanner], 250, 25, 0, 1.5, 1.5)
+
+    -- draw player name
+    love.graphics.setColor(0,0,0,1)
+    love.graphics.print(playername, 400, 400)
+
 
 
     buttons.drawButtons()
