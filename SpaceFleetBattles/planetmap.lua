@@ -36,7 +36,7 @@ local function createPilotFighter(numpilots, numfighters, forf)
 end
 
 local function adjustResourceLevels()
-	-- remember that resource levels only adjust the gloal supply. It doesn't change how many fighters are in the battle
+	-- remember that resource levels only adjust the global supply. It doesn't change how many fighters are in the battle
 	-- unless your supply goes below the maximum for the battle
 
 	local currentsector = FLEET.sector
@@ -83,7 +83,7 @@ local function drawPlanets()
 		-- draw the resources text
 		love.graphics.print(PLANETS[i].tooltip, PLANETS[i].x, PLANETS[i].y - 75)
 
-		-- add a dot for debugging purposes
+		-- add a dot in the centre of the planet for debugging purposes
 		-- love.graphics.setColor(1,0,0,1)
 		-- love.graphics.circle("fill", PLANETS[i].x, PLANETS[i].y, 5)
     end
@@ -112,6 +112,22 @@ function planetmap.mousereleased(rx, ry, x, y, button)
 			FLEET.sector = FLEET.newSector
 		end
 		adjustResourceLevels()
+
+		-- ensure the player has a pilot to fly
+		local playerpilot = fun.getPlayerPilot()
+		if playerpilot.isDead then
+			-- find a new pilot for the player
+			for i = 1, #ROSTER do
+				if ROSTER[i].Missions = 0 then
+					-- this is the new player
+					ROSTER[i].firstname = playername
+					PLAYER_GUID = ROSTER[i].guid
+				end
+			end
+		end
+		local playerpilot = fun.getPlayerPilot()
+		if playerpilot.isDead then print("Player does not have a pilot to role play for this round") end
+
 		FLEET.movesLeft = 0
         cf.swapScreen(enum.sceneBattleRoster, SCREEN_STACK)
 	else
