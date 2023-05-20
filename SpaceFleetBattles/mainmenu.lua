@@ -1,52 +1,23 @@
 mainmenu = {}
 
-local playername = ""
-local field = InputField("Initial text.")
-local fieldX = 480
-local fieldY = 385
-
-function mainmenu.keyreleased(key, scancode)
-    if key == "escape" then
-		cf.removeScreen(SCREEN_STACK)
-	end
-end
-
-function mainmenu.keypressed(key, scancode, isRepeat)
-	field:keypressed(key, isRepeat)
-end
-
-function mainmenu.textinput(text)
-    field:textinput(text)
-end
-
-function mainmenu.mousepressed(rx, ry, x, y, button, isTouch)
-    field:mousepressed(rx - fieldX, ry - fieldY, button, isTouch)         -- not sure if the isTouch works as intended
-end
-
-function mainmenu.mousemoved(x, y, dx, dy)
-    field:mousemoved(x-fieldX, y-fieldY)        --! needs to be rx/ry?
-end
-
 function mainmenu.mousereleased(rx, ry, x, y, button)
 
     local clickedButtonID = buttons.getButtonID(rx, ry)
+
     if clickedButtonID == enum.buttonMainMenuNewGame then
-        if playername == "" then
+		-- initialise game
+		fun.initialiseRoster()
+		fun.initialiseHanger()
+		fun.initialiseFleet()
+        fun.initialsePlanets()      -- also saves to file
 
-        else
-    		-- initialise game
-    		fun.initialiseRoster()
-    		fun.initialiseHanger()
-    		fun.initialiseFleet()
-            fun.initialsePlanets()      -- also saves to file
+        cf.saveTableToFile("fleet.dat", FLEET)
+        cf.saveTableToFile("roster.dat", ROSTER)
+        cf.saveTableToFile("hanger.dat", HANGER)
+        -- planets is saved after creation but before images are loaded
 
-            cf.saveTableToFile("fleet.dat", FLEET)
-            cf.saveTableToFile("roster.dat", ROSTER)
-            cf.saveTableToFile("hanger.dat", HANGER)
-            -- planets is saved after creation but before images are loaded
+		cf.addScreen(enum.scenePlanetMap, SCREEN_STACK)
 
-    		cf.addScreen(enum.scenePlanetMap, SCREEN_STACK)
-        end
 	elseif clickedButtonID == enum.buttonMainMenuContinueGame then
 		-- load game
         ROSTER = cf.loadTableFromFile("roster.dat")         --! test what happens when file doesn't exist.
@@ -58,16 +29,11 @@ function mainmenu.mousereleased(rx, ry, x, y, button)
 
 		-- swap to fight scene
         cf.addScreen(enum.scenePlanetMap, SCREEN_STACK)
+
+
     elseif clickedButtonID == enum.buttonMainMenuExitGame then
         love.event.quit()
     end
-
-    field:mousereleased(rx - fieldX, ry - fieldY, button)
-
-end
-
-function mainmenu.wheelmoved(x,y)
-    field:wheelmoved(x, y)
 end
 
 function mainmenu.draw()
@@ -75,29 +41,8 @@ function mainmenu.draw()
     love.graphics.draw(IMAGE[enum.imageMainMenu], 0, 0)
     love.graphics.draw(IMAGE[enum.imageMainMenuBanner], 250, 25, 0, 1.5, 1.5)
 
-    -- draw text field
-    love.graphics.setFont(FONT[enum.fontCorporate])
-    -- draw black box
-    love.graphics.setColor(0, 0, 0, 1)
-    love.graphics.rectangle("fill", fieldX - 5, fieldY - 5, 150, 40)
-
-    love.graphics.setColor(0, 0, 1)
-	for _, x, y, w, h in field:eachSelection() do
-		love.graphics.rectangle("fill", fieldX+x, fieldY+y, w, h)
-	end
-
-	love.graphics.setColor(1, 1, 1)
-	for _, text, x, y in field:eachVisibleLine() do
-		love.graphics.print(text, fieldX+x, fieldY+y)
-	end
-
-	local x, y, h = field:getCursorLayout()
-    love.graphics.rectangle("fill", fieldX + x, fieldY + y, 1, h)
-    love.graphics.setFont(FONT[enum.fontDefault])
 
     buttons.drawButtons()
-
-    -- print(field:getText( ))
 end
 
 function mainmenu.loadButtons()

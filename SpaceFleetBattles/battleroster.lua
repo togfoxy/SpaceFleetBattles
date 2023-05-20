@@ -48,6 +48,8 @@ local function getUnassignedPilot()
 	end
 	print("No combat-ready pilot found")
 	return nil
+
+
 end
 
 local function getEmptyVessel()
@@ -219,7 +221,7 @@ local function drawRoster()
 end
 
 local function drawHanger()
-	-- font is set in battleroster.draw()
+	-- font is set in main draw()
 	local drawx = 900
     local drawy = 100
 
