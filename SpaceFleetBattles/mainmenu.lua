@@ -1,10 +1,37 @@
 mainmenu = {}
 
-local playername = "Fox"
+local playername = ""
+local newgame = false       -- set to true if clicking new game and prompting for player name
+
+function mainmenu.keypressed( key, scancode, isrepeat )
+    if key == "backspace" then
+        playername = playername:sub(1, -2)
+    elseif key == "space" then
+        playername = playername .. " "
+    end
+end
+
+function mainmenu.textinput(key)
+    local ascii = string.byte(key)
+    print(ascii)
+    if (ascii >= 97 and ascii <= 122) or (ascii >= 65 and ascii <= 90) then
+        if string.len(playername) <= 20 then
+            playername = playername .. key
+        else
+            --! player error sound
+        end
+    end
+    if key == "backspace" then
+        playername = playername:sub(1, -2)
+    else
+    end
+end
 
 function mainmenu.keyreleased(key, scancode)
     if key == "escape" then
 		cf.removeScreen(SCREEN_STACK)
+    else
+
 	end
 end
 
@@ -13,23 +40,26 @@ function mainmenu.mousereleased(rx, ry, x, y, button)
     local clickedButtonID = buttons.getButtonID(rx, ry)
 
     if clickedButtonID == enum.buttonMainMenuNewGame then
-        if playername == "" then
+        if newgame == false then
             -- can't start a new game unless a player name is provided
-
-
+            newgame = true
         else
-    		-- initialise game
-    		fun.initialiseRoster()
-    		fun.initialiseHanger()
-    		fun.initialiseFleet()
-            fun.initialsePlanets()      -- also saves to file
+            if playername ~= "" then
+        		-- initialise game
+        		fun.initialiseRoster()
+        		fun.initialiseHanger()
+        		fun.initialiseFleet()
+                fun.initialsePlanets()      -- also saves to file
 
-            cf.saveTableToFile("fleet.dat", FLEET)
-            cf.saveTableToFile("roster.dat", ROSTER)
-            cf.saveTableToFile("hanger.dat", HANGER)
-            -- planets is saved after creation but before images are loaded
+                cf.saveTableToFile("fleet.dat", FLEET)
+                cf.saveTableToFile("roster.dat", ROSTER)
+                cf.saveTableToFile("hanger.dat", HANGER)
+                -- planets is saved after creation but before images are loaded
 
-    		cf.addScreen(enum.scenePlanetMap, SCREEN_STACK)
+        		cf.addScreen(enum.scenePlanetMap, SCREEN_STACK)
+            else
+                --! probably need an error sound here
+            end
         end
 	elseif clickedButtonID == enum.buttonMainMenuContinueGame then
 		-- load game
@@ -55,9 +85,22 @@ function mainmenu.draw()
     love.graphics.draw(IMAGE[enum.imageMainMenuBanner], 250, 25, 0, 1.5, 1.5)
 
     -- draw player name
-    love.graphics.setColor(0,0,0,1)
-    love.graphics.print(playername, 400, 400)
+    if newgame then
 
+        love.graphics.setFont(FONT[enum.fontCorporate])
+        love.graphics.setColor(1,1,1,1)
+
+        -- print label
+        love.graphics.print("Enter your pilots name:", 485, 350)
+
+        -- draw black rectangle
+        love.graphics.setColor(0,0,0,1)
+        love.graphics.rectangle("fill", 480, 385, 270, 40)
+
+        love.graphics.setColor(1,1,1,1)
+        love.graphics.print(playername, 485, 390)
+        love.graphics.setFont(FONT[enum.fontDefault])
+    end
 
 
     buttons.drawButtons()
