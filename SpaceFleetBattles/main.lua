@@ -92,14 +92,26 @@ end
 function endContact(a, b, coll)
 end
 
-function love.keyreleased( key, scancode )
-	-- if key == "escape" then
-	-- 	cf.removeScreen(SCREEN_STACK)
-	-- end
+function love.keypressed( key, scancode, isrepeat )
+	local currentscene = cf.currentScreenName(SCREEN_STACK)
+	if currentscene == enum.sceneMainMenu then
+		mainmenu.keypressed( key, scancode, isrepeat )
+	end
+end
 
+function love.keyreleased( key, scancode )
 	local currentscene = cf.currentScreenName(SCREEN_STACK)
 	if currentscene == enum.sceneFight then
 		fight.keyreleased(key, scancode)
+	elseif currentscene == enum.sceneMainMenu then
+		mainmenu.keyreleased(key, scancode)
+	end
+end
+
+function love.textinput(text)
+	local currentscene = cf.currentScreenName(SCREEN_STACK)
+	if currentscene == enum.sceneMainMenu then
+		mainmenu.textinput(text)
 	end
 end
 
