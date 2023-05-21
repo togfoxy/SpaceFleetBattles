@@ -189,6 +189,8 @@ function love.load()
 	GRIDS[enum.gridExplosion] = anim8.newGrid(16, 16, IMAGE[enum.imageExplosion]:getWidth(), IMAGE[enum.imageExplosion]:getHeight())
 	GRIDS[enum.gridBulletSmoke] = anim8.newGrid(32, 32, IMAGE[enum.imageBulletSmoke]:getWidth(), IMAGE[enum.imageBulletSmoke]:getHeight())
 
+	FIRSTNAMES = fun.ImportNameFile("interfirstnamesshort.csv")
+	LASTNAMES = fun.ImportNameFile("intersurnamesshort.csv")
 end
 
 function love.draw()

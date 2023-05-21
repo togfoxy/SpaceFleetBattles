@@ -402,6 +402,7 @@ function functions.getObject(guid)
 end
 
 function functions.isPlayerAlive()
+    -- only works on fight screen. --! I should move it there and make it local
     -- this returns true if the players fighter is alive
     for i = 1, #OBJECTS do
         if OBJECTS[i].guid == PLAYER_FIGHTER_GUID then
@@ -427,10 +428,14 @@ end
 
 function functions.createNewPilot()
     -- retun a pilot object
+    -- get random name
+    local firstnameindex = love.math.random(1, #FIRSTNAMES)
+    local lastnameindex = love.math.random(1, #LASTNAMES)
+
     local thispilot = {}
     thispilot.guid = cf.getGUID()
-    thispilot.firstname = "Bob"
-    thispilot.lastname = "Starbuck"
+    thispilot.firstname = FIRSTNAMES[firstnameindex]
+    thispilot.lastname = LASTNAMES[lastnameindex]
     thispilot.health = 100
     thispilot.vesselguid = nil
     thispilot.kills = 0
@@ -438,16 +443,6 @@ function functions.createNewPilot()
     thispilot.ejections = 0
     thispilot.isDead = false
     return thispilot
-end
-
-function functions.initialiseRoster()
-	ROSTER = {}
-	for i = 1, FRIEND_PILOT_COUNT do
-		local thispilot = fun.createNewPilot()
-		table.insert(ROSTER, thispilot)
-	end
-	ROSTER[1].isPlayer = true
-    PLAYER_GUID = ROSTER[1].guid
 end
 
 function functions.initialiseHanger()
@@ -640,5 +635,16 @@ function functions.loadImagesIntoPlanets()
 
     PLANETS[14].image = IMAGE[enum.imagePlanet14]
 end
+
+function functions.ImportNameFile(filename)
+
+    local thistable = {}
+    local savefile = savedir .. filename
+    for line in io.lines(savefile) do
+        table.insert(thistable, line)
+    end
+    return thistable
+end
+
 
 return functions
