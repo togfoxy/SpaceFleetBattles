@@ -13,7 +13,6 @@ end
 
 function mainmenu.textinput(key)
     local ascii = string.byte(key)
-    print(ascii)
     if (ascii >= 97 and ascii <= 122) or (ascii >= 65 and ascii <= 90) then
         if string.len(playername) <= 20 then
             playername = playername .. key
@@ -35,6 +34,18 @@ function mainmenu.keyreleased(key, scancode)
 	end
 end
 
+local function initialiseRoster()
+	ROSTER = {}
+	for i = 1, FRIEND_PILOT_COUNT do
+		local thispilot = fun.createNewPilot()
+		table.insert(ROSTER, thispilot)
+	end
+	ROSTER[1].isPlayer = true
+    ROSTER[1].firstname = playername
+    ROSTER[1].lastname = "Smith"
+    PLAYER_GUID = ROSTER[1].guid
+end
+
 function mainmenu.mousereleased(rx, ry, x, y, button)
 
     local clickedButtonID = buttons.getButtonID(rx, ry)
@@ -46,13 +57,10 @@ function mainmenu.mousereleased(rx, ry, x, y, button)
         else
             if playername ~= "" then
         		-- initialise game
-        		fun.initialiseRoster()
+        		initialiseRoster()
         		fun.initialiseHanger()
         		fun.initialiseFleet()
                 fun.initialsePlanets()      -- also saves to file
-
-                ROSTER[1].firstname = playername
-                ROSTER[1].lastname = "Smith"
 
 print(inspect(ROSTER))
 print("***********")

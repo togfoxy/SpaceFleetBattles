@@ -445,16 +445,6 @@ function functions.createNewPilot()
     return thispilot
 end
 
-function functions.initialiseRoster()
-	ROSTER = {}
-	for i = 1, FRIEND_PILOT_COUNT do
-		local thispilot = fun.createNewPilot()
-		table.insert(ROSTER, thispilot)
-	end
-	ROSTER[1].isPlayer = true
-    PLAYER_GUID = ROSTER[1].guid
-end
-
 function functions.initialiseHanger()
 	-- creates fighters and 'stores' them in the hanger table. Friendly only
     -- NOTE: this puts the object in HANGER but not in OBJECTS

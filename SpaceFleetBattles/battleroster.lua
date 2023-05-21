@@ -208,9 +208,6 @@ local function drawRoster()
             love.graphics.setColor(1,1,1,1)
         end
 
-		print(i)
-		print(ROSTER[i].firstname)
-		print(ROSTER[i].lastname)
 		local txt = ROSTER[i].firstname .. " " .. ROSTER[i].lastname
 		love.graphics.print(txt, drawx, drawy)
 
