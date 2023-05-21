@@ -118,7 +118,7 @@ function planetmap.mousereleased(rx, ry, x, y, button)
 		if playerpilot.isDead then
 			-- find a new pilot for the player
 			for i = 1, #ROSTER do
-				if ROSTER[i].Missions = 0 then
+				if ROSTER[i].missions == 0 then
 					-- this is the new player
 					ROSTER[i].firstname = playername
 					PLAYER_GUID = ROSTER[i].guid

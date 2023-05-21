@@ -52,7 +52,10 @@ function mainmenu.mousereleased(rx, ry, x, y, button)
                 fun.initialsePlanets()      -- also saves to file
 
                 ROSTER[1].firstname = playername
-                ROSTER[1].lastname = ""
+                ROSTER[1].lastname = "Smith"
+
+print(inspect(ROSTER))
+print("***********")
 
                 cf.saveTableToFile("fleet.dat", FLEET)
                 cf.saveTableToFile("roster.dat", ROSTER)

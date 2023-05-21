@@ -428,10 +428,14 @@ end
 
 function functions.createNewPilot()
     -- retun a pilot object
+    -- get random name
+    local firstnameindex = love.math.random(1, #FIRSTNAMES)
+    local lastnameindex = love.math.random(1, #LASTNAMES)
+
     local thispilot = {}
     thispilot.guid = cf.getGUID()
-    thispilot.firstname = "Bob"
-    thispilot.lastname = "Starbuck"
+    thispilot.firstname = FIRSTNAMES[firstnameindex]
+    thispilot.lastname = LASTNAMES[lastnameindex]
     thispilot.health = 100
     thispilot.vesselguid = nil
     thispilot.kills = 0
@@ -641,5 +645,16 @@ function functions.loadImagesIntoPlanets()
 
     PLANETS[14].image = IMAGE[enum.imagePlanet14]
 end
+
+function functions.ImportNameFile(filename)
+
+    local thistable = {}
+    local savefile = savedir .. filename
+    for line in io.lines(savefile) do
+        table.insert(thistable, line)
+    end
+    return thistable
+end
+
 
 return functions
