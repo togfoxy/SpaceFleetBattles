@@ -135,89 +135,6 @@ local function getImpactedComponent(Obj)
     error()     -- should not reach this point
 end
 
-local function createEscapePod(Obj)
-    -- Obj is the obj that is spawning/creating the pod. It assumed this Obj will soon be destroyed
-
-    local thisobject = {}
-    thisobject.body = love.physics.newBody(PHYSICSWORLD, Obj.podx, Obj.pody, "dynamic")
-	thisobject.body:setLinearDamping(0)
-
-    if forf == enum.forfFriend then
-        thisobject.body:setAngle(math.pi)   -- towards base
-    else
-        thisobject.body:setAngle(0)
-    end
-
-    thisobject.shape = love.physics.newRectangleShape(4, 3)
-	thisobject.fixture = love.physics.newFixture(thisobject.body, thisobject.shape, 1)		-- the 1 is the density
-	thisobject.fixture:setRestitution(0.25)
-	thisobject.fixture:setSensor(false)
-
-    if Obj.forf == enum.forfFriend then
-        thisobject.fixture:setCategory(enum.categoryFriendlyPod)
-        thisobject.fixture:setMask(enum.categoryFriendlyFighter, enum.categoryFriendlyBullet, enum.categoryEnemyFighter, enum.categoryFriendlyPod)
-        thisobject.body:applyLinearImpulse(-0.75, 0)
-    elseif Obj.forf == enum.forfEnemy then
-        thisobject.fixture:setCategory(enum.categoryEnemyPod)
-        thisobject.fixture:setMask(enum.categoryEnemyFighter, enum.categoryEnemyBullet, enum.categoryFriendlyFighter, enum.categoryEnemyPod)   -- these are the things that will not trigger a collision
-        thisobject.body:applyLinearImpulse(0.75, 0)
-    end
-
-    local guid
-    if Obj.guid == PLAYER_FIGHTER_GUID then
-        guid = PLAYER_FIGHTER_GUID      -- POD inherits player fighter guid
-    else
-        guid = cf.getGUID()             -- assigning a new guid effectively destroys the fighter from objects
-    end
-	thisobject.fixture:setUserData(guid)
-    thisobject.guid = guid
-    assert(thisobject.guid ~= nil)
-
-    thisobject.forf = Obj.forf
-    thisobject.squadCallsign = Obj.squadcallsign
-
-    thisobject.weaponcooldown = 0           -- might be more than one weapon in the future
-
-    thisobject.currentMaxForwardThrust = 50    -- can be less than max if battle damaged
-    thisobject.maxForwardThrust = 50
-    thisobject.currentForwardThrust = 0
-    thisobject.maxAcceleration = 25
-    thisobject.maxDeacceleration = 25       -- set to 0 for bullets
-    thisobject.currentMaxAcceleration = 25 -- this can be less than maxAcceleration if battle damaged
-    thisobject.maxSideThrust = 0
-    thisobject.currentSideThrust = 0
-
-    thisobject.componentSize = {}
-    thisobject.componentSize[enum.componentStructure] = 3
-    thisobject.componentSize[enum.componentThruster] = 0
-    thisobject.componentSize[enum.componentAccelerator] = 0
-    thisobject.componentSize[enum.componentWeapon] = 0
-    thisobject.componentSize[enum.componentSideThruster] = 0
-
-    thisobject.componentHealth = {}
-    thisobject.componentHealth[enum.componentStructure] = 100
-    thisobject.componentHealth[enum.componentThruster] = 0
-    thisobject.componentHealth[enum.componentAccelerator] = 0
-    thisobject.componentHealth[enum.componentWeapon] = 0
-    thisobject.componentHealth[enum.componentSideThruster] = 0
-
-    thisobject.actions = {}         -- this will be influenced by squad orders + player choices
-    thisobject.actions[1] = {}
-    thisobject.actions[1].action = enum.unitActionReturningToBase
-    thisobject.actions[1].targetguid = nil
-	
-    if thisobject.forf == enum.forfFriend then
-        thisobject.actions[1].destx = FRIEND_START_X
-    elseif thisobject.forf == enum.forfEnemy then
-        thisobject.actions[1].destx = FOE_START_X
-    end
-    thisobject.actions[1].desty = Obj.pody
-
-    -- print("Adding pod to OBJECTS: " .. thisobject.guid)
-    table.insert(OBJECTS, thisobject)
-    print("Pod guid created: " .. guid)
-end
-
 function functions.setTaskEject(Obj)
     Obj.lifetime = 0
     Obj.actions = {}
@@ -288,6 +205,7 @@ local function destroyVictim(victim, bullet)
 	local pilotguid = victim.pilotguid
 	local pilotobj = fun.getPilot(pilotguid)
 	if pilotobj ~= nil then pilotobj.isDead = true end
+    if pilotguid == PLAYER_GUID then pilotobj.isPlayer = false end      --! check to see if this has unintended consequences
 
 	-- remove fighter from hanger
 	for i = #HANGER, 1, -1 do
@@ -297,7 +215,7 @@ local function destroyVictim(victim, bullet)
 	end
 end
 
-local function createDamageText(componenthit)
+local function createDamageText(componenthit, victim)
 	local txt = ""
 	if componenthit == enum.componentAccelerator then
 		txt = "Throttle"
@@ -318,11 +236,13 @@ local function createDamageText(componenthit)
 	thistext.object = victim
 	thistext.timeleft = 5			-- how many seconds to display
 	table.insert(DAMAGETEXT, thistext)
+    -- print(inspect(DAMAGETEXT))
+    -- print("*******************")
 end
 
 local function addEvadeAction(victim)
 	-- insert an action at the TOP of the queue
-	
+
 	local thisaction = {}
 	if victim.forf == enum.forfFriend then
 		-- set a destination random degrees from current location
@@ -404,12 +324,12 @@ function functions.applyDamage(victim, bullet)
 		else	-- not dead and not ejecting
 			-- prep component hit if victim = player or victim = player target
 			if victim.guid == PLAYER_FIGHTER_GUID or bullet.ownerObjectguid == PLAYER_FIGHTER_GUID then
-				createDamageText(componenthit)
+				createDamageText(componenthit, victim)
 			end
-						
+
 			-- apply a small evasion wobble if trying to RTB
 			local action = fun.getTopAction(victim)
-			
+
 			if action ~= nil and action.action == enum.unitActionReturningToBase then
 				-- been hit while RTB. Try to evade.
 				-- insert an action at the TOP of the queue

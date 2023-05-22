@@ -3,6 +3,19 @@ mainmenu = {}
 local playername = ""
 local newgame = false       -- set to true if clicking new game and prompting for player name
 
+
+local function initialiseRoster()
+	ROSTER = {}
+	for i = 1, FRIEND_PILOT_COUNT do
+		local thispilot = fun.createNewPilot()
+		table.insert(ROSTER, thispilot)
+	end
+	ROSTER[1].isPlayer = true
+    ROSTER[1].firstname = ""
+    ROSTER[1].lastname = playername
+    PLAYER_GUID = ROSTER[1].guid
+end
+
 local function initialiseHanger()
 	-- creates fighters and 'stores' them in the hanger table. Friendly only
     -- NOTE: this puts the object in HANGER but not in OBJECTS
@@ -22,6 +35,30 @@ local function initialiseFleet()
     FLEET.movesLeft = 0
 
     cf.saveTableToFile("fleet.dat", FLEET)
+end
+
+local function loadImagesIntoPlanets()
+
+    PLANETS[1].image = IMAGE[enum.imagePlanet1]
+
+    PLANETS[2].image = IMAGE[enum.imagePlanet2]
+    PLANETS[3].image = IMAGE[enum.imagePlanet3]
+
+    PLANETS[4].image = IMAGE[enum.imagePlanet4]
+    PLANETS[5].image = IMAGE[enum.imagePlanet5]
+    PLANETS[6].image = IMAGE[enum.imagePlanet6]
+
+    PLANETS[7].image = IMAGE[enum.imagePlanet7]
+    PLANETS[8].image = IMAGE[enum.imagePlanet8]
+
+    PLANETS[9].image = IMAGE[enum.imagePlanet9]
+    PLANETS[10].image = IMAGE[enum.imagePlanet10]
+    PLANETS[11].image = IMAGE[enum.imagePlanet11]
+
+    PLANETS[12].image = IMAGE[enum.imagePlanet12]
+    PLANETS[13].image = IMAGE[enum.imagePlanet13]
+
+    PLANETS[14].image = IMAGE[enum.imagePlanet14]
 end
 
 local function initialsePlanets()
@@ -104,30 +141,6 @@ local function initialsePlanets()
     loadImagesIntoPlanets()         -- loads images into the PLANETS table
 end
 
-local function loadImagesIntoPlanets()
-
-    PLANETS[1].image = IMAGE[enum.imagePlanet1]
-
-    PLANETS[2].image = IMAGE[enum.imagePlanet2]
-    PLANETS[3].image = IMAGE[enum.imagePlanet3]
-
-    PLANETS[4].image = IMAGE[enum.imagePlanet4]
-    PLANETS[5].image = IMAGE[enum.imagePlanet5]
-    PLANETS[6].image = IMAGE[enum.imagePlanet6]
-
-    PLANETS[7].image = IMAGE[enum.imagePlanet7]
-    PLANETS[8].image = IMAGE[enum.imagePlanet8]
-
-    PLANETS[9].image = IMAGE[enum.imagePlanet9]
-    PLANETS[10].image = IMAGE[enum.imagePlanet10]
-    PLANETS[11].image = IMAGE[enum.imagePlanet11]
-
-    PLANETS[12].image = IMAGE[enum.imagePlanet12]
-    PLANETS[13].image = IMAGE[enum.imagePlanet13]
-
-    PLANETS[14].image = IMAGE[enum.imagePlanet14]
-end
-
 local function startNewGame()
 
 	initialiseRoster()
@@ -161,10 +174,6 @@ function mainmenu.textinput(key)
         end
 	elseif key == "backspace" then
         playername = playername:sub(1, -2)
-	elseif key == "return" or key == "kpenter" then
-		if string.len(playername) > 0 then
-			startNewGame()
-		end
 	else
 		--! player error sound
     end
@@ -173,21 +182,13 @@ end
 function mainmenu.keyreleased(key, scancode)
     if key == "escape" then
 		cf.removeScreen(SCREEN_STACK)
-    else
-
-	end
-end
-
-local function initialiseRoster()
-	ROSTER = {}
-	for i = 1, FRIEND_PILOT_COUNT do
-		local thispilot = fun.createNewPilot()
-		table.insert(ROSTER, thispilot)
-	end
-	ROSTER[1].isPlayer = true
-    ROSTER[1].firstname = ""
-    ROSTER[1].lastname = playername
-    PLAYER_GUID = ROSTER[1].guid
+	elseif scancode == "return" or scancode == "kpenter" then
+		if string.len(playername) > 0 then		-- maybe check for at least 3 chars
+			startNewGame()
+		end
+	else
+		--! player error sound
+    end
 end
 
 function mainmenu.mousereleased(rx, ry, x, y, button)

@@ -78,7 +78,7 @@ local function drawPlanets()
     for i = 1, #PLANETS do
 		-- draw the planet image
 		love.graphics.setColor(1,1,1,1)
-        love.graphics.draw(PLANETS[i].image, PLANETS[i].x, PLANETS[i].y, 0, PLANETS[i].scale, PLANETS[i].scale, 150, 150)
+        love.graphics.draw(PLANETS[i].image, PLANETS[i].x, PLANETS[i].y, 0, PLANETS[i].scale, PLANETS[i].scale, 400, 400)
 
 		-- draw the resources text
 		love.graphics.print(PLANETS[i].tooltip, PLANETS[i].x, PLANETS[i].y - 75)
@@ -102,7 +102,7 @@ local function drawPlanets()
     local scale = PLANETS[sector].scale			-- scale = the size of the planet. Different scales used for asthetic reasons
     love.graphics.setColor(1,0,0,1)
     -- love.graphics.rectangle("line", drawx - 75, drawy - 75, 250 * scale, 250 * scale)
-	love.graphics.draw(IMAGE[enum.imageCrosshairPlanet], drawx - 75, drawy - 75, 0, 3, 3)
+	love.graphics.draw(IMAGE[enum.imageCrosshairPlanet], drawx - 200, drawy - 200, 0, 5, 5)
 end
 
 function planetmap.keyreleased(key, scancode)
@@ -126,7 +126,9 @@ function planetmap.mousereleased(rx, ry, x, y, button)
 			for i = 1, #ROSTER do
 				if ROSTER[i].missions == 0 then
 					-- this is the new player
-					ROSTER[i].firstname = playername
+					ROSTER[i].firstname = ""
+					ROSTER[i].lastname = playername
+					ROSTER[i].isPlayer = true
 					PLAYER_GUID = ROSTER[i].guid
 				end
 			end

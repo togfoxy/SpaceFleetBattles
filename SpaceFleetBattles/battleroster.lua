@@ -178,7 +178,7 @@ function battleroster.mousereleased(rx, ry, x, y, button)
 		loadBattleObjects()
 
 		endBattleHasLoaded = false
-		
+
 		cf.saveTableToFile("fleet.dat", FLEET)							-- do this here only when starting battle
         cf.swapScreen(enum.sceneFight, SCREEN_STACK)
 	-- elseif clickedButtonID == enum.buttonMainMenuContinueGame then
@@ -209,13 +209,17 @@ local function drawRoster()
             love.graphics.setColor(1,1,1,1)
         end
 
+		if ROSTER[i].firstname == nil then
+			print(inspect(ROSTER))
+		end
+
 		local txt = ROSTER[i].firstname .. " " .. ROSTER[i].lastname
 		love.graphics.print(txt, drawx, drawy)
 
-		love.graphics.print(ROSTER[i].health, drawx + 220, drawy)
-		love.graphics.print(ROSTER[i].missions, drawx + 350, drawy)
-		love.graphics.print(ROSTER[i].kills, drawx + 455, drawy)
-		love.graphics.print(ROSTER[i].ejections, drawx + 590, drawy)
+		love.graphics.print(ROSTER[i].health, drawx + 250, drawy)
+		love.graphics.print(ROSTER[i].missions, drawx + 380, drawy)
+		love.graphics.print(ROSTER[i].kills, drawx + 485, drawy)
+		love.graphics.print(ROSTER[i].ejections, drawx + 620, drawy)
 		drawy = drawy + 30
     end
 
@@ -223,17 +227,17 @@ end
 
 local function drawHanger()
 	-- font is set in main draw()
-	local drawx = 900
+	local drawx = 1100
     local drawy = 100
 
 	love.graphics.setColor(1,1,1,1)
 	love.graphics.print("Fighter ID", drawx, drawy)
-	love.graphics.print("Structure", drawx + 250, drawy)
+	love.graphics.print("Structure", drawx + 125, drawy)
 	drawy = drawy + 30
 
     for i = 1, #HANGER do
 		love.graphics.print(string.sub(HANGER[i].guid, -4), drawx + 25, drawy)
-		love.graphics.print(HANGER[i].componentHealth[enum.componentStructure], drawx + 280, drawy)
+		love.graphics.print(HANGER[i].componentHealth[enum.componentStructure], drawx + 150, drawy)
         drawy = drawy + 30
     end
 end

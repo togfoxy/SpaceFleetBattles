@@ -7,6 +7,90 @@ local showcallsigns = false
 local cameraindex = nil				-- which fighter has the cameras' focus
 local timefactor = 1
 
+
+local function createEscapePod(Obj)
+    -- Obj is the obj that is spawning/creating the pod. It assumed this Obj will soon be destroyed
+
+    local thisobject = {}
+    thisobject.body = love.physics.newBody(PHYSICSWORLD, Obj.podx, Obj.pody, "dynamic")
+	thisobject.body:setLinearDamping(0)
+
+    if forf == enum.forfFriend then
+        thisobject.body:setAngle(math.pi)   -- towards base
+    else
+        thisobject.body:setAngle(0)
+    end
+
+    thisobject.shape = love.physics.newRectangleShape(4, 3)
+	thisobject.fixture = love.physics.newFixture(thisobject.body, thisobject.shape, 1)		-- the 1 is the density
+	thisobject.fixture:setRestitution(0.25)
+	thisobject.fixture:setSensor(false)
+
+    if Obj.forf == enum.forfFriend then
+        thisobject.fixture:setCategory(enum.categoryFriendlyPod)
+        thisobject.fixture:setMask(enum.categoryFriendlyFighter, enum.categoryFriendlyBullet, enum.categoryEnemyFighter, enum.categoryFriendlyPod)
+        thisobject.body:applyLinearImpulse(-0.75, 0)
+    elseif Obj.forf == enum.forfEnemy then
+        thisobject.fixture:setCategory(enum.categoryEnemyPod)
+        thisobject.fixture:setMask(enum.categoryEnemyFighter, enum.categoryEnemyBullet, enum.categoryFriendlyFighter, enum.categoryEnemyPod)   -- these are the things that will not trigger a collision
+        thisobject.body:applyLinearImpulse(0.75, 0)
+    end
+
+    local guid
+    if Obj.guid == PLAYER_FIGHTER_GUID then
+        guid = PLAYER_FIGHTER_GUID      -- POD inherits player fighter guid
+    else
+        guid = cf.getGUID()             -- assigning a new guid effectively destroys the fighter from objects
+    end
+	thisobject.fixture:setUserData(guid)
+    thisobject.guid = guid
+    assert(thisobject.guid ~= nil)
+
+    thisobject.forf = Obj.forf
+    thisobject.squadCallsign = Obj.squadcallsign
+
+    thisobject.weaponcooldown = 0           -- might be more than one weapon in the future
+
+    thisobject.currentMaxForwardThrust = 50    -- can be less than max if battle damaged
+    thisobject.maxForwardThrust = 50
+    thisobject.currentForwardThrust = 0
+    thisobject.maxAcceleration = 25
+    thisobject.maxDeacceleration = 25       -- set to 0 for bullets
+    thisobject.currentMaxAcceleration = 25 -- this can be less than maxAcceleration if battle damaged
+    thisobject.maxSideThrust = 0
+    thisobject.currentSideThrust = 0
+
+    thisobject.componentSize = {}
+    thisobject.componentSize[enum.componentStructure] = 3
+    thisobject.componentSize[enum.componentThruster] = 0
+    thisobject.componentSize[enum.componentAccelerator] = 0
+    thisobject.componentSize[enum.componentWeapon] = 0
+    thisobject.componentSize[enum.componentSideThruster] = 0
+
+    thisobject.componentHealth = {}
+    thisobject.componentHealth[enum.componentStructure] = 100
+    thisobject.componentHealth[enum.componentThruster] = 0
+    thisobject.componentHealth[enum.componentAccelerator] = 0
+    thisobject.componentHealth[enum.componentWeapon] = 0
+    thisobject.componentHealth[enum.componentSideThruster] = 0
+
+    thisobject.actions = {}         -- this will be influenced by squad orders + player choices
+    thisobject.actions[1] = {}
+    thisobject.actions[1].action = enum.unitActionReturningToBase
+    thisobject.actions[1].targetguid = nil
+
+    if thisobject.forf == enum.forfFriend then
+        thisobject.actions[1].destx = FRIEND_START_X
+    elseif thisobject.forf == enum.forfEnemy then
+        thisobject.actions[1].destx = FOE_START_X
+    end
+    thisobject.actions[1].desty = Obj.pody
+
+    -- print("Adding pod to OBJECTS: " .. thisobject.guid)
+    table.insert(OBJECTS, thisobject)
+    print("Pod guid created: " .. guid)
+end
+
 local function destroyObjects(dt)
 
     for i = #OBJECTS, 1, -1 do
@@ -50,6 +134,7 @@ local function updateDamageText(dt)
 	for i = #DAMAGETEXT, 1, -1 do
 		DAMAGETEXT[i].timeleft = DAMAGETEXT[i].timeleft - dt
 		if DAMAGETEXT[i].timeleft <= 0 then table.remove(DAMAGETEXT, i) end
+        print("Displaying damage text")
 	end
 end
 
@@ -67,12 +152,12 @@ function fight.keyreleased(key, scancode)
 	if key == "," then cameraindex = cameraindex - 1 end			-- this is < key
 	if key == "-" then timefactor = timefactor - 0.5 end			-- this is the '-' minus key
 	if key == "=" then timefactor = timefactor + 0.5 end			-- this is the '+' plus key
-    
-	if key == "lctrl" or key == "rctrl" then 
-		showcallsigns = not showcallsigns 
+
+	if key == "lctrl" or key == "rctrl" then
+		showcallsigns = not showcallsigns
 		snapcamera = true
 	end
-	
+
 	if key == "escape" then
         if showmenu then
             showmenu = false
@@ -81,7 +166,7 @@ function fight.keyreleased(key, scancode)
             love.event.quit()
         end
     end
-		
+
 	if key == "c" then
 		for i = 1, #OBJECTS do
 			if OBJECTS[i].guid == PLAYER_FIGHTER_GUID then
@@ -91,13 +176,13 @@ function fight.keyreleased(key, scancode)
 			end
 		end
 	end
-	
+
 	if cameraindex < 1 then cameraindex = #OBJECTS end
 	if cameraindex > #OBJECTS then cameraindex = 1 end
-	
+
 	if timefactor < 1 then timefactor = 1 end
 	if timefactor > 2 then timefactor = 2 end
-	
+
 end
 
 function fight.wheelmoved(x, y)
@@ -302,15 +387,14 @@ local function drawMenu()
     -- love.graphics.rectangle("line", objx, objy + 36, 200, 20)
     -- love.graphics.rectangle("line", objx, objy + 56, 200, 20)
     -- love.graphics.rectangle("line", objx, objy + 76, 200, 20)
-
 end
 
 local function drawPhysicsObject(Obj)
 	for _, fixture in pairs(Obj.body:getFixtures()) do
-	
+
 		local drawx = Obj.body:getX()
         local drawy = Obj.body:getY()
-	
+
 		local objtype = fixture:getCategory()           -- an enum
 		if objtype == enum.categoryFriendlyPod or objtype == enum.categoryEnemyPod then
 			love.graphics.setColor(1,1,1,1)
@@ -374,10 +458,10 @@ local function drawCallsign(Obj)
 				local pilot = fun.getPilot(guid)
 				str = str .. "\n" .. pilot.lastname
 			end
-		
+
 			love.graphics.setColor(1,1,1,1)
 			love.graphics.print(str, drawx, drawy, 0, 1, 1, -15, 30)
-		
+
 			-- draw a cool line next
 			local x2, y2 = drawx + 30, drawy - 14
 			love.graphics.setColor(1,1,1,1)
@@ -392,11 +476,15 @@ local function drawDamageText()
 
 	love.graphics.setColor(1,1,1,1)
 	for i = 1, #DAMAGETEXT do
-		local drawx = DAMAGETEXT.object.body.getX()
-		local drawy = DAMAGETEXT.object.body.getY()
-		drawy = drawy - (DAMAGETEXT.timeleft * -1)		-- this creates a floating effect
-		
-		love.graphics.print(DAMAGETEXT[i].text, drawx, drawy)
+        if DAMAGETEXT[i].object.body:isDestroyed() then
+            -- nothing
+        else
+            local drawx = DAMAGETEXT[i].object.body:getX()
+    		local drawy = DAMAGETEXT[i].object.body:getY()
+    		drawy = drawy - (DAMAGETEXT[i].timeleft * -10) - 50		-- this creates a floating effect
+
+    		love.graphics.print(DAMAGETEXT[i].text, drawx, drawy)
+        end
 	end
 end
 
@@ -504,6 +592,9 @@ function fight.draw()
 		drawMenu()
     end
 
+    -- draw damage text
+    drawDamageText()
+
     -- animations are drawn in love.draw()
     cam:detach()
 end
@@ -526,7 +617,7 @@ function fight.update(dt)
         SCORE.enemiesdead = 0
 		SCORE.enemiesEjected = 0
 		SCORE.loser = 0
-		
+
 		DAMAGETEXT = {}
 
         RTB_TIMER = 0
@@ -536,7 +627,7 @@ function fight.update(dt)
 		pause = false
 		showmenu = false
 		showcallsigns = false
-		
+
 		-- set camera to player
 		for i = 1, #OBJECTS do
 			if OBJECTS[i].guid == PLAYER_FIGHTER_GUID then
@@ -566,7 +657,7 @@ function fight.update(dt)
 		TRANSLATEX = OBJECTS[cameraindex].body:getX()
 		TRANSLATEY = OBJECTS[cameraindex].body:getY()
     end
-	
+
     if battleOver() or BATTLE_TIMER > BATTLE_TIMER_LIMIT then
         -- fleet movement points is added/subtracted in the commanderai file
 		fightsceneHasLoaded = false
