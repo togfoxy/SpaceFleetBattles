@@ -134,7 +134,6 @@ local function updateDamageText(dt)
 	for i = #DAMAGETEXT, 1, -1 do
 		DAMAGETEXT[i].timeleft = DAMAGETEXT[i].timeleft - dt
 		if DAMAGETEXT[i].timeleft <= 0 then table.remove(DAMAGETEXT, i) end
-        print("Displaying damage text")
 	end
 end
 
@@ -481,7 +480,7 @@ local function drawDamageText()
         else
             local drawx = DAMAGETEXT[i].object.body:getX()
     		local drawy = DAMAGETEXT[i].object.body:getY()
-    		drawy = drawy - (DAMAGETEXT[i].timeleft * -10) - 50		-- this creates a floating effect
+    		drawy = drawy - (DAMAGETEXT[i].timeleft * -10) - 125		-- this creates a floating effect
 
     		love.graphics.print(DAMAGETEXT[i].text, drawx, drawy)
         end
