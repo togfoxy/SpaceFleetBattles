@@ -178,6 +178,7 @@ function battleroster.mousereleased(rx, ry, x, y, button)
 		loadBattleObjects()
 
 		endBattleHasLoaded = false
+		
 		cf.saveTableToFile("fleet.dat", FLEET)							-- do this here only when starting battle
         cf.swapScreen(enum.sceneFight, SCREEN_STACK)
 	-- elseif clickedButtonID == enum.buttonMainMenuContinueGame then

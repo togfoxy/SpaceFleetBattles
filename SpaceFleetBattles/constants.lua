@@ -10,7 +10,6 @@ function constants.load()
 
     -- camera
     ZOOMFACTOR = 1.3
-    -- ZOOMFACTOR = 1
     TRANSLATEX = cf.round(SCREEN_WIDTH / 2)		-- starts the camera in the middle of the ocean
     TRANSLATEY = cf.round(SCREEN_HEIGHT / 2)	-- need to round because this is working with pixels
 
@@ -66,11 +65,13 @@ function constants.load()
     POD_QUEUE = {}              -- a list of pods waiting to spawn. Box2D work around
     FIRSTNAMES = {}
     LASTNAMES = {}
+	DAMAGETEXT = {}				-- a list of text that needs to be displayed when components are damaged
 
     SCORE.friendsdead = 0       -- put here for documentation and to help me remember
 	SCORE.friendsEjected = 0
     SCORE.enemiesdead = 0
 	SCORE.enemiesEjected = 0
+	SCORE.loser = 0				-- which AI index called a retreat first?	
 
     PLAYER_GUID = nil
     PLAYER_FIGHTER_GUID = nil

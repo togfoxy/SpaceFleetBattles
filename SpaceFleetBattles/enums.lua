@@ -64,6 +64,8 @@ function enums.load()
     enum.imageCrosshairsHasTarget = 9
     enum.imageCrosshairsIsTarget = 10
     enum.imageCrosshairPlayer = 11
+	enum.imageCrosshairPlanet = 12
+	
     enum.imagePlanet1 = 20
     enum.imagePlanet2 = 21
     enum.imagePlanet3= 22

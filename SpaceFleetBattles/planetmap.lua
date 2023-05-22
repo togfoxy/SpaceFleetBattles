@@ -99,10 +99,16 @@ local function drawPlanets()
 
     local drawx = PLANETS[sector].x         -- this is top left corner of the planet
     local drawy = PLANETS[sector].y
-    local scale = PLANETS[sector].scale
+    local scale = PLANETS[sector].scale			-- scale = the size of the planet. Different scales used for asthetic reasons
     love.graphics.setColor(1,0,0,1)
-    love.graphics.rectangle("line", drawx - 75, drawy - 75, 250 * scale, 250 * scale)
+    -- love.graphics.rectangle("line", drawx - 75, drawy - 75, 250 * scale, 250 * scale)
+	love.graphics.draw(IMAGE[enum.imageCrosshairPlanet], drawx - 75, drawy - 75, 0, 3, 3)
+end
 
+function planetmap.keyreleased(key, scancode)
+	if scancode == "escape" then
+		cf.removeScreen(SCREEN_STACK)
+	end
 end
 
 function planetmap.mousereleased(rx, ry, x, y, button)

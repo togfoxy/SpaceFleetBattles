@@ -3,6 +3,9 @@ fight = {}
 local pause = false
 local snapcamera = true
 local showmenu = false
+local showcallsigns = false
+local cameraindex = nil				-- which fighter has the cameras' focus
+local timefactor = 1
 
 local function destroyObjects(dt)
 
@@ -43,10 +46,34 @@ local function battleOver()
     end
 end
 
+local function updateDamageText(dt)
+	for i = #DAMAGETEXT, 1, -1 do
+		DAMAGETEXT[i].timeleft = DAMAGETEXT[i].timeleft - dt
+		if DAMAGETEXT[i].timeleft <= 0 then table.remove(DAMAGETEXT, i) end
+	end
+end
+
+local function spawnPods()
+    for i = #POD_QUEUE, 1, -1 do
+        createEscapePod(POD_QUEUE[i])       -- send the object into this function so it can spawn a pod
+        table.remove(POD_QUEUE, i)
+    end
+end
+
 function fight.keyreleased(key, scancode)
     if key == "space" then pause = not pause end
     if key == "c" then snapcamera = not snapcamera end
-    if key == "escape" then
+	if key == "." then cameraindex = cameraindex + 1 end			-- this is > key
+	if key == "," then cameraindex = cameraindex - 1 end			-- this is < key
+	if key == "-" then timefactor = timefactor - 0.5 end			-- this is the '-' minus key
+	if key == "=" then timefactor = timefactor + 0.5 end			-- this is the '+' plus key
+    
+	if key == "lctrl" or key == "rctrl" then 
+		showcallsigns = not showcallsigns 
+		snapcamera = true
+	end
+	
+	if key == "escape" then
         if showmenu then
             showmenu = false
             pause = false
@@ -54,6 +81,23 @@ function fight.keyreleased(key, scancode)
             love.event.quit()
         end
     end
+		
+	if key == "c" then
+		for i = 1, #OBJECTS do
+			if OBJECTS[i].guid == PLAYER_FIGHTER_GUID then
+				cameraindex = i
+				snapcamera = true
+				break
+			end
+		end
+	end
+	
+	if cameraindex < 1 then cameraindex = #OBJECTS end
+	if cameraindex > #OBJECTS then cameraindex = 1 end
+	
+	if timefactor < 1 then timefactor = 1 end
+	if timefactor > 2 then timefactor = 2 end
+	
 end
 
 function fight.wheelmoved(x, y)
@@ -79,14 +123,18 @@ function fight.mousemoved(x, y, dx, dy)
 		if fun.isPlayerAlive() then
             -- see if player unit is clicked
 			local Obj = fun.getObject(PLAYER_FIGHTER_GUID)
+			local objcategory = Obj.fixture:getCategory()				-- need to check if this is a fighter or pod
             local objscreenx, objscreeny = cam:toScreen(Obj.body:getX(), Obj.body:getY()) -- need to convert physical to screen
             local dist = cf.getDistance(x, y, objscreenx, objscreeny)
 
-            if dist <= 30 then
+            if dist <= 30 and objcategory == enum.categoryFriendlyFighter then
                 -- player unit is moused over
                 showmenu = true
                 pause = true
             end
+		else		-- player is dead. Hide menu
+			showmenu = false
+			pause = false
         end
     end
 end
@@ -97,6 +145,7 @@ function fight.mousereleased(rx, ry, x, y, button)
 		if fun.isPlayerAlive() then
             -- see if player unit is clicked
             local Obj = fun.getObject(PLAYER_FIGHTER_GUID)              -- get the hanger object with physics body
+			-- local objcategory = Obj.fixture:getCategory()				-- need to check if this is a fighter or pod
             local objx, objy = Obj.body:getPosition()                   -- get the physics x/y
             local robjx, robjy = res.toGame(objx, objy)                 -- scale that to the current resolution
             local crobjx, crobjy = cam:toScreen(robjx, robjy)           -- convert that to the screen
@@ -256,6 +305,101 @@ local function drawMenu()
 
 end
 
+local function drawPhysicsObject(Obj)
+	for _, fixture in pairs(Obj.body:getFixtures()) do
+	
+		local drawx = Obj.body:getX()
+        local drawy = Obj.body:getY()
+	
+		local objtype = fixture:getCategory()           -- an enum
+		if objtype == enum.categoryFriendlyPod or objtype == enum.categoryEnemyPod then
+			love.graphics.setColor(1,1,1,1)
+			love.graphics.draw(IMAGE[enum.imageEscapePod], drawx, drawy, 1.5707, 0.35, 0.35)      -- 1.57 radians = 90 degrees
+		elseif objtype == enum.categoryFriendlyFighter then
+			love.graphics.setColor(1,1,1,1)
+			local angle = Obj.body:getAngle()           -- radians
+			love.graphics.draw(IMAGE[enum.imageFighterFriend], drawx, drawy, angle, 0.15, 0.15, 75, 50)
+
+			if Obj.guid == PLAYER_FIGHTER_GUID then
+				-- draw recticle that shows player vessel
+				love.graphics.draw(IMAGE[enum.imageCrosshairPlayer], drawx, drawy, 0, 0.75, 0.75, 35, 30)
+			end
+		elseif objtype == enum.categoryEnemyFighter then
+			love.graphics.setColor(1,1,1,1)
+			local angle = Obj.body:getAngle()           -- radians
+			love.graphics.draw(IMAGE[enum.imageFighterFoe], drawx, drawy, angle, 0.10, 0.15, 130, 70)
+		else
+			local shape = fixture:getShape()
+			if shape:typeOf("PolygonShape") then
+				--
+				local points = {Obj.body:getWorldPoints(shape:getPoints())}
+				if Obj.forf == enum.forfFriend then
+					love.graphics.setColor(0,1,0,1)
+				elseif Obj.forf == enum.forfEnemy then
+					love.graphics.setColor(0,0,1,1)
+				elseif Obj.forf == enum.forfNeutral then
+					love.graphics.setColor(0.5,0.5,0.5,1)
+				else
+					error()
+				end
+
+				if Obj.guid == PLAYER_FIGHTER_GUID then
+					love.graphics.setColor(1,1,0,1)
+				end
+
+				love.graphics.polygon("fill", points)
+
+			elseif shape:typeOf("CircleShape") then
+				--
+				local bodyx, bodyy = Obj.body:getWorldPoints(shape:getPoint())
+				local radius = shape:getRadius()
+				love.graphics.setColor(1, 0, 0, 1)
+				love.graphics.circle("line", bodyx, bodyy, radius)
+			else
+				error()
+			end
+		end
+	end
+end
+
+local function drawCallsign(Obj)
+	if showcallsigns then
+		local drawx = Obj.body:getX()
+        local drawy = Obj.body:getY()
+		if Obj.squadCallsign ~= nil then
+			local str = "CS: " .. Obj.squadCallsign .. "-" .. string.sub(Obj.guid, - 4)		-- this is squad callsign + guid
+			if Obj.forf == enum.forfFriend then
+				-- get the pilots last name and add that to the callsign
+				local pilotguid = Obj.pilotguid
+				local pilot = fun.getPilot(guid)
+				str = str .. "\n" .. pilot.lastname
+			end
+		
+			love.graphics.setColor(1,1,1,1)
+			love.graphics.print(str, drawx, drawy, 0, 1, 1, -15, 30)
+		
+			-- draw a cool line next
+			local x2, y2 = drawx + 30, drawy - 14
+			love.graphics.setColor(1,1,1,1)
+			love.graphics.line(drawx, drawy, x2, y2)
+		else
+			error()
+		end
+	end
+end
+
+local function drawDamageText()
+
+	love.graphics.setColor(1,1,1,1)
+	for i = 1, #DAMAGETEXT do
+		local drawx = DAMAGETEXT.object.body.getX()
+		local drawy = DAMAGETEXT.object.body.getY()
+		drawy = drawy - (DAMAGETEXT.timeleft * -1)		-- this creates a floating effect
+		
+		love.graphics.print(DAMAGETEXT[i].text, drawx, drawy)
+	end
+end
+
 function fight.draw()
 
     drawHUD()       -- do this before the attach
@@ -268,7 +412,7 @@ function fight.draw()
     love.graphics.setColor(1,1,1,0.25)
     love.graphics.draw(IMAGE[enum.imageFightBG], 0, 0, 0, 2.4, 0.90)
 
-    -- draw the boundary
+    -- draw the two start lines
     love.graphics.setColor(1,1,1,0.25)
     love.graphics.line(0,0, FRIEND_START_X, SCREEN_HEIGHT)
     love.graphics.line(FOE_START_X, 0, FOE_START_X, SCREEN_HEIGHT)
@@ -281,79 +425,16 @@ function fight.draw()
         local drawy = objy
 
         -- draw callsign first
-        -- if Obj.squadCallsign ~= nil then
-        --     local str = "CS: " .. Obj.squadCallsign .. "-" .. string.sub(Obj.guid, -2)
-        --
-        --     love.graphics.setColor(1,1,1,1)
-        --     love.graphics.print(str, drawx, drawy, 0, 1, 1, -15, 30)
-        --
-        --     -- draw a cool line next
-        --     local x2, y2 = drawx + 30, drawy - 14
-        --     love.graphics.setColor(1,1,1,1)
-        --     love.graphics.line(drawx, drawy, x2, y2)
-        -- end
+		drawCallsign(Obj)
 
         -- draw the physics object
-        for _, fixture in pairs(Obj.body:getFixtures()) do
-            local objtype = fixture:getCategory()           -- an enum
-            if objtype == enum.categoryFriendlyPod or objtype == enum.categoryEnemyPod then
-                love.graphics.setColor(1,1,1,1)
-                love.graphics.draw(IMAGE[enum.imageEscapePod], drawx, drawy, 1.5707, 0.35, 0.35)      -- 1.57 radians = 90 degrees
-            elseif objtype == enum.categoryFriendlyFighter then
-                love.graphics.setColor(1,1,1,1)
-
-                love.graphics.setColor(1,1,1,1)
-                local angle = Obj.body:getAngle()           -- radians
-                love.graphics.draw(IMAGE[enum.imageFighterFriend], objx, objy, angle, 0.15, 0.15, 75, 50)
-
-                if Obj.guid == PLAYER_FIGHTER_GUID then
-                    -- draw recticle that shows player vessel
-                    love.graphics.draw(IMAGE[enum.imageCrosshairPlayer], objx, objy, 0, 0.75, 0.75, 35, 30)
-                end
-            elseif objtype == enum.categoryEnemyFighter then
-                love.graphics.setColor(1,1,1,1)
-                local angle = Obj.body:getAngle()           -- radians
-                love.graphics.draw(IMAGE[enum.imageFighterFoe], objx, objy, angle, 0.10, 0.15, 130, 70)
-            else
-                local shape = fixture:getShape()
-                if shape:typeOf("PolygonShape") then
-                    --
-                    local points = {Obj.body:getWorldPoints(shape:getPoints())}
-                    if Obj.forf == enum.forfFriend then
-                        love.graphics.setColor(0,1,0,1)
-                    elseif Obj.forf == enum.forfEnemy then
-                        love.graphics.setColor(0,0,1,1)
-                    elseif Obj.forf == enum.forfNeutral then
-                        love.graphics.setColor(0.5,0.5,0.5,1)
-                    else
-                        error()
-                    end
-
-                    if Obj.guid == PLAYER_FIGHTER_GUID then
-                        love.graphics.setColor(1,1,0,1)
-                    end
-
-
-
-                    love.graphics.polygon("fill", points)
-
-                elseif shape:typeOf("CircleShape") then
-                    --
-                    local bodyx, bodyy = Obj.body:getWorldPoints(shape:getPoint())
-                    local radius = shape:getRadius()
-                    love.graphics.setColor(1, 0, 0, 1)
-                    love.graphics.circle("line", bodyx, bodyy, radius)
-                else
-                    error()
-                end
-            end
-		end
+		drawPhysicsObject(Obj)
 
         -- draw velocity as text
         -- if not Obj.body:isBullet() then
         --     local vx, vy = Obj.body:getLinearVelocity()
         --     local vel = cf.getDistance(0, 0, vx, vy)    -- get distance of velocity vector
-        --     vel = "v: " .. cf.round(vel, 0)             -- this is not the same as getLinearVelocity x/y because this is the distance between two points
+        --     vel = "v: " .. cf.round(vel, 0)             -- this is not the same as getLinearVelocity x/y because this is the 		distance between two points
         --     love.graphics.setColor(1,1,1,1)
         --     love.graphics.print(vel, drawx, drawy, 0, 1, 1, 30, 30)
         -- end
@@ -444,36 +525,48 @@ function fight.update(dt)
 		SCORE.friendsEjected = 0
         SCORE.enemiesdead = 0
 		SCORE.enemiesEjected = 0
+		SCORE.loser = 0
+		
+		DAMAGETEXT = {}
 
         RTB_TIMER = 0
         BATTLE_TIMER = 0
+		timefactor = 1
 
-		snapcamera = true
 		pause = false
 		showmenu = false
+		showcallsigns = false
+		
+		-- set camera to player
+		for i = 1, #OBJECTS do
+			if OBJECTS[i].guid == PLAYER_FIGHTER_GUID then
+				cameraindex = i
+				snapcamera = true
+				break
+			end
+		end
     end
 
     if not pause then
-        RTB_TIMER = RTB_TIMER + dt
-        BATTLE_TIMER = BATTLE_TIMER + dt
-        commanderai.update(dt)
-        squadai.update(dt)
-        unitai.update(dt)
+		local newdt = dt * timefactor
+        RTB_TIMER = RTB_TIMER + newdt
+        BATTLE_TIMER = BATTLE_TIMER + newdt
+        commanderai.update(newdt)
+        squadai.update(newdt)
+        unitai.update(newdt)
 
-        destroyObjects(dt)
-        fun.spawnPods()
+        destroyObjects(newdt)
+        spawnPods()
+		updateDamageText(newdt)
 
-        PHYSICSWORLD:update(dt) --this puts the world into motion
+        PHYSICSWORLD:update(newdt) --this puts the world into motion
     end
 
     if snapcamera then
-        local Obj = fun.getObject(PLAYER_FIGHTER_GUID)
-        if Obj ~= nil then
-            TRANSLATEX = Obj.body:getX()
-            TRANSLATEY = Obj.body:getY()
-        end
+		TRANSLATEX = OBJECTS[cameraindex].body:getX()
+		TRANSLATEY = OBJECTS[cameraindex].body:getY()
     end
-
+	
     if battleOver() or BATTLE_TIMER > BATTLE_TIMER_LIMIT then
         -- fleet movement points is added/subtracted in the commanderai file
 		fightsceneHasLoaded = false
