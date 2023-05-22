@@ -48,7 +48,7 @@ function unitai.setTaskRTB(Obj)
     local thisaction = {}
 	thisaction.cooldown = 10
 	thisaction.action = enum.unitActionReturningToBase
-	thisaction.targetguid = nil
+	thisaction.targetguid = nil								--! need to not do this if RTB ppl want to shoot
     if Obj.forf == enum.forfFriend then
         thisaction.destx = FRIEND_START_X - 20
     elseif Obj.forf == enum.forfEnemy then
@@ -73,7 +73,7 @@ local function setTaskDestination(Obj, x, y)
 	local thisaction = {}
 	thisaction.cooldown = 5
 	thisaction.action = enum.unitActionMoveToDest
-	thisaction.targetguid = nil
+	thisaction.targetguid = nil						--! maybe not wipe target when RTB
 	thisaction.destx = x
 	thisaction.desty = y
 	table.insert(Obj.actions, thisaction)
@@ -221,7 +221,7 @@ local function adjustAngle(Obj, dt)
         end
 
     -- turn to target if one exists
-    elseif Obj.actions[1] ~= nil and Obj.actions[1].targetguid ~= nil then
+    elseif Obj.actions[1] ~= nil and Obj.actions[1].targetguid ~= nil then		--! need to not adjust angle if RTB
         local enemyobject = fun.getObject(Obj.actions[1].targetguid)
         if enemyobject == nil or enemyobject.body:isDestroyed() then
             -- somehow, the target is no longer legitimate
@@ -406,6 +406,7 @@ local function updatePod(Pod)
 end
 
 local function checkForRTB(Obj)
+	-- check for successful RTB and then set lifetime to zero
     local topaction = fun.getTopAction(Obj)
     if topaction ~= nil and topaction.action == enum.unitActionReturningToBase then
         if Obj.forf == enum.forfFriend then

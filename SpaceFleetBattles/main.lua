@@ -55,7 +55,7 @@ function beginContact(fixtureA, fixtureB, coll)
 	-- get the object that owns the fixture
 	local guidA = fixtureA:getUserData()
 	local guidB = fixtureB:getUserData()
-	local objA = fun.getObject(guidA)		-- this is different Fixture:getBody( )
+	local objA = fun.getObject(guidA)		-- this is different to fixture:getBody( )
 	local objB = fun.getObject(guidB)
 	--
 	-- local bodyA = fixtureA:getBody()
@@ -81,7 +81,9 @@ function beginContact(fixtureA, fixtureB, coll)
 		objB.lifetime = 0
 	end
 
-	fun.applyDamage(victim, bullet)		-- assumes bullet hit fighter. Send in bullet to check if bullet belongs to player
+	if catA == enum.categoryFriendlyFighter or catB == enum.categoryFriendlyFighter or catB == enum.categoryEnemyFighter or catB == enum.categoryEnemyFighter then
+		fun.applyDamage(victim, bullet)		-- assumes bullet hit fighter. Send in bullet to check if bullet belongs to player
+	end
 
 	-- play sounds if player is hit
 	if victim.guid == PLAYER_FIGHTER_GUID then
@@ -105,6 +107,8 @@ function love.keyreleased( key, scancode )
 		fight.keyreleased(key, scancode)
 	elseif currentscene == enum.sceneMainMenu then
 		mainmenu.keyreleased(key, scancode)
+	elseif currentscene == enum.scenePlanetMap then
+		planetmap.keyreleased(key, scancode)
 	end
 end
 
@@ -169,7 +173,7 @@ function love.load()
 	cam:setZoom(ZOOMFACTOR)
 	cam:setPos(TRANSLATEX,	TRANSLATEY)
 
-	love.window.setTitle("Dogfight 2 " .. GAME_VERSION)
+	love.window.setTitle("Space Fleet Battles " .. GAME_VERSION)
 
 	love.keyboard.setKeyRepeat(true)
 
@@ -212,7 +216,6 @@ function love.draw()
 
 	-- draw animations
 	love.graphics.setColor(1,1,1,1)
-	local scale = love.physics.getMeter( )
 	for _, animation in pairs(ANIMATIONS) do
 		local drawx, drawy = cam:toScreen(animation.drawx, animation.drawy)
 		if animation.type == enum.animExplosion then
