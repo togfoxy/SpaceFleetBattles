@@ -3,13 +3,53 @@ endbattle = {}
 endBattleHasLoaded = false
 
 function endbattle.mousereleased(rx, ry, x, y, button)
-
     local clickedButtonID = buttons.getButtonID(rx, ry)
     if clickedButtonID == enum.buttonEndBattleNewGame then
         cf.swapScreen(enum.scenePlanetMap, SCREEN_STACK)
     elseif clickedButtonID == enum.buttonEndBattleExitGame then
         cf.removeScreen(SCREEN_STACK)
     end
+end
+
+local function drawPilotStats(playerpilot, drawx, drawy)
+    love.graphics.print("Your pilot stats:", drawx, drawy)
+    drawy = drawy + 50
+    love.graphics.print("                              Health  # Missions    # Kills     # Fighters lost", drawx, drawy)		--! make this correct x/y values
+    drawy = drawy + 50
+
+    local txt = playerpilot.firstname .. " " .. playerpilot.lastname .. "                  "
+    txt = txt .. playerpilot.health .. "                 " .. playerpilot.missions .. "                  " .. playerpilot.kills .. "                        " .. playerpilot.ejections
+
+    if playerpilot.isDead then
+        love.graphics.setColor(1,1,1,0.5)
+    else
+        love.graphics.setColor(1,1,1,1)
+    end
+    love.graphics.print(txt, drawx, drawy)
+    drawy = drawy + 50
+end
+
+local function drawLoserInfo()
+	-- access global variables (only)
+    love.graphics.setColor(1,1,1,1)
+	if SCORE.loser == enum.forfFriend then
+		love.graphics.print("Your forces retreated from battle in the face of overwhelming forces.", 800, 250)
+	elseif SCORE.loser == enum.forfEnemy then
+		love.graphics.print("Your forces defeated the opposing fleet.", 800, 250)
+	else
+		error()		-- should not happen
+	end
+end
+
+local function drawKillCount()
+	-- access global variables (only)
+    local drawx = 800
+    local drawy = 280
+	love.graphics.print("Pilots lost: " .. SCORE.friendsdead, drawx, drawy)
+	love.graphics.print("Fighters lost: " .. SCORE.friendsdead + SCORE.friendsEjected, drawx, drawy + 25)
+
+	love.graphics.print("Enemy pilots destroyed: " .. SCORE.enemiesdead, drawx, drawy + 60)
+	love.graphics.print("Enemy fighters destroyed: " .. SCORE.enemiesdead + SCORE.enemiesEjected, drawx, drawy + 85)
 end
 
 function endbattle.draw()
@@ -20,13 +60,12 @@ function endbattle.draw()
     love.graphics.draw(IMAGE[enum.imageEndBattle],0,0,0, 0.75,0.75)
 
     local playerpilot = fun.getPlayerPilot()
-    local playerfighter = fun.getObject(PLAYER_FIGHTER_GUID)
+    local playerfighter = fun.getObject(PLAYER_FIGHTER_GUID)            --! can't use 'get object' on end battle due to objects destroyed
 
     local drawx = 100
     local drawy = 100
     love.graphics.setColor(1,1,1,1)
     if playerpilot.isDead then
-        print("Your pilot died honourably in battle. You will be assigned a new pilot.")
         love.graphics.print("Your pilot died honourably in battle. You will be assigned a new pilot.", drawx, drawy)
         drawy = drawy + 50
     elseif playerfighter == nil then
@@ -37,24 +76,14 @@ function endbattle.draw()
         drawy = drawy + 50
     end
 
-    -- personal pilot stats here
-    love.graphics.print("Your pilot stats:", drawx, drawy)
-    drawy = drawy + 50
-    love.graphics.print("                                  Health  # Missions    # Kills     # Fighters lost", drawx, drawy)
-    drawy = drawy + 50
+    -- pilot stats here
+	drawPilotStats(playerpilot, drawx, drawy)
 
-    local txt = playerpilot.firstname .. " " .. playerpilot.lastname .. "           "
-    txt = txt .. playerpilot.health .. "                 " .. playerpilot.missions .. "                  " .. playerpilot.kills .. "                        " .. playerpilot.ejections
+    -- display kill count
+	drawKillCount()
 
-    if playerpilot.isDead then
-        love.graphics.setColor(1,1,1,0.5)
-    else
-        love.graphics.setColor(1,1,1,1)
-    end
-    love.graphics.print(txt, drawx, drawy)
-    drawy = drawy + 50
-
-    --! add enemy fleet count here
+	-- display who retreated first
+	drawLoserInfo()
 
     love.graphics.setFont(FONT[enum.fontDefault])
     buttons.drawButtons()

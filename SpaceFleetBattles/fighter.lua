@@ -3,6 +3,7 @@ fighter = {}
 function fighter.createFighter(forf)
     -- forf = friend or foe.  See enums
     -- returns an object that is a fighter
+	-- this is called from multiple places
 
     assert(forf ~= nil)
 

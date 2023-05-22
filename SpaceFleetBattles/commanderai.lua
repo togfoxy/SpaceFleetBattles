@@ -38,7 +38,7 @@ function commanderai.update(dt)
                 print(inspect(commanderAI[i]))
                 error()
             end
-            if ratio > 0.66 and RTB_TIMER <= RTB_TIMER_LIMIT then
+            if ratio > 0.66 and RTB_TIMER <= RTB_TIMER_LIMIT then		--! what happens when one side starts with ratio < 0.66?
                 -- set orders to engage
                 thisorder = {}
                 thisorder.cooldown = 10
@@ -54,12 +54,13 @@ function commanderai.update(dt)
                 thisorder.order = enum.commanderOrdersReturnToBase
                 table.insert(commanderAI[i].orders, thisorder)
                 print("Commander orders: RTB")
-				if ratio <= 0.66 then
-					-- this commander has lost the battle
+				if ratio <= 0.66 then		-- can retreat due to ratio or to timer.
+					-- this commander has lost the battle. Adjust fleet moves accordingly
+					if SCORE.loser == 0 then SCORE.loser = commanderAI[i].forf end
 					if commanderAI[i].forf == enum.forfFriend then
 						FLEET.movesLeft = -1			--! test
 					elseif commanderAI[i].forf == enum.forfEnemy then
-						FLEET.movesLeft = 1			--! test
+						FLEET.movesLeft = 1				--! test
 					else
 						error()
 					end
