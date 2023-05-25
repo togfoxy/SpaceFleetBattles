@@ -309,7 +309,7 @@ end
 
 local function createNewBullet(Obj, bullet)
     -- input: Obj = the vessel creating the bullet
-    -- input: bullet = true if bullet
+    -- input: bullet = true if fast moving bullet. Use false for slow moving bomb
 
     assert(bullet ~= nil)       -- ensure parameter is not nil
 
@@ -345,6 +345,7 @@ local function createNewBullet(Obj, bullet)
     thisobject.squadCallsign = nil
     thisobject.lifetime = 5            -- seconds
     thisobject.ownerObjectguid = Obj.guid
+    print("The owner of this bullet has guid: " .. thisobject.ownerObjectguid)
 
     thisobject.body:setAngle(currentangle)
     thisobject.body:setLinearVelocity(math.cos(currentangle) * 300, math.sin(currentangle) * 300)
@@ -464,7 +465,8 @@ local function updateUnitTask(Obj, squadorder, dt)
             unitai.setTaskRTB(Obj)
         end
 
-        if #Obj.actions <= 0 then
+        local currentaction = fun.getTopAction(Obj)     -- receives an object
+        if currentaction == nil then
 
     		-- after the self-preservation bits, take direction from current squad orders
             if squadorder == enum.squadOrdersEngage then
@@ -482,7 +484,7 @@ local function updateUnitTask(Obj, squadorder, dt)
                 setTaskDestination(Obj, x, y)
             end
         else
-            -- print(#Obj.actions)
+            print("Current action is: " .. currentaction.action)
         end
         print(squadorder)
     end

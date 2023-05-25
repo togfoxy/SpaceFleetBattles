@@ -91,6 +91,7 @@ local function addPilotandFighterToBattle(thispilot, thisfighter, thiscallsign)
 
 	if thispilot.isPlayer then
 		PLAYER_FIGHTER_GUID = thisfighter.guid
+		print("Players fighter guid:" .. PLAYER_FIGHTER_GUID )
 	end
 end
 
