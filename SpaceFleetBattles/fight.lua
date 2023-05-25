@@ -278,29 +278,31 @@ local function drawHUD()
 
     if fun.isPlayerAlive() then
         local Obj = fun.getObject(PLAYER_FIGHTER_GUID)
-        local barlength = 100       -- unnecessary but a reminder that the barlength is a convenient 100 pixels
-        local barheight = 10
-        love.graphics.setColor(0,1,0,0.3)
+        if Obj ~= nil then      -- this is a safety check
+            local barlength = 100       -- unnecessary but a reminder that the barlength is a convenient 100 pixels
+            local barheight = 10
+            love.graphics.setColor(0,1,0,0.3)
 
-        -- structure bar
-        local drawlength = Obj.componentHealth[enum.componentStructure]
-        love.graphics.rectangle("fill", 145, 47, drawlength, 10)
+            -- structure bar
+            local drawlength = Obj.componentHealth[enum.componentStructure]
+            love.graphics.rectangle("fill", 145, 47, drawlength, 10)
 
-        -- thrusters bar
-        local drawlength = Obj.componentHealth[enum.componentThruster]
-        love.graphics.rectangle("fill", 145, 71, drawlength, 10)
+            -- thrusters bar
+            local drawlength = Obj.componentHealth[enum.componentThruster]
+            love.graphics.rectangle("fill", 145, 71, drawlength, 10)
 
-        -- weapon bar
-        local drawlength = Obj.componentHealth[enum.componentWeapon]
-        love.graphics.rectangle("fill", 145, 95, drawlength, 10)
+            -- weapon bar
+            local drawlength = Obj.componentHealth[enum.componentWeapon]
+            love.graphics.rectangle("fill", 145, 95, drawlength, 10)
 
-        -- Steering bar (side thrusters)
-        local drawlength = Obj.componentHealth[enum.componentSideThruster]
-        love.graphics.rectangle("fill", 145, 119, drawlength, 10)
+            -- Steering bar (side thrusters)
+            local drawlength = Obj.componentHealth[enum.componentSideThruster]
+            love.graphics.rectangle("fill", 145, 119, drawlength, 10)
 
-        -- throttle bar (componentAccelerator)
-        local drawlength = Obj.componentHealth[enum.componentAccelerator]
-        love.graphics.rectangle("fill", 145, 143, drawlength, 10)
+            -- throttle bar (componentAccelerator)
+            local drawlength = Obj.componentHealth[enum.componentAccelerator]
+            love.graphics.rectangle("fill", 145, 143, drawlength, 10)
+        end
     else
         -- print("Player not alive")
     end
@@ -401,7 +403,7 @@ local function drawPhysicsObject(Obj)
 		elseif objtype == enum.categoryFriendlyFighter then
 			love.graphics.setColor(1,1,1,1)
 			local angle = Obj.body:getAngle()           -- radians
-			love.graphics.draw(IMAGE[enum.imageFighterFriend], drawx, drawy, angle, 0.15, 0.15, 75, 50)
+			love.graphics.draw(IMAGE[enum.imageFighterFriend], drawx, drawy, angle, 0.15, 0.15, 76, 49)
 
 			if Obj.guid == PLAYER_FIGHTER_GUID then
 				-- draw recticle that shows player vessel
@@ -410,7 +412,7 @@ local function drawPhysicsObject(Obj)
 		elseif objtype == enum.categoryEnemyFighter then
 			love.graphics.setColor(1,1,1,1)
 			local angle = Obj.body:getAngle()           -- radians
-			love.graphics.draw(IMAGE[enum.imageFighterFoe], drawx, drawy, angle, 0.10, 0.15, 130, 70)
+			love.graphics.draw(IMAGE[enum.imageFighterFoe], drawx, drawy, angle, 0.10, 0.15, 128, 70)
 		else
 			local shape = fixture:getShape()
 			if shape:typeOf("PolygonShape") then
@@ -454,7 +456,7 @@ local function drawCallsign(Obj)
 			if Obj.forf == enum.forfFriend then
 				-- get the pilots last name and add that to the callsign
 				local pilotguid = Obj.pilotguid
-				local pilot = fun.getPilot(guid)
+				local pilot = fun.getPilot(pilotguid)
 				str = str .. "\n" .. pilot.lastname
 			end
 
@@ -466,7 +468,11 @@ local function drawCallsign(Obj)
 			love.graphics.setColor(1,1,1,1)
 			love.graphics.line(drawx, drawy, x2, y2)
 		else
-			error()
+            local category = Obj.fixture:getCategory()
+            if category == enum.categoryEnemyFighter or category == enum.categoryFriendlyFighter then
+                print("Category:" .. category)
+                error()
+            end
 		end
 	end
 end
@@ -480,7 +486,7 @@ local function drawDamageText()
         else
             local drawx = DAMAGETEXT[i].object.body:getX()
     		local drawy = DAMAGETEXT[i].object.body:getY()
-    		drawy = drawy - (DAMAGETEXT[i].timeleft * -10) - 125		-- this creates a floating effect
+    		drawy = drawy - (DAMAGETEXT[i].timeleft * -11) - 90		-- this creates a floating effect
 
     		love.graphics.print(DAMAGETEXT[i].text, drawx, drawy)
         end
@@ -577,10 +583,6 @@ function fight.draw()
         if playerfighter ~= nil and playerfighter.fixture:getCategory() ~= enum.categoryFriendlyPod then
             local objx = playerfighter.body:getX()
             local objy = playerfighter.body:getY()
-            -- local linelength = 12
-            -- love.graphics.setColor(1, 0.5, 0, 1)
-            -- love.graphics.line(objx, objy - linelength, objx + linelength, objy + linelength, objx - linelength, objy + linelength, objx, objy - linelength)
-
             love.graphics.setColor(1, 0.5, 0, 0.75)
             love.graphics.draw(IMAGE[enum.imageCrosshairsIsTarget], objx, objy, 0, 0.75, 0.75, 35, 30)
         end
@@ -652,7 +654,7 @@ function fight.update(dt)
         PHYSICSWORLD:update(newdt) --this puts the world into motion
     end
 
-    if snapcamera then
+    if snapcamera and OBJECTS[cameraindex] ~= nil then
 		TRANSLATEX = OBJECTS[cameraindex].body:getX()
 		TRANSLATEY = OBJECTS[cameraindex].body:getY()
     end

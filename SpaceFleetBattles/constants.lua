@@ -41,10 +41,10 @@ function constants.load()
 	FOE_FIGHTER_COUNT = 24			-- these aren't really constants
 	FOE_PILOT_COUNT = 24			-- these aren't really constants
 
-	FRIEND_SQUADRON_COUNT = 2		-- not a constant and changes for each battle
-    FRIEND_SHIPS_PER_SQUADRON = 6	-- not a constant and changes for each battle
-    FOE_SQUADRON_COUNT = 2
-    FOE_SHIPS_PER_SQUADRON = 6
+	FRIEND_SQUADRON_COUNT = 2		-- not a constant and changes for each battle. NOTE: the callsigns assume two squadrons.  --! need to fix
+    FRIEND_SHIPS_PER_SQUADRON = 1	--
+    FOE_SQUADRON_COUNT = FRIEND_SQUADRON_COUNT
+    FOE_SHIPS_PER_SQUADRON = FRIEND_SHIPS_PER_SQUADRON
 
     RTB_TIMER = 0
     RTB_TIMER_LIMIT = 60 * 4        -- commander will RTB after this time limit
@@ -71,7 +71,7 @@ function constants.load()
 	SCORE.friendsEjected = 0
     SCORE.enemiesdead = 0
 	SCORE.enemiesEjected = 0
-	SCORE.loser = 0				-- which AI index called a retreat first?	
+	SCORE.loser = 0				-- which AI index called a retreat first?
 
     PLAYER_GUID = nil
     PLAYER_FIGHTER_GUID = nil

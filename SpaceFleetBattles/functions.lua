@@ -234,7 +234,7 @@ local function createDamageText(componenthit, victim)
 	local thistext = {}
 	thistext.text = txt
 	thistext.object = victim
-	thistext.timeleft = 5			-- how many seconds to display
+	thistext.timeleft = 4			-- how many seconds to display
 	table.insert(DAMAGETEXT, thistext)
     -- print(inspect(DAMAGETEXT))
     -- print("*******************")
@@ -302,9 +302,14 @@ function functions.applyDamage(victim, bullet)
         fun.createAnimation(victim, enum.animSmoke)
 
         -- play audio
+        print("Hello")
         if fun.isPlayerAlive() and bullet.ownerObjectguid == PLAYER_FIGHTER_GUID then
             -- this bullet is the players bullet. Make an audible
+            print("Playing HIT audio")
             cf.playAudio(enum.audioBulletHit, false, true)
+        else
+            print("alpha")
+            print(bullet.ownerObjectguid, PLAYER_FIGHTER_GUID)
         end
 
 		-- see if ejects

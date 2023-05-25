@@ -37,7 +37,8 @@ local function drawLoserInfo()
 	elseif SCORE.loser == enum.forfEnemy then
 		love.graphics.print("Your forces defeated the opposing fleet.", 800, 250)
 	else
-		error()		-- should not happen
+        -- a draw as the timer ran out
+        love.graphics.print("Your forces did not win nor lose. The battle ended with a stalemate.", 800, 250)
 	end
 end
 

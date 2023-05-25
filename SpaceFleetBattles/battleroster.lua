@@ -91,11 +91,13 @@ local function addPilotandFighterToBattle(thispilot, thisfighter, thiscallsign)
 
 	if thispilot.isPlayer then
 		PLAYER_FIGHTER_GUID = thisfighter.guid
+		print("Players fighter guid:" .. PLAYER_FIGHTER_GUID )
 	end
 end
 
 local function loadBattleObjects()
 	-- this assigns pilots to fighters and loads up all the objects needed for battle
+	--! need to break this down into smaller subs
 
 	OBJECTS = {}				-- these are the objects that go to battle
 	initialiseSquadList()		-- load all the callsigns
@@ -105,8 +107,8 @@ local function loadBattleObjects()
 	-- do friendly fleet first
 	local livingroster = fun.getActivePilotCount()
 	local numfriendlyfighters = math.min(livingroster, #HANGER)
-	if numfriendlyfighters > 12 then numfriendlyfighters = 12 end
-
+	if numfriendlyfighters > 1 then numfriendlyfighters = 1 end		--! where does FRIEND_FIGHTER_COUNT come into this?
+	--!!
 	-- establish the correct amount of friendly squads
 	local callsign = {}
 	for i = 1, FRIEND_SQUADRON_COUNT do
@@ -116,6 +118,9 @@ local function loadBattleObjects()
         squadAI[thiscallsign].orders = {}
 		table.insert(callsign, thiscallsign)
 	end
+
+-- print("alpha")
+-- print(inspect(callsign))
 
 	local callsignindex = 1		-- flip flops between 1 and 2 to shuffle assignments between two squads
 	for i = 1, numfriendlyfighters do
@@ -144,7 +149,8 @@ local function loadBattleObjects()
 	end
 
 	local numenemyfighters = math.min(FOE_FIGHTER_COUNT, FOE_PILOT_COUNT)
-	if numenemyfighters > 12 then numenemyfighters = 12 end
+	if numenemyfighters > 1 then numenemyfighters = 1 end
+	--!!
 
 	-- establish the correct amount of enemy squads
 	local callsign = {}
@@ -155,6 +161,9 @@ local function loadBattleObjects()
         squadAI[thiscallsign].orders = {}
 		table.insert(callsign, thiscallsign)
 	end
+
+-- print("beta")
+-- print(inspect(callsign))
 
 	callsignindex = 1		-- flip flops between 1 and 2 to shuffle assignments between two squads
 	for i = 1, numenemyfighters do
@@ -169,6 +178,8 @@ local function loadBattleObjects()
 		else error()
 		end
 	end
+-- print("charlie")
+-- print(inspect())
 end
 
 function battleroster.mousereleased(rx, ry, x, y, button)
