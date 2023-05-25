@@ -69,6 +69,7 @@ end
 
 local function setTaskDestination(Obj, x, y)
 	-- set Obj's task to move to the given x/y location
+    -- operates directly on Obj so not a function
 
 	local thisaction = {}
 	thisaction.cooldown = 5
@@ -475,13 +476,16 @@ local function updateUnitTask(Obj, squadorder, dt)
                 -- no squad order or unexpected squad order
                 Obj.actions[1] = nil
                 print("No squad order available for this unit")
+                -- set destination to the centre of the battle map
+                local x = SCREEN_WIDTH / 2
+                local y = SCREEN_HEIGHT / 2
+                setTaskDestination(Obj, x, y)
             end
+        else
+            -- print(#Obj.actions)
         end
-
         print(squadorder)
-
     end
-
     assert(#Obj.actions > 0)
 end
 

@@ -454,7 +454,7 @@ local function drawCallsign(Obj)
 			if Obj.forf == enum.forfFriend then
 				-- get the pilots last name and add that to the callsign
 				local pilotguid = Obj.pilotguid
-				local pilot = fun.getPilot(guid)
+				local pilot = fun.getPilot(pilotguid)
 				str = str .. "\n" .. pilot.lastname
 			end
 
@@ -466,7 +466,11 @@ local function drawCallsign(Obj)
 			love.graphics.setColor(1,1,1,1)
 			love.graphics.line(drawx, drawy, x2, y2)
 		else
-			error()
+            local category = Obj.fixture:getCategory()
+            if category == enum.categoryEnemyFighter or category == enum.categoryFriendlyFighter then
+                print("Category:" .. category)
+                error()
+            end
 		end
 	end
 end
@@ -480,7 +484,7 @@ local function drawDamageText()
         else
             local drawx = DAMAGETEXT[i].object.body:getX()
     		local drawy = DAMAGETEXT[i].object.body:getY()
-    		drawy = drawy - (DAMAGETEXT[i].timeleft * -10) - 125		-- this creates a floating effect
+    		drawy = drawy - (DAMAGETEXT[i].timeleft * -10) - 100		-- this creates a floating effect
 
     		love.graphics.print(DAMAGETEXT[i].text, drawx, drawy)
         end
@@ -577,10 +581,6 @@ function fight.draw()
         if playerfighter ~= nil and playerfighter.fixture:getCategory() ~= enum.categoryFriendlyPod then
             local objx = playerfighter.body:getX()
             local objy = playerfighter.body:getY()
-            -- local linelength = 12
-            -- love.graphics.setColor(1, 0.5, 0, 1)
-            -- love.graphics.line(objx, objy - linelength, objx + linelength, objy + linelength, objx - linelength, objy + linelength, objx, objy - linelength)
-
             love.graphics.setColor(1, 0.5, 0, 0.75)
             love.graphics.draw(IMAGE[enum.imageCrosshairsIsTarget], objx, objy, 0, 0.75, 0.75, 35, 30)
         end
