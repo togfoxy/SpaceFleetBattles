@@ -484,7 +484,7 @@ local function drawDamageText()
         else
             local drawx = DAMAGETEXT[i].object.body:getX()
     		local drawy = DAMAGETEXT[i].object.body:getY()
-    		drawy = drawy - (DAMAGETEXT[i].timeleft * -10) - 100		-- this creates a floating effect
+    		drawy = drawy - (DAMAGETEXT[i].timeleft * -11) - 90		-- this creates a floating effect
 
     		love.graphics.print(DAMAGETEXT[i].text, drawx, drawy)
         end

@@ -78,14 +78,14 @@ local function drawPlanets()
     for i = 1, #PLANETS do
 		-- draw the planet image
 		love.graphics.setColor(1,1,1,1)
-        love.graphics.draw(PLANETS[i].image, PLANETS[i].x, PLANETS[i].y, 0, PLANETS[i].scale, PLANETS[i].scale, 400, 400)
+        love.graphics.draw(PLANETS[i].image, PLANETS[i].x, PLANETS[i].y, 0, PLANETS[i].scale, PLANETS[i].scale, 150, 150)
 
 		-- draw the resources text
 		love.graphics.print(PLANETS[i].tooltip, PLANETS[i].x, PLANETS[i].y - 75)
 
 		-- add a dot in the centre of the planet for debugging purposes
-		-- love.graphics.setColor(1,0,0,1)
-		-- love.graphics.circle("fill", PLANETS[i].x, PLANETS[i].y, 5)
+		love.graphics.setColor(1,0,0,1)
+		love.graphics.circle("fill", PLANETS[i].x, PLANETS[i].y, 5)
     end
 	love.graphics.setFont(FONT[enum.fontDefault])
 
@@ -102,7 +102,11 @@ local function drawPlanets()
     local scale = PLANETS[sector].scale			-- scale = the size of the planet. Different scales used for asthetic reasons
     love.graphics.setColor(1,0,0,1)
     -- love.graphics.rectangle("line", drawx - 75, drawy - 75, 250 * scale, 250 * scale)
-	love.graphics.draw(IMAGE[enum.imageCrosshairPlanet], drawx - 200, drawy - 200, 0, 5, 5)
+	love.graphics.draw(IMAGE[enum.imageCrosshairPlanet], drawx - 165, drawy - 165, 0, 5, 5)
+
+	-- add a dot in the centre of the fleet for debugging purposes
+	love.graphics.setColor(0,1,0,1)
+	love.graphics.circle("fill", drawx, drawy, 5)
 end
 
 function planetmap.keyreleased(key, scancode)

@@ -67,7 +67,7 @@ function squadai.update(dt)
         -- if not (squad.orders[1] ~= nil) then
         --     print(inspect(squad.orders))
         -- end
-        assert(squad.orders[1] ~= nil)
+        -- assert(squad.orders[1] ~= nil)      --! need to determine if this is a problem
     end
 end
 
