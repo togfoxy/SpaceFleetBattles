@@ -67,6 +67,8 @@ function unitai.setTaskRTB(Obj)
     thisaction.desty = y
 	table.insert(Obj.actions, thisaction)
     -- print("Setting action to RTB")
+
+    assert(Obj.actions[1] ~= nil )
 end
 
 local function setTaskDestination(Obj, x, y)
@@ -136,7 +138,7 @@ function unitai.setTaskEngage(Obj, cooldown)
 		print("Stacking orders: return to battle and then RTB")
 		unitai.setTaskRTB(Obj)     -- this is an instance of stacking orders
 	end
-
+    assert(Obj.actions[1] ~= nil )
 end
 
 local function isFighter(Obj)
@@ -475,6 +477,7 @@ local function updateUnitTask(Obj, squadorder, dt)
             if squadorder == enum.squadOrdersEngage then
                 print("alpha. setting task = engage")
 				unitai.setTaskEngage(Obj)
+                assert(Obj.actions[1] ~= nil )
             elseif squadorder == enum.squadOrdersReturnToBase then
                 print("beta")
 				unitai.setTaskRTB(Obj)
@@ -491,7 +494,8 @@ local function updateUnitTask(Obj, squadorder, dt)
                 assert(#Obj.actions > 0)
             end
         else
-            print("Current action is: " .. currentaction)
+            print("Current action is:")
+            print(inspect(currentaction))
         end
         print("This unit now has current action:")
         local currentaction = fun.getTopAction(Obj)

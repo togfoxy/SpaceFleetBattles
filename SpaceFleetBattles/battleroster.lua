@@ -110,7 +110,7 @@ local function loadBattleObjects()
 	local livingroster = fun.getActivePilotCount()
 	local livingfighter = fun.getActiveFighterCount(enum.forfFriend)
 	local deploynumber = math.min(livingfighter, livingroster)
-	if deploynumber > 1 then deploynumber = 1 end
+	-- if deploynumber > 1 then deploynumber = 1 end
 
 	for i = 1, FRIEND_SQUADRON_COUNT do
 		local thiscallsign = getUniqueCallsign()		-- unique two character code. also removes from circulation
@@ -135,7 +135,7 @@ local function loadBattleObjects()
 	livingroster = FOE_PILOT_COUNT
 	livingfighter = fun.getActiveFighterCount(enum.forfEnemy)
 	deploynumber = math.min(livingfighter, livingroster)
-	if deploynumber > 1 then deploynumber = 1 end
+	-- if deploynumber > 1 then deploynumber = 1 end
 
 	for i = 1, FOE_SQUADRON_COUNT do
 		local thiscallsign = getUniqueCallsign()

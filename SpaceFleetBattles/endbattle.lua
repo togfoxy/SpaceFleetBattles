@@ -69,7 +69,7 @@ function endbattle.draw()
     if not SCORE.playeralive then
         love.graphics.print("Your pilot died honourably in battle. You will be able to roleplay a new pilot.", drawx, drawy)
         drawy = drawy + 50
-    elseif not SCORE.playerfighteralive == nil then
+    elseif not SCORE.playerfighteralive then
         love.graphics.print("Your fighter was destroyed in combat but your pilot lived to fight another day.", drawx, drawy)
         drawy = drawy + 50
     else
@@ -94,6 +94,9 @@ function endbattle.update(dt)
 
     if not endBattleHasLoaded then
         endBattleHasLoaded = true
+
+        print("Score:")
+        print(inspect(SCORE))
 
 		-- take pilots out of fighters
 		for k, pilot in pairs(ROSTER) do

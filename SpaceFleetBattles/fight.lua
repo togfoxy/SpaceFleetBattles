@@ -98,12 +98,15 @@ local function destroyObjects(dt)
             OBJECTS[i].lifetime = OBJECTS[i].lifetime - dt
             if OBJECTS[i].lifetime <= 0 then
 
-                if OBJECTS[i].fixture:getCategory() == enum.categoryEnemyBullet or OBJECTS[i].fixture:getCategory() == enum.categoryFriendlyBullet then
-                    fun.createAnimation(OBJECTS[i], enum.animBulletSmoke)
+                if OBJECTS[i].body:isDestroyed() then
+                    -- do nothing
+                else
+                    if OBJECTS[i].fixture:getCategory() == enum.categoryEnemyBullet or OBJECTS[i].fixture:getCategory() == enum.categoryFriendlyBullet then
+                        fun.createAnimation(OBJECTS[i], enum.animBulletSmoke)
+                    end
+                    OBJECTS[i].fixture:destroy()
+                    OBJECTS[i].body:destroy()
                 end
-
-                OBJECTS[i].fixture:destroy()
-                OBJECTS[i].body:destroy()
                 table.remove(OBJECTS, i)
             end
         end
