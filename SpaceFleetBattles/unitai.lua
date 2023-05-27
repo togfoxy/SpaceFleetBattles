@@ -18,6 +18,8 @@ end
 local function getClosestFighter(thisObj, desiredforf)
     -- returns the guid of the closest object (or nil)
 
+	assert(desiredforf ~= nil)
+
     local closestdist = 999999999       -- ridiculously large
     local closestid = nil
     local thisobjx, thisobjy = thisObj.body:getPosition()
@@ -96,6 +98,10 @@ function unitai.setTaskEngage(Obj, cooldown)
 		targetguid = getClosestFighter(Obj, enum.forfEnemy)        -- this OBJECTS guid or nil
 	elseif Obj.forf == enum.forfEnemy then
 		targetguid = getClosestFighter(Obj, enum.forfFriend)       -- this OBJECTS guid or nil
+	else
+		print("Zulu")
+		print(inspect(Obj))
+		error()		--! this should never happen
 	end
 	if targetguid ~= nil then
 		local thisorder = {}
@@ -432,6 +438,7 @@ local function updateUnitTask(Obj, squadorder, dt)
     -- this adjusts targets or other goals based on the squad order
 
     assert(Obj ~= nil)
+    print("Unit reacting to squad order: " .. squadorder)
 
     if Obj.actions[1] ~= nil then
         Obj.actions[1].cooldown = Obj.actions[1].cooldown - dt
@@ -444,11 +451,7 @@ local function updateUnitTask(Obj, squadorder, dt)
 	if Obj.actions[1] == nil then
         -- try to find a new action
 
-        local toporder = fun.getTopAction(Obj)
-        local targetguid
-        if toporder ~= nil then
-            targetguid = toporder.targetguid
-        end
+        print("Seeking new action")
 
         -- do self-preservation checks firstly. Remember the ordering matters
         if Obj.componentHealth[enum.componentWeapon] <= 0 then
@@ -468,13 +471,18 @@ local function updateUnitTask(Obj, squadorder, dt)
         local currentaction = fun.getTopAction(Obj)     -- receives an object
         if currentaction == nil then
 
+            print("No self-preservation required. Continuing to seek new action.")
+
     		-- after the self-preservation bits, take direction from current squad orders
             if squadorder == enum.squadOrdersEngage then
+                print("alpha")
 				unitai.setTaskEngage(Obj)
             elseif squadorder == enum.squadOrdersReturnToBase then
+                print("beta")
 				unitai.setTaskRTB(Obj)
                 -- print("Unit task: RTB")
             else
+                print("charlie")
                 -- no squad order or unexpected squad order
                 Obj.actions[1] = nil
                 print("No squad order available for this unit")
@@ -482,11 +490,14 @@ local function updateUnitTask(Obj, squadorder, dt)
                 local x = SCREEN_WIDTH / 2
                 local y = SCREEN_HEIGHT / 2
                 setTaskDestination(Obj, x, y)
+                assert(#Obj.actions > 0)
             end
         else
-            print("Current action is: " .. currentaction.action)
+            print("Current action is: " .. currentaction)
         end
-        print(squadorder)
+        print("This unit now has current action:")
+        local currentaction = fun.getTopAction(Obj)
+        print(inspect(currentaction))
     end
     assert(#Obj.actions > 0)
 end

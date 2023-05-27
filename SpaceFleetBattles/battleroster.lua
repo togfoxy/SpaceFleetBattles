@@ -1,5 +1,8 @@
 battleroster = {}
 
+local battlerosterhasloaded = false
+local rosterdrawy = 100			-- this tracks where the roster starts to draw. It emulates scrolling.
+
 local function initialiseSquadList()
 	-- the squad list is the master list of call signs made available to each battle
 	SQUAD_LIST = {}				-- the master list of callsigns
@@ -48,8 +51,6 @@ local function getUnassignedPilot()
 	end
 	print("No combat-ready pilot found")
 	return nil
-
-
 end
 
 local function getEmptyVessel()
@@ -119,9 +120,6 @@ local function loadBattleObjects()
 		table.insert(callsign, thiscallsign)
 	end
 
--- print("alpha")
--- print(inspect(callsign))
-
 	local callsignindex = 1		-- flip flops between 1 and 2 to shuffle assignments between two squads
 	for i = 1, numfriendlyfighters do
 
@@ -162,9 +160,6 @@ local function loadBattleObjects()
 		table.insert(callsign, thiscallsign)
 	end
 
--- print("beta")
--- print(inspect(callsign))
-
 	callsignindex = 1		-- flip flops between 1 and 2 to shuffle assignments between two squads
 	for i = 1, numenemyfighters do
 		local thisfighter = fighter.createFighter(enum.forfEnemy)
@@ -178,8 +173,10 @@ local function loadBattleObjects()
 		else error()
 		end
 	end
--- print("charlie")
--- print(inspect())
+end
+
+function battleroster.wheelmoved(x, y)
+	rosterdrawy = rosterdrawy + y
 end
 
 function battleroster.mousereleased(rx, ry, x, y, button)
@@ -187,22 +184,16 @@ function battleroster.mousereleased(rx, ry, x, y, button)
     local clickedButtonID = buttons.getButtonID(rx, ry)
     if clickedButtonID == enum.buttonBattleRosterLaunch then
 		loadBattleObjects()
-
-		endBattleHasLoaded = false
-
-		cf.saveTableToFile("fleet.dat", FLEET)							-- do this here only when starting battle
+		battlerosterhasloaded = false
+		cf.saveTableToFile("fleet.dat", FLEET)							-- do this here only when starting the next battle
         cf.swapScreen(enum.sceneFight, SCREEN_STACK)
-	-- elseif clickedButtonID == enum.buttonMainMenuContinueGame then
-
-    -- elseif clickedButtonID == enum.buttonMainMenuExitGame then
-        -- love.event.quit()
     end
 end
 
 local function drawRoster()
 	-- font is set in main draw()
 	local drawx = 100
-    local drawy = 100
+    local drawy = rosterdrawy
 
 	love.graphics.setColor(1,1,1,1)
 
@@ -276,10 +267,11 @@ end
 
 function battleroster.update(dt)
 
-	if not endBattleHasLoaded then
-		endBattleHasLoaded = true
-
+	if not battlerosterhasloaded then
+		battlerosterhasloaded = true
+		rosterdrawy = 100						-- reset the scrolly thing
 	end
+
 
 end
 
