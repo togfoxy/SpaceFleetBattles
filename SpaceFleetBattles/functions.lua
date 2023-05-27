@@ -302,7 +302,7 @@ function functions.applyDamage(victim, bullet)
         fun.createAnimation(victim, enum.animSmoke)
 
         -- play audio
-        if fun.isPlayerAlive() and bullet.ownerObjectguid == PLAYER_FIGHTER_GUID then
+        if fun.isPlayerFighterAlive() and bullet.ownerObjectguid == PLAYER_FIGHTER_GUID then
             -- this bullet is the players bullet. Make an audible
             cf.playAudio(enum.audioBulletHit, false, true)
         else
@@ -361,7 +361,7 @@ function functions.getObject(guid)
     return nil
 end
 
-function functions.isPlayerAlive()
+function functions.isPlayerFighterAlive()
     -- only works on fight screen. --! I should move it there and make it local
     -- this returns true if the players fighter is alive
     for i = 1, #OBJECTS do
@@ -469,6 +469,14 @@ function functions.getActivePilotCount()
 		end
 	end
 	return result
+end
+
+function functions.getActiveFighterCount(forf)
+    local result = 0
+    for i = 1, #HANGER do
+        if HANGER[i].forf == forf then result = result + 1 end
+    end
+    return result
 end
 
 function functions.ImportNameFile(filename)

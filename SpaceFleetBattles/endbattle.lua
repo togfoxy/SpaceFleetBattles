@@ -11,7 +11,9 @@ function endbattle.mousereleased(rx, ry, x, y, button)
     end
 end
 
-local function drawPilotStats(playerpilot, drawx, drawy)
+local function drawPilotStats(drawx, drawy)
+    local playerpilot = fun.getPlayerPilot()
+
     love.graphics.print("Your pilot stats:", drawx, drawy)
     drawy = drawy + 50
     love.graphics.print("                              Health  # Missions    # Kills     # Fighters lost", drawx, drawy)		--! make this correct x/y values
@@ -60,17 +62,15 @@ function endbattle.draw()
     love.graphics.setColor(1,1,1,0.25)
     love.graphics.draw(IMAGE[enum.imageEndBattle],0,0,0, 0.75,0.75)
 
-    local playerpilot = fun.getPlayerPilot()
-    local playerfighter = fun.getObject(PLAYER_FIGHTER_GUID)            --! can't use 'get object' on end battle due to objects destroyed
-
     local drawx = 100
     local drawy = 100
     love.graphics.setColor(1,1,1,1)
-    if playerpilot.isDead then
-        love.graphics.print("Your pilot died honourably in battle. You will be assigned a new pilot.", drawx, drawy)
+
+    if not SCORE.playeralive then
+        love.graphics.print("Your pilot died honourably in battle. You will be able to roleplay a new pilot.", drawx, drawy)
         drawy = drawy + 50
-    elseif playerfighter == nil then
-        love.graphics.print("Your fighter was destroyed in combat but you lived to fight another day.", drawx, drawy)
+    elseif not SCORE.playerfighteralive == nil then
+        love.graphics.print("Your fighter was destroyed in combat but your pilot lived to fight another day.", drawx, drawy)
         drawy = drawy + 50
     else
         love.graphics.print("You bravely confronted the enemy and brought your fighter home." , drawx, drawy)
@@ -78,7 +78,7 @@ function endbattle.draw()
     end
 
     -- pilot stats here
-	drawPilotStats(playerpilot, drawx, drawy)
+	drawPilotStats(drawx, drawy)           -- calls getPlayerPilot()
 
     -- display kill count
 	drawKillCount()

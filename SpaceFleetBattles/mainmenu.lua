@@ -17,23 +17,30 @@ local function initialiseRoster()
 end
 
 local function initialiseHanger()
-	-- creates fighters and 'stores' them in the hanger table. Friendly only
+	-- creates fighters and 'stores' them in the hanger table. Friendly and foe fighters
     -- NOTE: this puts the object in HANGER but not in OBJECTS
 	-- NOTE: this does not create a physical object. That happens right before the battle is started
 	for i = 1, FRIEND_FIGHTER_COUNT do
 		-- local fighter = fighter.createFighter(enum.forfFriend)
         local fighter = fighter.createHangerFighter(enum.forfFriend)
+        fighter.isLaunched = false		--! need to see if isLaunched is still necessary
+		table.insert(HANGER, fighter)
+	end
+
+	for i = 1, FOE_FIGHTER_COUNT do
+		-- local fighter = fighter.createFighter(enum.forfFriend)
+        local fighter = fighter.createHangerFighter(enum.forfEnemy)
         fighter.isLaunched = false
 		table.insert(HANGER, fighter)
 	end
 end
 
 local function initialiseFleet()
+	-- the FLEET tracks where on the battlemap the player is
 	FLEET = {}
 	FLEET.sector = 1
 	FLEET.newSector = nil			-- use this as a way to capture original and final sector
     FLEET.movesLeft = 0
-
     cf.saveTableToFile("fleet.dat", FLEET)
 end
 

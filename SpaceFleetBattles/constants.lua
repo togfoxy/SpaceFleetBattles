@@ -41,7 +41,7 @@ function constants.load()
 	FOE_FIGHTER_COUNT = 12			-- these aren't really constants
 	FOE_PILOT_COUNT = 12			-- these aren't really constants
 
-	FRIEND_SQUADRON_COUNT = 2		-- not a constant and changes for each battle. NOTE: the callsigns assume two squadrons.  --! need to fix
+	FRIEND_SQUADRON_COUNT = 1		-- not a constant and changes for each battle. NOTE: the callsigns assume two squadrons.  --! need to fix
     FRIEND_SHIPS_PER_SQUADRON = 1							--
     FOE_SQUADRON_COUNT = FRIEND_SQUADRON_COUNT
     FOE_SHIPS_PER_SQUADRON = FRIEND_SHIPS_PER_SQUADRON

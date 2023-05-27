@@ -351,8 +351,6 @@ local function createNewBullet(Obj, bullet)
     thisobject.squadCallsign = nil
     thisobject.lifetime = 5            -- seconds
     thisobject.ownerObjectguid = Obj.guid
-    print("The owner of this bullet has guid: " .. thisobject.ownerObjectguid)
-
     thisobject.body:setAngle(currentangle)
     thisobject.body:setLinearVelocity(math.cos(currentangle) * 300, math.sin(currentangle) * 300)
 
@@ -475,7 +473,7 @@ local function updateUnitTask(Obj, squadorder, dt)
 
     		-- after the self-preservation bits, take direction from current squad orders
             if squadorder == enum.squadOrdersEngage then
-                print("alpha")
+                print("alpha. setting task = engage")
 				unitai.setTaskEngage(Obj)
             elseif squadorder == enum.squadOrdersReturnToBase then
                 print("beta")
@@ -499,7 +497,7 @@ local function updateUnitTask(Obj, squadorder, dt)
         local currentaction = fun.getTopAction(Obj)
         print(inspect(currentaction))
     end
-    assert(#Obj.actions > 0)
+    assert(Obj.actions[1] ~= nil )
 end
 
 function unitai.update(dt)

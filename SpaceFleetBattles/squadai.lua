@@ -4,18 +4,22 @@ function squadai.update(dt)
     -- cycle through all squads and assign orders or cool down existing orders
     -- the commanderAI is all the commanders. Be sure to filter into the one appropriate for the squad
 
-    for callsign, squad in pairs(squadAI) do
-        if squad.orders == nil then squad.orders = {} end
+    -- squadAI uses callsigns and not sequential so have to use pairs
 
-        -- cool down the top order
-        if #squad.orders > 0 then
-            squad.orders[1].cooldown = squad.orders[1].cooldown - dt
-            if squad.orders[1].cooldown <= 0 then
-                table.remove(squadAI[callsign].orders, 1)
+    -- cool down the top order
+    for thiscallsign, thissquad in pairs(squadAI) do
+        if #thissquad.orders ~= 0 then
+            thissquad.orders[1].cooldown = thissquad.orders[1].cooldown - dt
+            if thissquad.orders[1].cooldown <= 0 then
+                thissquad.orders[1] = nil       --! check that this deletes the order
             end
         end
+    end
 
-        if #squad.orders < 1 then
+    -- squadAI uses callsigns and not sequential so have to use pairs
+    for callsign, squad in pairs(squadAI) do
+
+        if #squad.orders == 0 then
             -- squad has no current orders. Check what commander is ordering
             for i = 1, #commanderAI do
                 if commanderAI[i].forf == squad.forf then
@@ -28,7 +32,7 @@ function squadai.update(dt)
                                 thisorder.active = true         -- set to false if you want to queue it but not activate it
                                 thisorder.order = enum.squadOrdersEngage
                                 table.insert(squadAI[callsign].orders, thisorder)
-                                -- print("Squad orders: engage")
+                                print("Squad orders: engage")
                             elseif commanderAI[i].orders[1].order == enum.commanderOrdersReturnToBase then
                                 -- squad RTB
                                 thisorder = {}
@@ -67,8 +71,11 @@ function squadai.update(dt)
         -- if not (squad.orders[1] ~= nil) then
         --     print(inspect(squad.orders))
         -- end
-        -- assert(squad.orders[1] ~= nil)      --! need to determine if this is a problem
+        assert(squad.orders ~= nil)      --! need to determine if this is a problem
     end
+
+    -- print("squad orders")
+    -- print(inspect(squadAI))
 end
 
 return squadai
