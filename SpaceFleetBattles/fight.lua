@@ -204,7 +204,7 @@ function fight.mousemoved(x, y, dx, dy)
         TRANSLATEY = TRANSLATEY - dy
 	else
 		-- check for mouse over the player then display menu
-		if fun.isPlayerAlive() then
+		if fun.isPlayerFighterAlive() then
             -- see if player unit is clicked
 			local Obj = fun.getObject(PLAYER_FIGHTER_GUID)
 			local objcategory = Obj.fixture:getCategory()				-- need to check if this is a fighter or pod
@@ -226,7 +226,7 @@ end
 function fight.mousereleased(rx, ry, x, y, button)
     if button == 1 then
 		-- menu appears during mouse over. This is to check if menu is clicked
-		if fun.isPlayerAlive() then
+		if fun.isPlayerFighterAlive() then
             -- see if player unit is clicked
             local Obj = fun.getObject(PLAYER_FIGHTER_GUID)              -- get the hanger object with physics body
 			-- local objcategory = Obj.fixture:getCategory()				-- need to check if this is a fighter or pod
@@ -276,7 +276,7 @@ local function drawHUD()
     love.graphics.setColor(1,1,1,1)
     love.graphics.draw(IMAGE[enum.imageFightHUD], 0, 0)
 
-    if fun.isPlayerAlive() then
+    if fun.isPlayerFighterAlive() then
         local Obj = fun.getObject(PLAYER_FIGHTER_GUID)
         if Obj ~= nil then      -- this is a safety check
             local barlength = 100       -- unnecessary but a reminder that the barlength is a convenient 100 pixels
@@ -558,7 +558,7 @@ function fight.draw()
     end
 
     -- draw target recticle for player 1
-    if fun.isPlayerAlive() then
+    if fun.isPlayerFighterAlive() then
         -- player still alive
         if playerfighter.actions ~= nil and playerfighter.actions[1] ~= nil then
             if playerfighter.actions[1].targetguid ~= nil then
@@ -589,7 +589,7 @@ function fight.draw()
     end
 
     -- draw the menu if menu is open
-    if showmenu and fun.isPlayerAlive() then
+    if showmenu and fun.isPlayerFighterAlive() then
 		drawMenu()
     end
 
@@ -661,6 +661,21 @@ function fight.update(dt)
 
     if battleOver() or BATTLE_TIMER > BATTLE_TIMER_LIMIT then
         -- fleet movement points is added/subtracted in the commanderai file
+
+        -- load up the SCORE table for later user
+        if fun.isPlayerFighterAlive() then
+            SCORE.playerfighteralive = true
+        else
+            SCORE.playerfighteralive = false
+        end
+
+        local playerpilot = fun.getPlayerPilot()
+        if playerpilot == nil then
+            SCORE.playeralive = false
+        else
+            SCORE.playeralive = true
+        end
+
 		fightsceneHasLoaded = false
         cf.swapScreen(enum.sceneEndBattle, SCREEN_STACK)
     end
