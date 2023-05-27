@@ -81,8 +81,18 @@ function beginContact(fixtureA, fixtureB, coll)
 		objB.lifetime = 0
 	end
 
-	if catA == enum.categoryFriendlyFighter or catB == enum.categoryFriendlyFighter or catB == enum.categoryEnemyFighter or catB == enum.categoryEnemyFighter then
+
+	enum.categoryFriendlyFighter = 1
+    enum.categoryEnemyFighter = 2
+    enum.categoryFriendlyBullet = 3             -- includes missiles and bombs
+    enum.categoryEnemyBullet = 4                -- includes missiles and bombs
+    enum.categoryFriendlyPod = 5
+    enum.categoryEnemyPod = 6
+
+	print(catA, catB)
+	if catA == enum.categoryFriendlyFighter or catA == enum.categoryEnemyFighter or catB == enum.categoryFriendlyFighter or catB == enum.categoryEnemyFighter then
 		fun.applyDamage(victim, bullet)		-- assumes bullet hit fighter. Send in bullet to check if bullet belongs to player
+		print("Whiskey")
 	end
 
 	-- play sounds if player is hit
@@ -123,6 +133,8 @@ function love.wheelmoved(x, y)
 	local currentscene = cf.currentScreenName(SCREEN_STACK)
 	if currentscene == enum.sceneFight then
 		fight.wheelmoved(x, y)
+	elseif currentscene == enum.sceneBattleRoster then
+		battleroster.wheelmoved(x, y)
 	end
 end
 

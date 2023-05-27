@@ -302,13 +302,10 @@ function functions.applyDamage(victim, bullet)
         fun.createAnimation(victim, enum.animSmoke)
 
         -- play audio
-        print("Hello")
         if fun.isPlayerAlive() and bullet.ownerObjectguid == PLAYER_FIGHTER_GUID then
             -- this bullet is the players bullet. Make an audible
-            print("Playing HIT audio")
             cf.playAudio(enum.audioBulletHit, false, true)
         else
-            print("alpha")
             print(bullet.ownerObjectguid, PLAYER_FIGHTER_GUID)
         end
 
@@ -450,6 +447,7 @@ end
 
 function functions.getTopAction(Obj)
     -- return the top most action table that includes the action type and cooldown etc
+    -- else returns nil
     assert(Obj ~= nil)
 
     if Obj.actions ~= nil and #Obj.actions > 0 then

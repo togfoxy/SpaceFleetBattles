@@ -35,15 +35,46 @@ local function createPilotFighter(numpilots, numfighters, forf)
 	end
 end
 
+local function repairFleet(friendlyrepairpoints, foerepairpoints)
+	-- cycle through the fleet and repair vessels
+	-- return any unused points
+
+	-- repair the friendly ships in the hanger first
+	for i = 1, #HANGER do
+		for k, componenthealth in pairs(fighter.componentHealth) do
+			print("golf")
+			print(inspect(componenthealth))
+
+			if componenthealth < 100 then
+				local damagesuffered = 100 - componenthealth
+				local damagerepaired = math.min(damagesuffered, friendlyrepairpoints)
+
+				componenthealth = componenthealth + damagerepaired
+				friendlyrepairpoints = friendlyrepairpoints - damagerepaired
+			end
+		end
+	end
+
+	--! need to repair the enemy fleet here
+end
+
 local function adjustResourceLevels()
 	-- remember that resource levels only adjust the global supply. It doesn't change how many fighters are in the battle
 	-- unless your supply goes below the maximum for the battle
 
+	--! this needs to be redesigned so that:
+	-- the total resource points is calculated and then
+	-- repairs are made to existing fighters and then
+	-- any remaining points spent on new fighters and then
+	-- any left over is stored for next time
+
+	--! repairFleet(friendlyrepairpoints, foerepairpoints)			--! need to fix up this code and do this properly
+
 	local currentsector = FLEET.sector
 	if currentsector == 1 then
-		createPilotFighter(3,3, enum.forfFriend)
+		createPilotFighter(3,3, enum.forfFriend)		--! should probably build these into the PLANETS table
 	elseif currentsector == 2 then
-		createPilotFighter(2,0, enum.forfFriend)		-- pilot / fighter
+		createPilotFighter(2,0, enum.forfFriend)		-- pilot , fighter, forf
 	elseif currentsector == 3 then
 		createPilotFighter(0,2, enum.forfFriend)
 	elseif currentsector == 4 then

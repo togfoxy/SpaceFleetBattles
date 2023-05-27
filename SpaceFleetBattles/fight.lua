@@ -351,7 +351,7 @@ local function drawMenu()
 	love.graphics.setColor(1,1,1,1)
 	love.graphics.line(drawx, drawy + 15, drawx + menuwidth, drawy + 15)
 
-	-- draw current action and a line
+	-- draw current action and a line			--! this might be drawing a blank. Needs to be tested
 	local actionenum = functions.getTopAction(Obj)
     txt = ""
     if actionenum ~= nil then
@@ -403,7 +403,7 @@ local function drawPhysicsObject(Obj)
 		elseif objtype == enum.categoryFriendlyFighter then
 			love.graphics.setColor(1,1,1,1)
 			local angle = Obj.body:getAngle()           -- radians
-			love.graphics.draw(IMAGE[enum.imageFighterFriend], drawx, drawy, angle, 0.15, 0.15, 76, 49)
+			love.graphics.draw(IMAGE[enum.imageFighterFriend], drawx, drawy, angle, 0.15, 0.15, 76, 47)
 
 			if Obj.guid == PLAYER_FIGHTER_GUID then
 				-- draw recticle that shows player vessel
@@ -412,7 +412,7 @@ local function drawPhysicsObject(Obj)
 		elseif objtype == enum.categoryEnemyFighter then
 			love.graphics.setColor(1,1,1,1)
 			local angle = Obj.body:getAngle()           -- radians
-			love.graphics.draw(IMAGE[enum.imageFighterFoe], drawx, drawy, angle, 0.10, 0.15, 128, 70)
+			love.graphics.draw(IMAGE[enum.imageFighterFoe], drawx, drawy, angle, 0.10, 0.15, 115, 70)
 		else
 			local shape = fixture:getShape()
 			if shape:typeOf("PolygonShape") then
