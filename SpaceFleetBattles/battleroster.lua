@@ -184,10 +184,10 @@ local function drawRoster()
 	love.graphics.setColor(1,1,1,1)
 
 	love.graphics.print("Pilot", drawx, drawy)
-	love.graphics.print("Health", drawx + 200, drawy)
-	love.graphics.print("# Missions", drawx + 285, drawy)
-	love.graphics.print("# Kills", drawx + 425, drawy)
-	love.graphics.print("# Fighters lost", drawx + 510, drawy)
+	love.graphics.print("Health", drawx + 250, drawy)
+	love.graphics.print("# Missions", drawx + 335, drawy)
+	love.graphics.print("# Kills", drawx + 475, drawy)
+	love.graphics.print("# Fighters lost", drawx + 560, drawy)
 	drawy = drawy + 30
 
     for i = 1, #ROSTER do

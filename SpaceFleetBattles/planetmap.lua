@@ -132,8 +132,8 @@ local function drawPlanets()
     local drawy = PLANETS[sector].y
     local scale = PLANETS[sector].scale			-- scale = the size of the planet. Different scales used for asthetic reasons
     love.graphics.setColor(1,0,0,1)
-    -- love.graphics.rectangle("line", drawx - 75, drawy - 75, 250 * scale, 250 * scale)
-	love.graphics.draw(IMAGE[enum.imageCrosshairPlanet], drawx - 165, drawy - 165, 0, 5, 5)
+
+	love.graphics.draw(IMAGE[enum.imageCrosshairPlanet], drawx, drawy, 0, 5, 5, 33, 33)
 
 	-- add a dot in the centre of the fleet for debugging purposes
 	love.graphics.setColor(0,1,0,1)

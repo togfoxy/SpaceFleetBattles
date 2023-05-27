@@ -51,7 +51,7 @@ local function drawKillCount()
 	love.graphics.print("Pilots lost: " .. SCORE.friendsdead, drawx, drawy)
 	love.graphics.print("Fighters lost: " .. SCORE.friendsdead + SCORE.friendsEjected, drawx, drawy + 25)
 
-	love.graphics.print("Enemy pilots destroyed: " .. SCORE.enemiesdead, drawx, drawy + 60)
+	love.graphics.print("Enemy pilots lost: " .. SCORE.enemiesdead, drawx, drawy + 60)
 	love.graphics.print("Enemy fighters destroyed: " .. SCORE.enemiesdead + SCORE.enemiesEjected, drawx, drawy + 85)
 end
 
@@ -119,7 +119,8 @@ function endbattle.update(dt)
 
         cf.saveTableToFile("hanger.dat", HANGER)
 
-    	print(inspect(SCORE))
+    	print(inspect(HANGER))
+
     end
 end
 

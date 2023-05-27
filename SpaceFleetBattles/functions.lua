@@ -136,9 +136,11 @@ local function getImpactedComponent(Obj)
 end
 
 function functions.setTaskEject(Obj)
-    Obj.lifetime = 0
-    Obj.actions = {}
+
     print("Setting action to eject")
+    -- update pilot stats
+    local pilot = fun.getPilot(Obj.pilotguid)
+    if pilot ~= nil then pilot.ejections = pilot.ejections + 1 end
 
     local thisObj = {}
     thisObj.podx, thisObj.pody = Obj.body:getPosition()
@@ -147,11 +149,10 @@ function functions.setTaskEject(Obj)
     thisObj.squadCallsign = Obj.squadcallsign
     table.insert(POD_QUEUE, thisObj)        -- Box2D won't let an object to be created inside contact event so queue it here
 
-    -- update pilot stats
-    local pilot = fun.getPilot(Obj.pilotguid)
-    if pilot ~= nil then pilot.ejections = pilot.ejections + 1 end
+    Obj.lifetime = 0
+    Obj.actions = {}
 
-    -- remove fighter from hanger, noting foe fighers don't have a hanger
+    -- remove fighter from hanger
     for i = #HANGER, 1, -1 do
         if HANGER[i].guid == Obj.guid then
             table.remove(HANGER, i)
@@ -205,7 +206,8 @@ local function destroyVictim(victim, bullet)
 	local pilotguid = victim.pilotguid
 	local pilotobj = fun.getPilot(pilotguid)
 	if pilotobj ~= nil then pilotobj.isDead = true end
-    if pilotguid == PLAYER_GUID then pilotobj.isPlayer = false end      --! check to see if this has unintended consequences
+    if pilotguid == PLAYER_GUID then
+        pilotobj.isPlayer = false end      --! check to see if this has unintended consequences
 
 	-- remove fighter from hanger
 	for i = #HANGER, 1, -1 do
