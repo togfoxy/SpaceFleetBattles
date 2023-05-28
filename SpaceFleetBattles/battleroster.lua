@@ -97,14 +97,7 @@ local function addPilotandFighterToBattle(thispilot, thisfighter, thiscallsign)
 	end
 end
 
-local function loadBattleObjects()
-	-- this assigns pilots to fighters and loads up all the objects needed for battle
-	--! need to break this down into smaller subs
-
-	OBJECTS = {}				-- these are the objects that go to battle
-	initialiseSquadList()		-- load all the callsigns
-    commanderAI = {}
-    squadAI = {}
+local function loadFriendlyObjects()
 
 	-- determine how many fighters are servicable
 	local livingroster = fun.getActivePilotCount()
@@ -116,7 +109,7 @@ local function loadBattleObjects()
 		local thiscallsign = getUniqueCallsign()		-- unique two character code. also removes from circulation
 		squadAI[thiscallsign] = {}
 		squadAI[thiscallsign].forf = enum.forfFriend
-        squadAI[thiscallsign].orders = {}
+		squadAI[thiscallsign].orders = {}
 
 		for j = 1, FRIEND_SHIPS_PER_SQUADRON do
 			if deploynumber > 0 then
@@ -131,10 +124,12 @@ local function loadBattleObjects()
 			end
 		end
 	end
+end
 
-	livingroster = FOE_PILOT_COUNT
-	livingfighter = fun.getActiveFighterCount(enum.forfEnemy)
-	deploynumber = math.min(livingfighter, livingroster)
+local function loadFoeObjects()
+	local livingroster = FOE_PILOT_COUNT
+	local livingfighter = fun.getActiveFighterCount(enum.forfEnemy)
+	local deploynumber = math.min(livingfighter, livingroster)
 	-- if deploynumber > 1 then deploynumber = 1 end
 
 	for i = 1, FOE_SQUADRON_COUNT do
@@ -159,6 +154,18 @@ local function loadBattleObjects()
 			end
 		end
 	end
+end
+
+local function loadBattleObjects()
+	-- this assigns pilots to fighters and loads up all the objects needed for battle
+
+	OBJECTS = {}				-- these are the objects that go to battle
+	initialiseSquadList()		-- load all the callsigns
+    commanderAI = {}
+    squadAI = {}
+
+	loadFriendlyObjects()
+	loadFoeObjects()
 end
 
 function battleroster.wheelmoved(x, y)

@@ -12,7 +12,7 @@ function endbattle.mousereleased(rx, ry, x, y, button)
 end
 
 local function drawPilotStats(drawx, drawy)
-    local playerpilot = fun.getPlayerPilot()
+    local playerpilot = fun.getPlayerPilot()        -- scans ROSTER
 
     love.graphics.print("Your pilot stats:", drawx, drawy)
     drawy = drawy + 50
