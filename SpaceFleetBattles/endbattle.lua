@@ -12,7 +12,7 @@ function endbattle.mousereleased(rx, ry, x, y, button)
 end
 
 local function drawPilotStats(drawx, drawy)
-    local playerpilot = fun.getPlayerPilot()
+    local playerpilot = fun.getPlayerPilot()        -- scans ROSTER
 
     love.graphics.print("Your pilot stats:", drawx, drawy)
     drawy = drawy + 50
@@ -51,7 +51,7 @@ local function drawKillCount()
 	love.graphics.print("Pilots lost: " .. SCORE.friendsdead, drawx, drawy)
 	love.graphics.print("Fighters lost: " .. SCORE.friendsdead + SCORE.friendsEjected, drawx, drawy + 25)
 
-	love.graphics.print("Enemy pilots destroyed: " .. SCORE.enemiesdead, drawx, drawy + 60)
+	love.graphics.print("Enemy pilots lost: " .. SCORE.enemiesdead, drawx, drawy + 60)
 	love.graphics.print("Enemy fighters destroyed: " .. SCORE.enemiesdead + SCORE.enemiesEjected, drawx, drawy + 85)
 end
 
@@ -69,7 +69,7 @@ function endbattle.draw()
     if not SCORE.playeralive then
         love.graphics.print("Your pilot died honourably in battle. You will be able to roleplay a new pilot.", drawx, drawy)
         drawy = drawy + 50
-    elseif not SCORE.playerfighteralive == nil then
+    elseif not SCORE.playerfighteralive then
         love.graphics.print("Your fighter was destroyed in combat but your pilot lived to fight another day.", drawx, drawy)
         drawy = drawy + 50
     else
@@ -95,6 +95,9 @@ function endbattle.update(dt)
     if not endBattleHasLoaded then
         endBattleHasLoaded = true
 
+        print("Score:")
+        print(inspect(SCORE))
+
 		-- take pilots out of fighters
 		for k, pilot in pairs(ROSTER) do
 			pilot.vesselguid = nil
@@ -116,7 +119,8 @@ function endbattle.update(dt)
 
         cf.saveTableToFile("hanger.dat", HANGER)
 
-    	print(inspect(SCORE))
+    	print(inspect(HANGER))
+
     end
 end
 

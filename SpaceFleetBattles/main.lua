@@ -51,8 +51,6 @@ function beginContact(fixtureA, fixtureB, coll)
 
 	local catA = fixtureA:getCategory()
 	local catB = fixtureB:getCategory()
-	-- print("Contact category: " .. catA, catB)
-	-- get the object that owns the fixture
 	local guidA = fixtureA:getUserData()
 	local guidB = fixtureB:getUserData()
 	local objA = fun.getObject(guidA)		-- this is different to fixture:getBody( )
@@ -65,29 +63,39 @@ function beginContact(fixtureA, fixtureB, coll)
 
 	assert(guidA ~= nil)
 	assert(guidB ~= nil)
-	assert(objA ~= nil)
-	assert(objB ~= nil)
+	-- assert(objA ~= nil)
+	-- assert(objB ~= nil)
 
-	if catA == enum.categoryEnemyBullet or catA == enum.categoryFriendlyBullet then
-		-- destroy Obj1 because its a bullet
-		victim = objB
-		bullet = objA
-		objA.lifetime = 0
-	end
-	if catB == enum.categoryEnemyBullet or catB == enum.categoryFriendlyBullet then
-		-- destroy Obj2 because it's a bullet
-		victim = objA
-		bullet = objB
-		objB.lifetime = 0
-	end
+	if objA == nil or objB == nil then
+		-- not sure how or why. Going to assume a bullet has hit an object that was
+		-- destroyed a nano-second earlier
+		print(catA, catB)
+		print(guidA, guidB)
+		print(inspect(objA))
+		print(inspect(objB))
+		-- error()
+	else
+		if catA == enum.categoryEnemyBullet or catA == enum.categoryFriendlyBullet then
+			-- destroy Obj1 because its a bullet
+			victim = objB
+			bullet = objA
+			objA.lifetime = 0
+		end
+		if catB == enum.categoryEnemyBullet or catB == enum.categoryFriendlyBullet then
+			-- destroy Obj2 because it's a bullet
+			victim = objA
+			bullet = objB
+			objB.lifetime = 0
+		end
 
-	if catA == enum.categoryFriendlyFighter or catA == enum.categoryEnemyFighter or catB == enum.categoryFriendlyFighter or catB == enum.categoryEnemyFighter then
-		fun.applyDamage(victim, bullet)		-- assumes bullet hit fighter. Send in bullet to check if bullet belongs to player
-	end
+		if catA == enum.categoryFriendlyFighter or catA == enum.categoryEnemyFighter or catB == enum.categoryFriendlyFighter or catB == enum.categoryEnemyFighter then
+			fun.applyDamage(victim, bullet)		-- assumes bullet hit fighter. Send in bullet to check if bullet belongs to player
+		end
 
-	-- play sounds if player is hit
-	if victim.guid == PLAYER_FIGHTER_GUID then
-		cf.playAudio(enum.audioBulletPing, false, true)
+		-- play sounds if player is hit
+		if victim.guid == PLAYER_FIGHTER_GUID then
+			cf.playAudio(enum.audioBulletPing, false, true)
+		end
 	end
 end
 

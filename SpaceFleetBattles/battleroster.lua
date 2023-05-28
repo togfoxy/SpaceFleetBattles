@@ -97,26 +97,19 @@ local function addPilotandFighterToBattle(thispilot, thisfighter, thiscallsign)
 	end
 end
 
-local function loadBattleObjects()
-	-- this assigns pilots to fighters and loads up all the objects needed for battle
-	--! need to break this down into smaller subs
-
-	OBJECTS = {}				-- these are the objects that go to battle
-	initialiseSquadList()		-- load all the callsigns
-    commanderAI = {}
-    squadAI = {}
+local function loadFriendlyObjects()
 
 	-- determine how many fighters are servicable
 	local livingroster = fun.getActivePilotCount()
 	local livingfighter = fun.getActiveFighterCount(enum.forfFriend)
 	local deploynumber = math.min(livingfighter, livingroster)
-	if deploynumber > 1 then deploynumber = 1 end
+	-- if deploynumber > 1 then deploynumber = 1 end
 
 	for i = 1, FRIEND_SQUADRON_COUNT do
 		local thiscallsign = getUniqueCallsign()		-- unique two character code. also removes from circulation
 		squadAI[thiscallsign] = {}
 		squadAI[thiscallsign].forf = enum.forfFriend
-        squadAI[thiscallsign].orders = {}
+		squadAI[thiscallsign].orders = {}
 
 		for j = 1, FRIEND_SHIPS_PER_SQUADRON do
 			if deploynumber > 0 then
@@ -131,11 +124,13 @@ local function loadBattleObjects()
 			end
 		end
 	end
+end
 
-	livingroster = FOE_PILOT_COUNT
-	livingfighter = fun.getActiveFighterCount(enum.forfEnemy)
-	deploynumber = math.min(livingfighter, livingroster)
-	if deploynumber > 1 then deploynumber = 1 end
+local function loadFoeObjects()
+	local livingroster = FOE_PILOT_COUNT
+	local livingfighter = fun.getActiveFighterCount(enum.forfEnemy)
+	local deploynumber = math.min(livingfighter, livingroster)
+	-- if deploynumber > 1 then deploynumber = 1 end
 
 	for i = 1, FOE_SQUADRON_COUNT do
 		local thiscallsign = getUniqueCallsign()
@@ -161,6 +156,18 @@ local function loadBattleObjects()
 	end
 end
 
+local function loadBattleObjects()
+	-- this assigns pilots to fighters and loads up all the objects needed for battle
+
+	OBJECTS = {}				-- these are the objects that go to battle
+	initialiseSquadList()		-- load all the callsigns
+    commanderAI = {}
+    squadAI = {}
+
+	loadFriendlyObjects()
+	loadFoeObjects()
+end
+
 function battleroster.wheelmoved(x, y)
 	rosterdrawy = rosterdrawy + y
 end
@@ -184,10 +191,10 @@ local function drawRoster()
 	love.graphics.setColor(1,1,1,1)
 
 	love.graphics.print("Pilot", drawx, drawy)
-	love.graphics.print("Health", drawx + 200, drawy)
-	love.graphics.print("# Missions", drawx + 285, drawy)
-	love.graphics.print("# Kills", drawx + 425, drawy)
-	love.graphics.print("# Fighters lost", drawx + 510, drawy)
+	love.graphics.print("Health", drawx + 250, drawy)
+	love.graphics.print("# Missions", drawx + 335, drawy)
+	love.graphics.print("# Kills", drawx + 475, drawy)
+	love.graphics.print("# Fighters lost", drawx + 560, drawy)
 	drawy = drawy + 30
 
     for i = 1, #ROSTER do
