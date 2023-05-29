@@ -455,12 +455,17 @@ local function drawCallsign(Obj)
 		local drawx = Obj.body:getX()
         local drawy = Obj.body:getY()
 		if Obj.squadCallsign ~= nil then
-			local str = "CS: " .. Obj.squadCallsign .. "-" .. string.sub(Obj.guid, - 4)		-- this is squad callsign + guid
+            local str = ""
+			-- local str = "CS: " .. Obj.squadCallsign .. "-" .. string.sub(Obj.guid, - 4)		-- this is squad callsign + guid
+            -- str = str .. "\n"
 			if Obj.forf == enum.forfFriend then
 				-- get the pilots last name and add that to the callsign
 				local pilotguid = Obj.pilotguid
 				local pilot = fun.getPilot(pilotguid)
-				str = str .. "\n" .. pilot.lastname
+                str = str .. pilot.lastname
+            else
+                -- str = "CS: " .. Obj.squadCallsign .. "-" .. string.sub(Obj.guid, - 4)		-- this is squad callsign + guid
+                str = str .. string.sub(Obj.guid, - 4)		-- this is squad callsign + guid
 			end
 
 			love.graphics.setColor(1,1,1,1)
