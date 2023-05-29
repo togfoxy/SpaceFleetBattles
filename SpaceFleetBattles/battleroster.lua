@@ -237,6 +237,25 @@ local function drawHanger()
         	drawy = drawy + 30
 		end
     end
+
+
+	-- draw bad hanger for debugging reasons
+	--! can consolidate these two loops into one for performance reasons
+	local drawx = 1400
+	local drawy = 100
+
+	love.graphics.setColor(1,1,1,1)
+	love.graphics.print("Fighter ID", drawx, drawy)
+	love.graphics.print("Structure", drawx + 125, drawy)
+	drawy = drawy + 30
+
+	for i = 1, #HANGER do
+		if HANGER[i].forf == enum.forfEnemy then
+			love.graphics.print(string.sub(HANGER[i].guid, -4), drawx + 25, drawy)
+			love.graphics.print(HANGER[i].componentHealth[enum.componentStructure], drawx + 150, drawy)
+			drawy = drawy + 30
+		end
+	end
 end
 
 function battleroster.draw()
