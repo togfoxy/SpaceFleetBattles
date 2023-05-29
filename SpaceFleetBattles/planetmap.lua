@@ -35,27 +35,42 @@ local function createPilotFighter(numpilots, numfighters, forf)
 	end
 end
 
-local function repairFleet(friendlyrepairpoints, foerepairpoints)
+local function repairFleet(sector)
 	-- cycle through the fleet and repair vessels
-	-- return any unused points
+
+-- print(inspect(FLEET))
+-- print("**")
+-- print(inspect(PLANETS))
 
 	-- repair the friendly ships in the hanger first
+	local friendlyfighterpoints = FLEET.friendlyFighterPoints + PLANETS[sector].friendlyfighters
+	local foefighterpoints = FLEET.foeFighterPoints + PLANETS[sector].foefighters
 	for i = 1, #HANGER do
-		for k, componenthealth in pairs(fighter.componentHealth) do
+		for k, componenthealth in pairs(HANGER[i].componentHealth) do
 			print("golf")
 			print(inspect(componenthealth))
 
 			if componenthealth < 100 then
 				local damagesuffered = 100 - componenthealth
-				local damagerepaired = math.min(damagesuffered, friendlyrepairpoints)
 
-				componenthealth = componenthealth + damagerepaired
-				friendlyrepairpoints = friendlyrepairpoints - damagerepaired
+				if HANGER[i].forf == enum.friendly then
+					local damagerepaired = math.min(damagesuffered, friendlyfighterpoints)
+					componenthealth = componenthealth + damagerepaired
+					friendlyfighterpoints = friendlyfighterpoints - damagerepaired
+					FLEET.friendlyFighterPoints = FLEET.friendlyFighterPoints - damagerepaired
+				else
+					local damagerepaired = math.min(damagesuffered, foefighterpoints)
+					componenthealth = componenthealth + damagerepaired
+					foefighterpoints = foefighterpoints - damagerepaired
+					FLEET.foeFighterPoints = FLEET.foeFighterPoints - damagerepaired
+				end
 			end
 		end
 	end
 
-	--! need to repair the enemy fleet here
+	--! what about pilot points stored in PLANETS and FLEET?
+	-- PLANETS[1].friendlypilots = 3
+	-- PLANETS[1].foepilots = 0
 end
 
 local function adjustResourceLevels()
@@ -68,9 +83,9 @@ local function adjustResourceLevels()
 	-- any remaining points spent on new fighters and then
 	-- any left over is stored for next time
 
-	--! repairFleet(friendlyrepairpoints, foerepairpoints)			--! need to fix up this code and do this properly
-
 	local currentsector = FLEET.sector
+	repairFleet(currentsector)		-- operates on FLEET table
+
 	if currentsector == 1 then
 		createPilotFighter(3,3, enum.forfFriend)		--! should probably build these into the PLANETS table
 	elseif currentsector == 2 then

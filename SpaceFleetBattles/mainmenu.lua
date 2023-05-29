@@ -41,6 +41,10 @@ local function initialiseFleet()
 	FLEET.sector = 1
 	FLEET.newSector = nil			-- use this as a way to capture original and final sector
     FLEET.movesLeft = 0
+	FLEET.friendlyPilotPoints = 0
+	FLEET.friendlyFighterPoints = 0
+	FLEET.foePilotPoints = 0
+	FLEET.foeFighterPoints = 0
     cf.saveTableToFile("fleet.dat", FLEET)
 end
 
