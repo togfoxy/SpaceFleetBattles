@@ -41,7 +41,7 @@ local function initialiseFleet()
 	FLEET.sector = 1
 	FLEET.newSector = nil			-- use this as a way to capture original and final sector
     FLEET.movesLeft = 0
-	FLEET.friendlyPilotPoints = 0
+	FLEET.friendlyPilotPoints = 0					-- these get spent as soon as they are earned so maybe not used?
 	FLEET.friendlyFighterPoints = 0
 	FLEET.foePilotPoints = 0
 	FLEET.foeFighterPoints = 0
@@ -277,8 +277,12 @@ function mainmenu.mousereleased(rx, ry, x, y, button)
 
         loadImagesIntoPlanets()         -- loads images into the PLANETS table
 
+		print("Hotel")
+		print(inspect(FLEET))
+		
 		-- swap to fight scene
         cf.addScreen(enum.scenePlanetMap, SCREEN_STACK)
+
 
     elseif clickedButtonID == enum.buttonMainMenuExitGame then
         love.event.quit()

@@ -141,7 +141,7 @@ function unitai.setTaskEngage(Obj, cooldown)
 		print("Stacking orders: return to battle and then RTB")
 		unitai.setTaskRTB(Obj)     -- this is an instance of stacking orders
 	end
-    assert(Obj.actions[1] ~= nil )
+    assert(#Obj.actions > 0 )       -- the first order can be nil so don't test for nil
 end
 
 local function isFighter(Obj)
@@ -480,7 +480,9 @@ local function updateUnitTask(Obj, squadorder, dt)
             if squadorder == enum.squadOrdersEngage then
                 print("alpha. setting task = engage")
 				unitai.setTaskEngage(Obj)
-                assert(Obj.actions[1] ~= nil )
+                assert(#Obj.actions > 0 )       -- the first order can be nil so don't test for nil
+                                                --! need to find a way to delete actions[1] when it is nil
+
             elseif squadorder == enum.squadOrdersReturnToBase then
                 print("beta")
 				unitai.setTaskRTB(Obj)
@@ -504,7 +506,7 @@ local function updateUnitTask(Obj, squadorder, dt)
         local currentaction = fun.getTopAction(Obj)
         print(inspect(currentaction))
     end
-    assert(Obj.actions[1] ~= nil )
+    assert(#Obj.actions > 0 )       -- the first order can be nil so don't test for nil
 end
 
 function unitai.update(dt)

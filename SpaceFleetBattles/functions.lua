@@ -203,11 +203,13 @@ local function destroyVictim(victim, bullet)
 	giveKillCredit(bullet)
 
 	-- remove friendly pilots from roster by marking isDead
-	local pilotguid = victim.pilotguid
+	local pilotguid = victim.pilotguid                         --! is sometimes nil. Not sure how. Foe escape pod?
 	local pilotobj = fun.getPilot(pilotguid)
 	if pilotobj ~= nil then pilotobj.isDead = true end
-    if pilotguid == PLAYER_GUID then
-        pilotobj.isPlayer = false end      --! check to see if this has unintended consequences
+
+    if PLAYER_GUID ~= nil and PLAYER_GUID == pilotguid then     --! not sure how PLAYER_GUID can ever be nil.
+        pilotobj.isPlayer = false       --! check for unintended consequences
+    end
 
 	-- remove fighter from hanger
 	for i = #HANGER, 1, -1 do
@@ -456,6 +458,8 @@ function functions.getTopAction(Obj)
         if Obj.actions[1] ~= nil then
             if Obj.actions[1].action ~= nil then
                 return Obj.actions[1]
+            elseif Obj.actions[1].action ~= nil then
+                return Obj.actions[2]
             end
         end
     end

@@ -50,6 +50,7 @@ local function getUnassignedPilot()
 		end
 	end
 	print("No combat-ready pilot found")
+	print(inspect(ROSTER))
 	return nil
 end
 
@@ -180,6 +181,9 @@ function battleroster.mousereleased(rx, ry, x, y, button)
 		battlerosterhasloaded = false
 		cf.saveTableToFile("fleet.dat", FLEET)							-- do this here only when starting the next battle
         cf.swapScreen(enum.sceneFight, SCREEN_STACK)
+
+		print("FLEET table: ")
+		print(inspect(FLEET))
     end
 end
 

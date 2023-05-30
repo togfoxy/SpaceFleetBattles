@@ -27,42 +27,41 @@ local function createPilotFighter(numpilots, numfighters, forf)
 	for i = 1, numpilots do
 		local thispilot = fun.createNewPilot()
 		table.insert(ROSTER, thispilot)
+		print("Added a fresh pilot to roster")
 	end
 	for i = 1, numfighters do
 		local fighter = fighter.createHangerFighter(forf)
 		fighter.isLaunched = false
 		table.insert(HANGER, fighter)
+		print("Added a fresh fighter to hanger")
 	end
 end
 
 local function repairFleet(sector)
 	-- cycle through the fleet and repair vessels
 
--- print(inspect(FLEET))
--- print("**")
--- print(inspect(PLANETS))
+	-- print(inspect(FLEET))
+	-- print("**")
+	-- print(inspect(PLANETS))
 
 	-- repair the friendly ships in the hanger first
-	local friendlyfighterpoints = FLEET.friendlyFighterPoints + PLANETS[sector].friendlyfighters
-	local foefighterpoints = FLEET.foeFighterPoints + PLANETS[sector].foefighters
+	FLEET.friendlyFighterPoints = FLEET.friendlyFighterPoints + PLANETS[sector].friendlyfighters
+	FLEET.foeFighterPoints = FLEET.foeFighterPoints + PLANETS[sector].foefighters
+
 	for i = 1, #HANGER do
 		for k, componenthealth in pairs(HANGER[i].componentHealth) do
-			print("golf")
-			print(inspect(componenthealth))
-
 			if componenthealth < 100 then
 				local damagesuffered = 100 - componenthealth
-
-				if HANGER[i].forf == enum.friendly then
-					local damagerepaired = math.min(damagesuffered, friendlyfighterpoints)
+				if HANGER[i].forf == enum.forfFriend then
+					local damagerepaired = math.min(damagesuffered, FLEET.friendlyFighterPoints)
 					componenthealth = componenthealth + damagerepaired
-					friendlyfighterpoints = friendlyfighterpoints - damagerepaired
 					FLEET.friendlyFighterPoints = FLEET.friendlyFighterPoints - damagerepaired
+					print("Adding " .. damagerepaired .. " repair points to friendly fleet.")
 				else
-					local damagerepaired = math.min(damagesuffered, foefighterpoints)
+					local damagerepaired = math.min(damagesuffered, FLEET.foeFighterPoints)
 					componenthealth = componenthealth + damagerepaired
-					foefighterpoints = foefighterpoints - damagerepaired
 					FLEET.foeFighterPoints = FLEET.foeFighterPoints - damagerepaired
+					print("Adding " .. damagerepaired .. " repair points to foe fleet.")
 				end
 			end
 		end
@@ -76,45 +75,26 @@ end
 local function adjustResourceLevels()
 	-- remember that resource levels only adjust the global supply. It doesn't change how many fighters are in the battle
 	-- unless your supply goes below the maximum for the battle
-
-	--! this needs to be redesigned so that:
-	-- the total resource points is calculated and then
-	-- repairs are made to existing fighters and then
-	-- any remaining points spent on new fighters and then
-	-- any left over is stored for next time
+	-- fighter points are allocated during the repair routine so don't add them here
 
 	local currentsector = FLEET.sector
 	repairFleet(currentsector)		-- operates on FLEET table
 
-	if currentsector == 1 then
-		createPilotFighter(3,3, enum.forfFriend)		--! should probably build these into the PLANETS table
-	elseif currentsector == 2 then
-		createPilotFighter(2,0, enum.forfFriend)		-- pilot , fighter, forf
-	elseif currentsector == 3 then
-		createPilotFighter(0,2, enum.forfFriend)
-	elseif currentsector == 4 then
-		createPilotFighter(0,1, enum.forfFriend)
-	elseif currentsector == 5 then
-		createPilotFighter(1,0, enum.forfFriend)
-	elseif currentsector == 6 then
-		createPilotFighter(0,1, enum.forfFriend)
-	elseif currentsector == 9 then
-		FOE_FIGHTER_COUNT = FOE_FIGHTER_COUNT + 1
-	elseif currentsector == 10 then
-		FOE_PILOT_COUNT = FOE_PILOT_COUNT + 1
-	elseif currentsector == 11 then
-		FOE_FIGHTER_COUNT = FOE_FIGHTER_COUNT + 1
-	elseif currentsector == 12 then
-		FOE_PILOT_COUNT = FOE_PILOT_COUNT + 2
-	elseif currentsector == 13 then
-		FOE_FIGHTER_COUNT = FOE_FIGHTER_COUNT + 2
-	elseif currentsector == 14 then
-		FOE_FIGHTER_COUNT = FOE_FIGHTER_COUNT + 3
-		FOE_PILOT_COUNT = FOE_PILOT_COUNT + 3
-	end
+	local newfriendlypilots = PLANETS[currentsector].friendlypilots
+	local newfoepilots = PLANETS[currentsector].foepilots
+
+	if newfriendlypilots == nil then newfriendlypilots = 0 end
+	if newfoepilots == nil then newfoepilots = 0 end
+
+	-- add the correct number of pilots to roster and fighters to hanger
+	local newfriendlyfighters = math.floor(FLEET.friendlyFighterPoints / 100)
+	createPilotFighter(newfriendlypilots, newfriendlyfighters, enum.forfFriend)
+	FLEET.friendlyFighterPoints = FLEET.friendlyFighterPoints - (newfriendlyfighters * 100)
 end
 
 local function drawPlanets()
+	--! this needs refactoring
+	-- this sub has multiple fonts
 
     -- draw bg
     love.graphics.draw(IMAGE[enum.imagePlanetBG], 0, 0, 0, 2, 2)
@@ -150,9 +130,20 @@ local function drawPlanets()
 
 	love.graphics.draw(IMAGE[enum.imageCrosshairPlanet], drawx, drawy, 0, 5, 5, 33, 33)
 
+	-- draw the roster and hanger counts
+	local rostersize = #ROSTER
+	local hangersize = fun.getActiveFighterCount(enum.forfFriend)
+	love.graphics.setColor(1,1,1,1)
+	love.graphics.setFont(FONT[enum.fontCorporate])
+	love.graphics.print("Available pilots: " .. rostersize, 600, 50)
+	love.graphics.print("Available fighters: " .. hangersize, 1100, 50)
+	love.graphics.setFont(FONT[enum.fontDefault])
+
 	-- add a dot in the centre of the fleet for debugging purposes
 	love.graphics.setColor(0,1,0,1)
 	love.graphics.circle("fill", drawx, drawy, 5)
+
+
 end
 
 function planetmap.keyreleased(key, scancode)

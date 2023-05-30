@@ -118,9 +118,6 @@ function endbattle.update(dt)
         end
 
         cf.saveTableToFile("hanger.dat", HANGER)
-
-    	print(inspect(HANGER))
-
     end
 end
 
