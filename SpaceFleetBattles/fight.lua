@@ -165,7 +165,7 @@ function fight.keyreleased(key, scancode)
             showmenu = false
             pause = false
         else
-            love.event.quit()
+            -- love.event.quit()
         end
     end
 
@@ -348,7 +348,6 @@ local function drawMenu()
 	elseif orderenum == enum.squadOrdersReturnToBase then
 		txt = "Squad: return to base"
 	end
-
 	love.graphics.setColor(0,0,0,1)
 	love.graphics.print(txt, drawx + 5, drawy)
 	love.graphics.setColor(1,1,1,1)
