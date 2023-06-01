@@ -1,6 +1,4 @@
-[![mainmenutitle.png](https://i.postimg.cc/s2wQjq7v/mainmenutitle.png)](https://postimg.cc/5HQNpPPV)
-
-# SpaceFleetBattles
+[![bannerwhite.png](https://i.postimg.cc/4ygdRH1b/bannerwhite.png)](https://postimg.cc/hz2g9j6f)
 
 Pause with SPACE bar
 
