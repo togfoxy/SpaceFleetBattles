@@ -355,15 +355,18 @@ local function drawMenu()
 
 	-- draw current action and a line			--! this might be drawing a blank. Needs to be tested
 	local actionenum = functions.getTopAction(Obj)
+
+    print("indigo")
+    print(inspect(actionenum))
     txt = ""
     if actionenum ~= nil then
-    	if actionenum == enum.unitActionEngaging then
+    	if actionenum.action == enum.unitActionEngaging then
     		txt = "Currently: engaging"
-    	elseif actionenum == enum.unitActionReturningToBase then
+    	elseif actionenum.action == enum.unitActionReturningToBase then
     		txt = "Currently: returning to base"
-    	elseif actionenum == enum.unitActionEject then
+    	elseif actionenum.action == enum.unitActionEject then
     		txt = "Currently: ejecting!"
-    	elseif actionenum == enum.unitActionReturningToBase then
+    	elseif actionenum.action == enum.unitActionReturningToBase then
     		txt = "Currently: moving to destination"
     	end
     	if txt ~= "" then
@@ -530,27 +533,6 @@ function fight.draw()
         -- draw the physics object
 		drawPhysicsObject(Obj)
 
-        -- draw velocity as text
-        -- if not Obj.body:isBullet() then
-        --     local vx, vy = Obj.body:getLinearVelocity()
-        --     local vel = cf.getDistance(0, 0, vx, vy)    -- get distance of velocity vector
-        --     vel = "v: " .. cf.round(vel, 0)             -- this is not the same as getLinearVelocity x/y because this is the 		distance between two points
-        --     love.graphics.setColor(1,1,1,1)
-        --     love.graphics.print(vel, drawx, drawy, 0, 1, 1, 30, 30)
-        -- end
-
-        -- draw the velocity indicator (purple line)
-        -- local linx, liny = Obj.body:getLinearVelocity( )
-        -- linx = linx * 2
-        -- liny = liny * 2
-        -- local objx, objy = Obj.body:getPosition( )
-        -- local objxscaled = objx
-        -- local objyscaled = objy
-        -- local pointxscaled = (objx + linx)
-        -- local pointyscaled = (objy + liny)
-        -- love.graphics.setColor(1,0,1,1)
-        -- love.graphics.line(objxscaled, objyscaled, pointxscaled, pointyscaled)
-
         -- print current action
         -- debug only
         currentaction = fun.getTopAction(Obj)     -- receives an object
@@ -562,6 +544,29 @@ function fight.draw()
         local drawx, drawy = res.toGame(objx, objy) -- need to convert physical to screen
         love.graphics.setColor(1,1,1,1)
         love.graphics.print(txt, drawx - 20, drawy + 10)
+
+        if false then       -- doing this so I can collapse this code
+            -- draw velocity as text
+            -- if not Obj.body:isBullet() then
+            --     local vx, vy = Obj.body:getLinearVelocity()
+            --     local vel = cf.getDistance(0, 0, vx, vy)    -- get distance of velocity vector
+            --     vel = "v: " .. cf.round(vel, 0)             -- this is not the same as getLinearVelocity x/y because this is the 		distance between two points
+            --     love.graphics.setColor(1,1,1,1)
+            --     love.graphics.print(vel, drawx, drawy, 0, 1, 1, 30, 30)
+            -- end
+
+            -- draw the velocity indicator (purple line)
+            -- local linx, liny = Obj.body:getLinearVelocity( )
+            -- linx = linx * 2
+            -- liny = liny * 2
+            -- local objx, objy = Obj.body:getPosition( )
+            -- local objxscaled = objx
+            -- local objyscaled = objy
+            -- local pointxscaled = (objx + linx)
+            -- local pointyscaled = (objy + liny)
+            -- love.graphics.setColor(1,0,1,1)
+            -- love.graphics.line(objxscaled, objyscaled, pointxscaled, pointyscaled)
+        end
     end
 
     -- draw target recticle for player 1
