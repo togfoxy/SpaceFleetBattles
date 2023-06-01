@@ -441,7 +441,9 @@ local function updateUnitTask(Obj, squadorder, dt)
     -- this adjusts targets or other goals based on the squad order
 
     assert(Obj ~= nil)
-    print("Unit reacting to squad order: " .. squadorder)
+    if DEV_MODE then
+        print("Unit reacting to squad order: " .. squadorder)
+    end
 
     if Obj.actions[1] ~= nil then
         Obj.actions[1].cooldown = Obj.actions[1].cooldown - dt

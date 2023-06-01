@@ -69,7 +69,7 @@ local function getEmptyVessel(forf)
 			return HANGER[i]
 		end
 	end
-    print("No combat-ready vessel found")
+    print("No combat-ready vessel found", forf)
 	return nil
 end
 
@@ -118,10 +118,9 @@ local function loadFriendlyObjects()
 				local thispilot = getUnassignedPilot()		-- preferences player pilot. Returns nil if failed to find any pilot
 				local thisfighter = getEmptyVessel(enum.forfFriend)
 
-				assert(thispilot ~= nil)
-				assert(thisfighter ~= nil)
-
-				addPilotandFighterToBattle(thispilot, thisfighter, thiscallsign)		-- adds to OBJECTS
+				if thispilot ~= nil and thisfighter ~= nil then
+					addPilotandFighterToBattle(thispilot, thisfighter, thiscallsign)		-- adds to OBJECTS
+				end
 			end
 		end
 	end
@@ -144,14 +143,15 @@ local function loadFoeObjects()
 				deploynumber = deploynumber - 1
 
 				local thisfighter = getEmptyVessel(enum.forfEnemy)
-				assert(thisfighter ~= nil)
-				thisfighter.squadCallsign = thiscallsign
-				thisfighter.isLaunched = true                   -- puts it into the batlespace
-				fighter.createFighterBody(thisfighter)          -- creates a physical body
-				local x, y = fun.getLaunchXY(enum.forfEnemy)
-				thisfighter.body:setPosition(x, y)
-				assert(thisfighter.guid ~= nil)
-				table.insert(OBJECTS, thisfighter)
+				if thisfighter ~= nil then		-- will be nil if hanger is very low in stock
+					thisfighter.squadCallsign = thiscallsign
+					thisfighter.isLaunched = true                   -- puts it into the batlespace
+					fighter.createFighterBody(thisfighter)          -- creates a physical body
+					local x, y = fun.getLaunchXY(enum.forfEnemy)
+					thisfighter.body:setPosition(x, y)
+					assert(thisfighter.guid ~= nil)
+					table.insert(OBJECTS, thisfighter)
+				end
 			end
 		end
 	end
@@ -245,19 +245,21 @@ local function drawHanger()
 
 	-- draw bad hanger for debugging reasons
 	--! can consolidate these two loops into one for performance reasons
-	local drawx = 1400
-	local drawy = 100
+	if DEV_MODE then
+		local drawx = 1400
+		local drawy = 100
 
-	love.graphics.setColor(1,1,1,1)
-	love.graphics.print("Fighter ID", drawx, drawy)
-	love.graphics.print("Structure", drawx + 125, drawy)
-	drawy = drawy + 30
+		love.graphics.setColor(1,1,1,1)
+		love.graphics.print("Fighter ID", drawx, drawy)
+		love.graphics.print("Structure", drawx + 125, drawy)
+		drawy = drawy + 30
 
-	for i = 1, #HANGER do
-		if HANGER[i].forf == enum.forfEnemy then
-			love.graphics.print(string.sub(HANGER[i].guid, -4), drawx + 25, drawy)
-			love.graphics.print(HANGER[i].componentHealth[enum.componentStructure], drawx + 150, drawy)
-			drawy = drawy + 30
+		for i = 1, #HANGER do
+			if HANGER[i].forf == enum.forfEnemy then
+				love.graphics.print(string.sub(HANGER[i].guid, -4), drawx + 25, drawy)
+				love.graphics.print(HANGER[i].componentHealth[enum.componentStructure], drawx + 150, drawy)
+				drawy = drawy + 30
+			end
 		end
 	end
 end

@@ -32,6 +32,9 @@ function constants.load()
     enums.load()
     -- add extra items below this line ======================================================
 
+    -- DEV_MODE = true
+    DEV_MODE = false
+
     FRIEND_START_X = 0      			-- left side of screen
     FOE_START_X = SCREEN_WIDTH * 2		-- right side of screen
 
