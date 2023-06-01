@@ -40,10 +40,6 @@ end
 local function repairFleet(sector)
 	-- cycle through the fleet and repair vessels
 
-	-- print(inspect(FLEET))
-	-- print("**")
-	-- print(inspect(PLANETS))
-
 	-- repair the friendly ships in the hanger first
 	FLEET.friendlyFighterPoints = FLEET.friendlyFighterPoints + PLANETS[sector].friendlyfighters
 	FLEET.foeFighterPoints = FLEET.foeFighterPoints + PLANETS[sector].foefighters
@@ -110,8 +106,10 @@ local function drawPlanets()
 		love.graphics.print(PLANETS[i].tooltip, PLANETS[i].x, PLANETS[i].y - 75)
 
 		-- add a dot in the centre of the planet for debugging purposes
-		love.graphics.setColor(1,0,0,1)
-		love.graphics.circle("fill", PLANETS[i].x, PLANETS[i].y, 5)
+		if DEV_MODE then
+			love.graphics.setColor(1,0,0,1)
+			love.graphics.circle("fill", PLANETS[i].x, PLANETS[i].y, 5)
+		end
     end
 	love.graphics.setFont(FONT[enum.fontDefault])
 

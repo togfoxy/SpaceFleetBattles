@@ -117,6 +117,10 @@ local function battleOver()
     local isFriends = false
     local isFoes = false
 
+    if BATTLE_TIMER <= 8 then
+        return false
+    end
+
     for i = 1, #OBJECTS do
         if OBJECTS[i].forf == enum.forfFriend then
             isFriends = true
@@ -535,16 +539,18 @@ function fight.draw()
 
         -- print current action
         -- debug only
-        currentaction = fun.getTopAction(Obj)     -- receives an object
-        if currentaction ~= nil then
-            txt = currentaction.action
-        else
-            txt = "None"
+        if DEV_MODE then
+            currentaction = fun.getTopAction(Obj)     -- receives an object
+            if currentaction ~= nil then
+                txt = currentaction.action
+            else
+                txt = "None"
+            end
+            local drawx, drawy = res.toGame(objx, objy) -- need to convert physical to screen
+            love.graphics.setColor(1,1,1,1)
+            love.graphics.print(txt, drawx - 20, drawy + 10)
         end
-        local drawx, drawy = res.toGame(objx, objy) -- need to convert physical to screen
-        love.graphics.setColor(1,1,1,1)
-        love.graphics.print(txt, drawx - 20, drawy + 10)
-
+        
         if false then       -- doing this so I can collapse this code
             -- draw velocity as text
             -- if not Obj.body:isBullet() then

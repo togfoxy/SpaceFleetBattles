@@ -139,6 +139,11 @@ local function initialsePlanets()
     PLANETS[7].x = startx + 600
     PLANETS[7].y = starty - 150
 	PLANETS[7].column = 4
+	PLANETS[7].tooltip = ""
+	PLANETS[7].friendlyfighters = 00
+	PLANETS[7].friendlypilots = 0
+	PLANETS[7].foefighters = 0
+	PLANETS[7].foepilots = 0
 	PLANETS[8].friendlyfighters = 0
 	PLANETS[8].friendlypilots = 0
 	PLANETS[8].foefighters = 0
@@ -146,6 +151,7 @@ local function initialsePlanets()
     PLANETS[8].x = startx + 600
     PLANETS[8].y = starty + 150
 	PLANETS[8].column = 4
+	PLANETS[8].tooltip = ""
 
     PLANETS[9].x = startx + 800
     PLANETS[9].y = starty - 300
@@ -167,10 +173,10 @@ local function initialsePlanets()
     PLANETS[11].y = starty + 300
 	PLANETS[11].column = 5
     PLANETS[11].tooltip = "-1 fighter"
-	PLANETS[12].friendlyfighters = 0
-	PLANETS[12].friendlypilots = 0
-	PLANETS[12].foefighters = 100
-	PLANETS[12].foepilots = 0
+	PLANETS[11].friendlyfighters = 0
+	PLANETS[11].friendlypilots = 0
+	PLANETS[11].foefighters = 100
+	PLANETS[11].foepilots = 0
 
     PLANETS[12].x = startx + 1000
     PLANETS[12].y = starty - 150
@@ -193,7 +199,7 @@ local function initialsePlanets()
     PLANETS[14].y = starty
 	PLANETS[14].column = 7
     PLANETS[14].tooltip = "-3 pilot / -3 fighter"
-	PLANETS[13].friendlyfighters = 0
+	PLANETS[14].friendlyfighters = 0
 	PLANETS[14].friendlypilots = 0
 	PLANETS[14].foefighters = 300
 	PLANETS[14].foepilots = 3
@@ -279,7 +285,7 @@ function mainmenu.mousereleased(rx, ry, x, y, button)
 
 		print("Hotel")
 		print(inspect(FLEET))
-		
+
 		-- swap to fight scene
         cf.addScreen(enum.scenePlanetMap, SCREEN_STACK)
 
