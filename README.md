@@ -1,5 +1,7 @@
 # SpaceFleetBattles
 
+Pause with SPACE bar
+
 Zoom with mouse wheel
 
 Pan left/rigth/up/down with right mouse button or middle wheel
