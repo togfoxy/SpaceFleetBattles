@@ -35,7 +35,7 @@ function commanderai.update(dt)
             elseif commanderAI[i].forf == enum.forfEnemy then
                 ratio = numoffoes / numoffriends
             else
-                print(inspect(commanderAI[i]))
+                -- print(inspect(commanderAI[i]))
                 error()
             end
             if ratio > 0.66 and RTB_TIMER <= RTB_TIMER_LIMIT then		--! what happens when one side starts with ratio < 0.66?

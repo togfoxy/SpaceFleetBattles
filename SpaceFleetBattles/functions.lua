@@ -96,6 +96,17 @@ function functions.createAnimation(Obj, animtype)
         anim.duration = 0.36 	-- seconds
         anim.type = animtype
         table.insert(ANIMATIONS, anim)
+    elseif animtype == enum.animDebugging then
+        local grid = GRIDS[enum.gridExplosion]
+        local frames = grid('1-4', '3-4')
+        local anim = anim8.newAnimation(frames, 10)
+        anim.drawx = objx
+        anim.drawy = objy
+        anim.angle = objangle
+        anim.attachtoobject = Obj
+        anim.duration = 10 	-- seconds
+        anim.type = animtype
+        table.insert(ANIMATIONS, anim)
     end
 end
 
@@ -109,9 +120,7 @@ function functions.updateAnimations(dt)
                 ANIMATIONS[i].angle = ANIMATIONS[i].attachtoobject.body:getAngle()
             end
         end
-
         ANIMATIONS[i].duration = ANIMATIONS[i].duration - dt
-
         ANIMATIONS[i]:update(dt)
         if ANIMATIONS[i].duration <= 0 then
 			table.remove(ANIMATIONS, i)

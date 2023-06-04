@@ -360,8 +360,8 @@ local function drawMenu()
 	-- draw current action and a line			--! this might be drawing a blank. Needs to be tested
 	local actionenum = functions.getTopAction(Obj)
 
-    print("indigo")
-    print(inspect(actionenum))
+    -- print("indigo")
+    -- print(inspect(actionenum))
     txt = ""
     if actionenum ~= nil then
     	if actionenum.action == enum.unitActionEngaging then
@@ -550,7 +550,7 @@ function fight.draw()
             love.graphics.setColor(1,1,1,1)
             love.graphics.print(txt, drawx - 20, drawy + 10)
         end
-        
+
         if false then       -- doing this so I can collapse this code
             -- draw velocity as text
             -- if not Obj.body:isBullet() then
@@ -652,9 +652,12 @@ function fight.update(dt)
 			if OBJECTS[i].guid == PLAYER_FIGHTER_GUID then
 				cameraindex = i
 				snapcamera = true
-				break
+                fun.createAnimation(OBJECTS[i], enum.animDebugging)
+                break
 			end
 		end
+
+
     end
 
     if not pause then

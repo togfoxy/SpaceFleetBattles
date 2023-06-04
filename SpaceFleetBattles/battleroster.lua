@@ -50,7 +50,7 @@ local function getUnassignedPilot()
 		end
 	end
 	print("No combat-ready pilot found")
-	print(inspect(ROSTER))
+	-- print(inspect(ROSTER))
 	return nil
 end
 
@@ -183,7 +183,7 @@ function battleroster.mousereleased(rx, ry, x, y, button)
         cf.swapScreen(enum.sceneFight, SCREEN_STACK)
 
 		print("FLEET table: ")
-		print(inspect(FLEET))
+		-- print(inspect(FLEET))
     end
 end
 
@@ -209,7 +209,7 @@ local function drawRoster()
         end
 
 		if ROSTER[i].firstname == nil then
-			print(inspect(ROSTER))
+			-- print(inspect(ROSTER))
 		end
 
 		local txt = ROSTER[i].firstname .. " " .. ROSTER[i].lastname
