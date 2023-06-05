@@ -56,16 +56,17 @@ end
 
 local function getEmptyVessel(forf)
 	-- returns an object or nil
-	-- this doesn't respect the players sort order
 	-- sort table according to structure health and thruster damage
-	-- also works for foe fighters but is a bit of a hack
+	-- also works for foe fighters
 
 	table.sort(HANGER, function(a, b)
 		return a.componentHealth[enum.componentStructure] > b.componentHealth[enum.componentStructure]
+		--! need to expand to include thrusters
 	end)
 
 	for i = 1, #HANGER do
-		if HANGER[i].pilotguid == nil and HANGER[i].forf == forf then
+		-- if HANGER[i].pilotguid == nil and HANGER[i].forf == forf then
+		if not HANGER[i].isLaunched then
 			return HANGER[i]
 		end
 	end
@@ -118,10 +119,10 @@ local function loadFriendlyObjects()
 				deploynumber = deploynumber - 1
 				local thispilot = getUnassignedPilot()		-- preferences player pilot. Returns nil if failed to find any pilot
 				local thisfighter = getEmptyVessel(enum.forfFriend)
-
 				if thispilot ~= nil and thisfighter ~= nil then
 					addPilotandFighterToBattle(thispilot, thisfighter, thiscallsign)		-- adds to OBJECTS
 				end
+
 			end
 		end
 	end
@@ -143,15 +144,21 @@ local function loadFoeObjects()
 			if deploynumber > 0 then
 				deploynumber = deploynumber - 1
 
-				local thisfighter = getEmptyVessel(enum.forfEnemy)
+				local thisfighter = {}
+				thisfighter = getEmptyVessel(enum.forfEnemy)
+
 				if thisfighter ~= nil then		-- will be nil if hanger is very low in stock
 					thisfighter.squadCallsign = thiscallsign
 					thisfighter.isLaunched = true                   -- puts it into the batlespace
 					fighter.createFighterBody(thisfighter)          -- creates a physical body
 					local x, y = fun.getLaunchXY(enum.forfEnemy)
 					thisfighter.body:setPosition(x, y)
-					assert(thisfighter.guid ~= nil)
+
 					table.insert(OBJECTS, thisfighter)
+
+					if DEV_MODE then
+						print("Added ship callsign " .. thiscallsign .. " to OBJECTS")
+					end
 				end
 			end
 		end
@@ -164,8 +171,11 @@ local function loadBattleObjects()
 
 	squadAI = {}
 	OBJECTS = {}				-- these are the objects that go to battle
-    
+
 	initialiseSquadList()		-- load all the callsigns
+
+print(inspect(HANGER))
+
 	loadFriendlyObjects()		-- assumes squadAI has been initialised to {}
 	loadFoeObjects()
 end

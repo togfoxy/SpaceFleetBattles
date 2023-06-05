@@ -40,10 +40,11 @@ function constants.load()
 
     -- FRIEND_FIGHTER_COUNT = 18 - 3		-- used to initalise the hanger. The -6 is to offset the homeworld +6
     -- FRIEND_PILOT_COUNT = 18 - 3		-- used to initialise the hanger. The -6 is to offset the homeworld +6
-    FRIEND_FIGHTER_COUNT = 4 - 3		-- used to initalise the hanger. The -6 is to offset the homeworld +6
-    FRIEND_PILOT_COUNT = 6 - 3		-- used to initialise the hanger. The -6 is to offset the homeworld +6
+    FRIEND_FIGHTER_COUNT = -3		-- used to initalise the hanger. The -6 is to offset the homeworld +6
+    FRIEND_PILOT_COUNT = 18 - 3		-- used to initialise the hanger. The -6 is to offset the homeworld +6
 
-	FOE_FIGHTER_COUNT = 18			-- these aren't really constants
+	-- FOE_FIGHTER_COUNT = 18			-- these aren't really constants
+	FOE_FIGHTER_COUNT = 5			-- these aren't really constants
 	FOE_PILOT_COUNT = 18			-- these aren't really constants
 
 	FRIEND_SQUADRON_COUNT = 2		-- not a constant and changes for each battle. NOTE: the callsigns assume two squadrons.  --! need to fix
