@@ -151,6 +151,216 @@ local function spawnPods()
     end
 end
 
+local function getImpactedComponent(Obj)
+
+    local totalsize = 0
+    for i = 1, #Obj.componentSize do
+        totalsize = totalsize + Obj.componentSize[i]
+    end
+    local rndnum = love.math.random(1, totalsize)
+    local tempvalue = totalsize
+    for k, v in pairs(Obj.componentSize) do
+        -- print(k, v)
+        rndnum = rndnum - v
+        if rndnum <= 0 then return k end
+    end
+    error()     -- should not reach this point
+end
+
+local function giveKillCredit(bullet)
+    -- give kill credit to the pilot
+    local vesselguid = bullet.ownerObjectguid           -- this is the vessel that shot the bullet
+    local vesselobj = fun.getObject(vesselguid)
+    local pilotguid = vesselobj.pilotguid
+
+    local shooter = fun.getPilot(pilotguid)
+    if shooter ~= nil then
+        shooter.kills = shooter.kills + 1
+    else
+        -- shooter = nil for some reason. Print debug if bullet is friendly
+        if bullet.forf == enum.forfFriend then
+            print("********************")
+            print(inspect(ROSTER))
+            print(inspect(bullet))
+            print(shooterguid)
+            print(inspect(shooter))
+            error()
+        end
+    end
+end
+
+local function destroyVictim(victim, bullet)
+
+	fun.createAnimation(victim, enum.animExplosion)
+	if victim.forf == enum.forfFriend then
+		SCORE.friendsdead = SCORE.friendsdead + 1
+		FOE_FIGHTER_COUNT = FOE_FIGHTER_COUNT - 1
+		FOE_PILOT_COUNT = FOE_PILOT_COUNT - 1
+	elseif victim.forf == enum.forfEnemy then
+		SCORE.enemiesdead = SCORE.enemiesdead + 1
+	end
+	victim.lifetime = 0
+	unitai.clearTarget(victim.guid)		-- remove this guid from everyone's target
+	print("Unit exploded")
+
+	--! play explosion sound here
+
+	-- give kill credit
+	giveKillCredit(bullet)
+
+	-- remove friendly pilots from roster by marking isDead
+	local pilotguid = victim.pilotguid                         --! is sometimes nil. Not sure how. Foe escape pod?
+	local pilotobj = fun.getPilot(pilotguid)
+	if pilotobj ~= nil then pilotobj.isDead = true end
+
+    if PLAYER_GUID ~= nil and PLAYER_GUID == pilotguid then     --! not sure how PLAYER_GUID can ever be nil.
+        pilotobj.isPlayer = false       --! check for unintended consequences
+    end
+
+	-- remove fighter from hanger
+	for i = #HANGER, 1, -1 do
+		if HANGER[i].guid == victim.guid then
+			table.remove(HANGER, i)
+		end
+	end
+end
+
+local function checkForTrauma(victim)
+	if victim.componentHealth[enum.componentWeapon] <= 0 then
+		victim.actions = {}         -- significant trauma. get a new task
+	end
+	if victim.componentHealth[enum.componentThruster] <= 50 then
+		victim.actions = {}         -- significant trauma. get a new task
+	end
+	if victim.componentHealth[enum.componentSideThruster] <= 50 then
+		victim.actions = {}         -- significant trauma. get a new task
+	end
+	if victim.componentHealth[enum.componentAccelerator] <= 25 then
+		victim.actions = {}         -- significant trauma. get a new task
+	end
+	if victim.componentHealth[enum.componentStructure] <= 33 then
+		victim.actions = {}         -- significant trauma. get a new task
+	end
+end
+
+local function addEvadeAction(victim)
+	-- insert an action at the TOP of the queue
+
+	local thisaction = {}
+	if victim.forf == enum.forfFriend then
+		-- set a destination random degrees from current location
+		local objx, objy = victim.body:getPosition()
+		local rndangle = love.math.random(-45, 45)
+		local destx, desty = cf.addVectorToPoint(objx,objy,(270 + rndangle),300)
+
+		thisaction.cooldown = 3
+		thisaction.action = enum.unitActionMoveToDest
+		thisaction.targetguid = nil							--! maybe not clear target when evading
+		thisaction.destx = destx
+		thisaction.desty = desty
+	elseif victim.forf == enum.forfEnemy then
+		local destx = FOE_START_X
+		local desty = love.math.random(0, SCREEN_HEIGHT)
+
+		thisaction.cooldown = 3
+		thisaction.action = enum.unitActionMoveToDest
+		thisaction.targetguid = nil							--! maybe not clear target when evading
+		thisaction.destx = destx
+		thisaction.desty = desty
+	end
+
+	table.insert(victim.actions, 1, thisaction)
+	-- print("Evasive force applied")
+end
+
+
+local function createDamageText(componenthit, victim)
+	local txt = ""
+	if componenthit == enum.componentAccelerator then
+		txt = "Throttle"
+	elseif componenthit == enum.componentSideThruster then
+		txt = "Steering"
+	elseif componenthit == enum.componentStructure then
+		txt = "Structure"
+	elseif componenthit == enum.componentThruster then
+		txt = "Thrusters"
+	elseif componenthit == enum.componentWeapon then
+		txt = "Weapon"
+	else
+		error()
+	end
+
+	local thistext = {}
+	thistext.text = txt
+	thistext.object = victim
+	thistext.timeleft = 4			-- how many seconds to display
+	table.insert(DAMAGETEXT, thistext)
+    -- print(inspect(DAMAGETEXT))
+    -- print("*******************")
+end
+
+function fight.applyDamage(victim, bullet)
+
+    local componenthit = getImpactedComponent(victim)
+    victim.componentHealth[componenthit] = victim.componentHealth[componenthit] - love.math.random(15, 35)
+    if victim.componentHealth[componenthit] < 0 then victim.componentHealth[componenthit] = 0 end
+
+	if victim.componentHealth[enum.componentStructure] <= 0 then
+		-- boom. Victim is dead
+		destroyVictim(victim, bullet)
+    else
+        -- victim not dead so attach a smoke animation to the object
+        fun.createAnimation(victim, enum.animSmoke)
+
+        -- play audio
+        if fun.isPlayerFighterAlive() and bullet.ownerObjectguid == PLAYER_FIGHTER_GUID then
+            -- this bullet is the players bullet. Make an audible
+            cf.playAudio(enum.audioBulletHit, false, true)
+        else
+            -- print(bullet.ownerObjectguid, PLAYER_FIGHTER_GUID)
+        end
+
+		-- see if ejects
+		local rndnum = love.math.random(1, 35)	-- ejection is a dice roll
+		if victim.componentHealth[enum.componentStructure] <= 35 and rndnum > victim.componentHealth[enum.componentStructure] then
+            if rndnum > victim.componentHealth[enum.componentStructure] then       -- more damage = more chance of eject
+                fun.setTaskEject(victim)
+                -- give kill credit
+                giveKillCredit(bullet)
+
+				if victim.forf == enum.forfFriend then
+					SCORE.friendsEjected = SCORE.friendsEjected + 1
+				elseif victim.forf == enum.forfEnemy then
+					SCORE.enemiesEjected = SCORE.enemiesEjected + 1
+				end
+			end
+		else	-- not dead and not ejecting
+			-- prep component hit if victim = player or victim = player target
+			if victim.guid == PLAYER_FIGHTER_GUID or bullet.ownerObjectguid == PLAYER_FIGHTER_GUID then
+				createDamageText(componenthit, victim)
+			end
+
+			-- apply a small evasion wobble if trying to RTB
+			local action = fun.getTopAction(victim)
+
+			if action ~= nil and action.action == enum.unitActionReturningToBase then
+				-- been hit while RTB. Try to evade.
+				-- insert an action at the TOP of the queue
+				addEvadeAction(victim)
+			else
+				-- not dead and not ejecting and not RTB
+				-- Unit is still in the fight. Clear action queue if traumatic damage taken
+				checkForTrauma(victim)
+			end
+		end
+
+		-- adjust object performance after receiving battle damage
+		victim.currentMaxForwardThrust = victim.maxForwardThrust * (victim.componentHealth[enum.componentThruster] / 100)
+		victim.currentMaxAcceleration = victim.maxAcceleration * (victim.componentHealth[enum.componentAccelerator] / 100)
+		victim.currentSideThrust = victim.maxSideThrust * (victim.componentHealth[enum.componentSideThruster] / 100)
+	end
+end
+
 function fight.keyreleased(key, scancode)
     if key == "space" then pause = not pause end
     if key == "c" then snapcamera = not snapcamera end
@@ -235,6 +445,8 @@ function fight.mousereleased(rx, ry, x, y, button)
 		-- menu appears during mouse over. This is to check if menu is clicked
 		if fun.isPlayerFighterAlive() then
             -- see if player unit is clicked
+
+            -- I reckon all of this can be simplified
             local Obj = fun.getObject(PLAYER_FIGHTER_GUID)              -- get the hanger object with physics body
 			-- local objcategory = Obj.fixture:getCategory()				-- need to check if this is a fighter or pod
             local objx, objy = Obj.body:getPosition()                   -- get the physics x/y
@@ -242,12 +454,10 @@ function fight.mousereleased(rx, ry, x, y, button)
             local crobjx, crobjy = cam:toScreen(robjx, robjy)           -- convert that to the screen
             local xadj = (rx - crobjx) / ZOOMFACTOR                     -- do a diff and apply the zoom
             local yadj = (ry - crobjy) / ZOOMFACTOR
-            -- print(cf.getDistance(x, y, crobjx, crobjy) / ZOOMFACTOR)
-            -- print(cf.getDistance(rx, ry, crobjx, crobjy) / ZOOMFACTOR)       -- going to use this one for now
-            -- print((rx - crobjx) / ZOOMFACTOR, (ry - crobjy) / ZOOMFACTOR)
-            -- print(xadj, yadj)
 
             local dist = cf.getDistance(rx, ry, crobjx, crobjy) / ZOOMFACTOR
+            -- local dist = cf.getDistance(rx, ry, objx, objy) / ZOOMFACTOR     --! pretty sure this line can replace the one above it
+
             if dist > 250 then
                 -- player unit is moused over
                 showmenu = false
@@ -329,7 +539,7 @@ end
 local function drawMenu()
 
 	local Obj = fun.getObject(PLAYER_FIGHTER_GUID)
-	local drawx, drawy = res.toGame(Obj.body:getX(), Obj.body:getY()) -- need to convert physical to screen
+    local drawx, drawy = Obj.body:getX(), Obj.body:getY()
 
 	-- fill the menu box
 	local menuwidth = 200
@@ -566,7 +776,7 @@ function fight.draw()
             else
                 txt = "None"
             end
-            local drawx, drawy = res.toGame(objx, objy) -- need to convert physical to screen
+            local drawx, drawy = objx, objy
             love.graphics.setColor(1,1,1,1)
             love.graphics.print(txt, drawx - 20, drawy + 10)
         end
@@ -644,10 +854,20 @@ function fight.update(dt)
     if not fightsceneHasLoaded then
         fightsceneHasLoaded = true
 
-        commanderAI[1] = {}
+        commanderAI = {}                                        -- squadAI is initialised in battle roster
+    	commanderAI[1] = {}
+    	commanderAI[2] = {}
         commanderAI[1].forf = enum.forfFriend
-        commanderAI[2] = {}
+    	commanderAI[1].orders = {}
         commanderAI[2].forf = enum.forfEnemy
+    	commanderAI[2].orders = {}
+    	thisorder = {}
+    	thisorder.cooldown = 15
+    	thisorder.active = true         						-- set to false if you want to queue it but not activate it
+    	thisorder.order = enum.commanderOrdersEngage
+    	table.insert(commanderAI[1].orders, thisorder)			-- should make this more robust in the future
+    	table.insert(commanderAI[2].orders, thisorder)
+
         -- neutral commander things go here
 
 		local playerfighter = fun.getPlayerPilot()

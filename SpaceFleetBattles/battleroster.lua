@@ -99,6 +99,7 @@ local function addPilotandFighterToBattle(thispilot, thisfighter, thiscallsign)
 end
 
 local function loadFriendlyObjects()
+	-- assumes squadAI has been initialised to {}
 
 	-- determine how many fighters are servicable
 	local livingroster = fun.getActivePilotCount()
@@ -159,13 +160,13 @@ end
 
 local function loadBattleObjects()
 	-- this assigns pilots to fighters and loads up all the objects needed for battle
+	-- AI stuff happens in fight.update()
 
+	squadAI = {}
 	OBJECTS = {}				-- these are the objects that go to battle
+    
 	initialiseSquadList()		-- load all the callsigns
-    commanderAI = {}
-    squadAI = {}
-
-	loadFriendlyObjects()
+	loadFriendlyObjects()		-- assumes squadAI has been initialised to {}
 	loadFoeObjects()
 end
 
