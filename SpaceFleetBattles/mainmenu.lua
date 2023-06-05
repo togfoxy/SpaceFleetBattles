@@ -297,10 +297,9 @@ end
 
 function mainmenu.draw()
 
+	love.graphics.setColor(1,1,1,1)
     love.graphics.draw(IMAGE[enum.imageMainMenu], 0, 0)
     love.graphics.draw(IMAGE[enum.imageMainMenuBanner], 250, 25, 0, 1.5, 1.5)
-
-
 
     -- draw player name
     if newgame then

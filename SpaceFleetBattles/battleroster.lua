@@ -209,7 +209,8 @@ local function drawRoster()
         end
 
 		if ROSTER[i].firstname == nil then
-			-- print(inspect(ROSTER))
+			print(inspect(ROSTER))
+			ROSTER[i].firstname = ""
 		end
 
 		local txt = ROSTER[i].firstname .. " " .. ROSTER[i].lastname

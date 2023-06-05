@@ -92,9 +92,6 @@ local function drawPlanets()
 	--! this needs refactoring
 	-- this sub has multiple fonts
 
-    -- draw bg
-    love.graphics.draw(IMAGE[enum.imagePlanetBG], 0, 0, 0, 2, 2)
-
     -- draw planets
 	love.graphics.setFont(FONT[enum.fontMedium])
     for i = 1, #PLANETS do
@@ -193,6 +190,10 @@ function planetmap.mousereleased(rx, ry, x, y, button)
 end
 
 function planetmap.draw()
+
+	-- draw bg
+	love.graphics.setColor(1,1,1,1)
+	love.graphics.draw(IMAGE[enum.imagePlanetBG], 0, 0, 0, 2, 2)
 
     drawPlanets()
 
