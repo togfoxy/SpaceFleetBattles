@@ -18,7 +18,6 @@ function squadai.update(dt)
 
     -- squadAI uses callsigns and not sequential so have to use pairs
     for callsign, squad in pairs(squadAI) do
-
         if #squad.orders == 0 then
             -- squad has no current orders. Check what commander is ordering
             for i = 1, #commanderAI do
@@ -74,8 +73,10 @@ function squadai.update(dt)
         assert(squad.orders ~= nil)      --! need to determine if this is a problem
     end
 
-    -- print("squad orders")
-    -- print(inspect(squadAI))
+    if DEV_MODE then
+        -- print("squad orders")
+        -- print(inspect(squadAI))
+    end
 end
 
 return squadai

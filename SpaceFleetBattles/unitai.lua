@@ -68,7 +68,7 @@ function unitai.setTaskRTB(Obj)
     end
     thisaction.desty = y
 	table.insert(Obj.actions, thisaction)
-    print("Setting action to RTB")
+    print("Unit setting action to RTB")
     -- -- print(inspect(thisaction))
     -- print(inspect(Obj.actions))
     assert(#Obj.actions > 0 )       -- the first order can be nil so don't test for nil

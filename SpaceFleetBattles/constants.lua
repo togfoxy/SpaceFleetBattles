@@ -32,14 +32,16 @@ function constants.load()
     enums.load()
     -- add extra items below this line ======================================================
 
-    -- DEV_MODE = true
-    DEV_MODE = false
+    DEV_MODE = true
+    -- DEV_MODE = false
 
     FRIEND_START_X = 0      			-- left side of screen
     FOE_START_X = SCREEN_WIDTH * 2		-- right side of screen
 
-    FRIEND_FIGHTER_COUNT = 18 - 3		-- used to initalise the hanger. The -6 is to offset the homeworld +6
-    FRIEND_PILOT_COUNT = 18 - 3		-- used to initialise the hanger. The -6 is to offset the homeworld +6
+    -- FRIEND_FIGHTER_COUNT = 18 - 3		-- used to initalise the hanger. The -6 is to offset the homeworld +6
+    -- FRIEND_PILOT_COUNT = 18 - 3		-- used to initialise the hanger. The -6 is to offset the homeworld +6
+    FRIEND_FIGHTER_COUNT = 4 - 3		-- used to initalise the hanger. The -6 is to offset the homeworld +6
+    FRIEND_PILOT_COUNT = 6 - 3		-- used to initialise the hanger. The -6 is to offset the homeworld +6
 
 	FOE_FIGHTER_COUNT = 18			-- these aren't really constants
 	FOE_PILOT_COUNT = 18			-- these aren't really constants

@@ -44,8 +44,6 @@ end
 
 function beginContact(fixtureA, fixtureB, coll)
 	-- a and be are fixtures
-
-
 	local victim = {}			-- this will contain the fighter object that was hit
 	local bullet = {}
 
@@ -89,7 +87,7 @@ function beginContact(fixtureA, fixtureB, coll)
 		end
 
 		if catA == enum.categoryFriendlyFighter or catA == enum.categoryEnemyFighter or catB == enum.categoryFriendlyFighter or catB == enum.categoryEnemyFighter then
-			fun.applyDamage(victim, bullet)		-- assumes bullet hit fighter. Send in bullet to check if bullet belongs to player
+			fight.applyDamage(victim, bullet)		-- assumes bullet hit fighter. Send in bullet to check if bullet belongs to player
 		end
 
 		-- play sounds if player is hit
