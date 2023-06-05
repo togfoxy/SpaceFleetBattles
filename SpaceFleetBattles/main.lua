@@ -168,7 +168,7 @@ function love.load()
 	local _, _, flags = love.window.getMode()
 	local width, height = love.window.getDesktopDimensions(flags.display)
 	-- local width, height = love.window.getDesktopDimensions(2)
-	res.setMode(width, height, {resizable = false})
+	res.setMode(width, height, {resizable = true})
 
 	constants.load()		-- also loads enums
 	fun.loadFonts()

@@ -678,8 +678,6 @@ function fight.update(dt)
                 break
 			end
 		end
-
-
     end
 
     if not pause then
