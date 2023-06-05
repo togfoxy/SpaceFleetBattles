@@ -32,7 +32,7 @@ function squadai.update(dt)
                                 thisorder.active = true         -- set to false if you want to queue it but not activate it
                                 thisorder.order = enum.squadOrdersEngage
                                 table.insert(squadAI[callsign].orders, thisorder)
-                                print("Squad orders: engage")
+                                -- print("Squad orders: engage")
                             elseif commanderAI[i].orders[1].order == enum.commanderOrdersReturnToBase then
                                 -- squad RTB
                                 thisorder = {}
@@ -40,7 +40,7 @@ function squadai.update(dt)
                                 thisorder.active = true         -- set to false if you want to queue it but not activate it
                                 thisorder.order = enum.squadOrdersReturnToBase
                                 table.insert(squadAI[callsign].orders, thisorder)
-                                print("Squad orders: RTB")
+                                -- print("Squad orders: RTB")
                             else
                                 error("Commander has an unexpected order.", 80)
                             end
@@ -61,7 +61,7 @@ function squadai.update(dt)
             -- do nothing. Cooldown will be invoked next cycle
             --! debugging
             if #squad.orders < 1 then
-                print("Number of squad orders: " .. #squad.orders)
+                -- print("Number of squad orders: " .. #squad.orders)
                 -- print(inspect(squad.orders))
                 -- print(callsign .. " squad has order: " .. squad.orders[1].order)
             end

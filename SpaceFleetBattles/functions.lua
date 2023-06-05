@@ -79,7 +79,7 @@ function functions.createAnimation(Obj, animtype)
         local frames = grid('1-4', '1-2')           -- cols then row
         local anim = anim8.newAnimation(frames, 0.15)
         anim.drawx = objx
-        anim.drawy = objy + 5
+        anim.drawy = objy
         anim.angle = objangle
         anim.attachtoobject = Obj       -- put the actual object here to make the animation move with this object
         anim.duration = 0.9 	-- seconds
@@ -90,10 +90,21 @@ function functions.createAnimation(Obj, animtype)
         local frames = grid('12-24', 1)                   -- cols then rows
         local anim = anim8.newAnimation(frames, 0.03)          -- frames, duration
         anim.drawx = objx
-        anim.drawy = objy + 5
+        anim.drawy = objy
         anim.angle = objangle
         anim.attachtoobject = nil       -- put the actual object here to make the animation move with this object
         anim.duration = 0.36 	-- seconds
+        anim.type = animtype
+        table.insert(ANIMATIONS, anim)
+    elseif animtype == enum.animDebugging then
+        local grid = GRIDS[enum.gridExplosion]
+        local frames = grid('1-4', '3-4')
+        local anim = anim8.newAnimation(frames, 10)
+        anim.drawx = objx
+        anim.drawy = objy
+        anim.angle = objangle
+        anim.attachtoobject = Obj
+        anim.duration = 10 	-- seconds
         anim.type = animtype
         table.insert(ANIMATIONS, anim)
     end
@@ -109,9 +120,7 @@ function functions.updateAnimations(dt)
                 ANIMATIONS[i].angle = ANIMATIONS[i].attachtoobject.body:getAngle()
             end
         end
-
         ANIMATIONS[i].duration = ANIMATIONS[i].duration - dt
-
         ANIMATIONS[i]:update(dt)
         if ANIMATIONS[i].duration <= 0 then
 			table.remove(ANIMATIONS, i)

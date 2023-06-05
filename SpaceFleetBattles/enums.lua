@@ -65,7 +65,7 @@ function enums.load()
     enum.imageCrosshairsIsTarget = 10
     enum.imageCrosshairPlayer = 11
 	enum.imageCrosshairPlanet = 12
-	
+
     enum.imagePlanet1 = 20
     enum.imagePlanet2 = 21
     enum.imagePlanet3= 22
@@ -97,6 +97,7 @@ function enums.load()
     enum.animExplosion = 1
     enum.animSmoke = 2
     enum.animBulletSmoke = 3
+    enum.animDebugging = 4
 
     enum.componentStructure = 1
     enum.componentThruster = 2

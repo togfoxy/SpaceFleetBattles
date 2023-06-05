@@ -162,11 +162,12 @@ end
 
 function love.load()
 
+	_ = love.window.setFullscreen( true )
 	res.init({width = 1920, height = 1080, mode = 2})
 
 	local _, _, flags = love.window.getMode()
 	local width, height = love.window.getDesktopDimensions(flags.display)
-	local width, height = love.window.getDesktopDimensions(2)
+	-- local width, height = love.window.getDesktopDimensions(2)
 	res.setMode(width, height, {resizable = true})
 
 	constants.load()		-- also loads enums
@@ -223,23 +224,6 @@ function love.draw()
 	else
 		error()
 	end
-
-	-- draw animations
-	love.graphics.setColor(1,1,1,1)
-	for _, animation in pairs(ANIMATIONS) do
-		local drawx, drawy = cam:toScreen(animation.drawx, animation.drawy)
-		if animation.type == enum.animExplosion then
-			animation:draw(IMAGE[enum.imageExplosion], drawx, drawy, animation.angle, 1, 1, 0, 0)
-		elseif animation.type == enum.animSmoke then
-			-- different offset
-			animation:draw(IMAGE[enum.imageExplosion], drawx, drawy, animation.angle, 1, 1, 10, 0)
-
-		elseif animation.type == enum.animBulletSmoke then
-			-- different offset
-			animation:draw(IMAGE[enum.imageBulletSmoke], drawx, drawy, animation.angle, 0.5, 0.5, 10, 10)
-		end
-	end
-
     res.stop()
 end
 
