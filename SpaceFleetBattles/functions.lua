@@ -79,7 +79,7 @@ function functions.createAnimation(Obj, animtype)
         local frames = grid('1-4', '1-2')           -- cols then row
         local anim = anim8.newAnimation(frames, 0.15)
         anim.drawx = objx
-        anim.drawy = objy + 5
+        anim.drawy = objy
         anim.angle = objangle
         anim.attachtoobject = Obj       -- put the actual object here to make the animation move with this object
         anim.duration = 0.9 	-- seconds
@@ -90,7 +90,7 @@ function functions.createAnimation(Obj, animtype)
         local frames = grid('12-24', 1)                   -- cols then rows
         local anim = anim8.newAnimation(frames, 0.03)          -- frames, duration
         anim.drawx = objx
-        anim.drawy = objy + 5
+        anim.drawy = objy
         anim.angle = objangle
         anim.attachtoobject = nil       -- put the actual object here to make the animation move with this object
         anim.duration = 0.36 	-- seconds

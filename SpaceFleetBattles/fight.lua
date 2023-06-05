@@ -507,6 +507,26 @@ local function drawDamageText()
 	end
 end
 
+local function drawAnimations()
+	-- draw animations
+	love.graphics.setColor(1,1,1,1)
+	for _, animation in pairs(ANIMATIONS) do
+		local drawx, drawy = animation.drawx, animation.drawy
+
+		if animation.type == enum.animExplosion then
+			animation:draw(IMAGE[enum.imageExplosion], drawx, drawy, animation.angle, 1, 1, 0, 0)
+		elseif animation.type == enum.animSmoke then
+			-- different offset
+			animation:draw(IMAGE[enum.imageExplosion], drawx, drawy, animation.angle, 1, 1, 10, 8)
+		elseif animation.type == enum.animBulletSmoke then
+			-- different offset
+			animation:draw(IMAGE[enum.imageBulletSmoke], drawx, drawy, animation.angle, 0.5, 0.5, 10, 10)
+		elseif animation.type == enum.animDebugging then
+			animation:draw(IMAGE[enum.imageExplosion], drawx, drawy, animation.angle, 1, 1, 10, 8)
+		end
+	end
+end
+
 function fight.draw()
 
     drawHUD()       -- do this before the attach
@@ -614,6 +634,8 @@ function fight.draw()
     -- draw damage text
     drawDamageText()
 
+    drawAnimations()
+
     -- animations are drawn in love.draw()
     cam:detach()
 end
@@ -652,7 +674,7 @@ function fight.update(dt)
 			if OBJECTS[i].guid == PLAYER_FIGHTER_GUID then
 				cameraindex = i
 				snapcamera = true
-                fun.createAnimation(OBJECTS[i], enum.animDebugging)
+                -- fun.createAnimation(OBJECTS[i], enum.animDebugging)          -- debugging only
                 break
 			end
 		end

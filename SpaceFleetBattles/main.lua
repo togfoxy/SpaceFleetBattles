@@ -208,27 +208,6 @@ function love.load()
 	LASTNAMES = fun.ImportNameFile("intersurnamesshort.csv")
 end
 
-local function drawAnimations()
-	-- draw animations
-	love.graphics.setColor(1,1,1,1)
-	for _, animation in pairs(ANIMATIONS) do
-		local drawx, drawy = cam:toScreen(animation.drawx, animation.drawy)
-		-- local drawx, drawy = animation.drawx, animation.drawy
-
-		if animation.type == enum.animExplosion then
-			animation:draw(IMAGE[enum.imageExplosion], drawx, drawy, animation.angle, 1, 1, 0, 0)
-		elseif animation.type == enum.animSmoke then
-			-- different offset
-			animation:draw(IMAGE[enum.imageExplosion], drawx, drawy, animation.angle, 1, 1, 10, 0)
-		elseif animation.type == enum.animBulletSmoke then
-			-- different offset
-			animation:draw(IMAGE[enum.imageBulletSmoke], drawx, drawy, animation.angle, 0.5, 0.5, 10, 10)
-		elseif animation.type == enum.animDebugging then
-			animation:draw(IMAGE[enum.imageExplosion], drawx, drawy, animation.angle, 1, 1, 0, 0)
-		end
-	end
-end
-
 function love.draw()
     res.start()
 	local currentscene = cf.currentScreenName(SCREEN_STACK)
@@ -245,9 +224,6 @@ function love.draw()
 	else
 		error()
 	end
-
-	drawAnimations()
-
     res.stop()
 end
 
