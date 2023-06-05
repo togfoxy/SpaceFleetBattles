@@ -235,6 +235,8 @@ function fight.mousereleased(rx, ry, x, y, button)
 		-- menu appears during mouse over. This is to check if menu is clicked
 		if fun.isPlayerFighterAlive() then
             -- see if player unit is clicked
+
+            -- I reckon all of this can be simplified
             local Obj = fun.getObject(PLAYER_FIGHTER_GUID)              -- get the hanger object with physics body
 			-- local objcategory = Obj.fixture:getCategory()				-- need to check if this is a fighter or pod
             local objx, objy = Obj.body:getPosition()                   -- get the physics x/y
@@ -242,12 +244,10 @@ function fight.mousereleased(rx, ry, x, y, button)
             local crobjx, crobjy = cam:toScreen(robjx, robjy)           -- convert that to the screen
             local xadj = (rx - crobjx) / ZOOMFACTOR                     -- do a diff and apply the zoom
             local yadj = (ry - crobjy) / ZOOMFACTOR
-            -- print(cf.getDistance(x, y, crobjx, crobjy) / ZOOMFACTOR)
-            -- print(cf.getDistance(rx, ry, crobjx, crobjy) / ZOOMFACTOR)       -- going to use this one for now
-            -- print((rx - crobjx) / ZOOMFACTOR, (ry - crobjy) / ZOOMFACTOR)
-            -- print(xadj, yadj)
 
             local dist = cf.getDistance(rx, ry, crobjx, crobjy) / ZOOMFACTOR
+            -- local dist = cf.getDistance(rx, ry, objx, objy) / ZOOMFACTOR     --! pretty sure this line can replace the one above it
+
             if dist > 250 then
                 -- player unit is moused over
                 showmenu = false
@@ -329,7 +329,7 @@ end
 local function drawMenu()
 
 	local Obj = fun.getObject(PLAYER_FIGHTER_GUID)
-	local drawx, drawy = res.toGame(Obj.body:getX(), Obj.body:getY()) -- need to convert physical to screen
+    local drawx, drawy = Obj.body:getX(), Obj.body:getY()
 
 	-- fill the menu box
 	local menuwidth = 200
@@ -566,7 +566,7 @@ function fight.draw()
             else
                 txt = "None"
             end
-            local drawx, drawy = res.toGame(objx, objy) -- need to convert physical to screen
+            local drawx, drawy = objx, objy
             love.graphics.setColor(1,1,1,1)
             love.graphics.print(txt, drawx - 20, drawy + 10)
         end
