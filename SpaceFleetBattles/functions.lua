@@ -163,17 +163,6 @@ function functions.getObject(guid)
     return nil
 end
 
-function functions.isPlayerFighterAlive()
-    -- only works on fight screen. --! I should move it there and make it local
-    -- this returns true if the players fighter is alive
-    for i = 1, #OBJECTS do
-        if OBJECTS[i].guid == PLAYER_FIGHTER_GUID then
-            return true
-        end
-    end
-    return false
-end
-
 function functions.unitIsTargeted(guid)
     -- return true if any object has this guid as a target
     for _, Obj in pairs(OBJECTS) do

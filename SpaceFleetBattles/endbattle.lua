@@ -19,6 +19,8 @@ local function drawPilotStats(drawx, drawy)
     love.graphics.print("                              Health  # Missions    # Kills     # Fighters lost", drawx, drawy)		--! make this correct x/y values
     drawy = drawy + 50
 
+    if playerpilot.firstname == nil then playerpilot.firstname = "" end
+    if playerpilot.lastname == nil then playerpilot.lastname = "" end
     local txt = playerpilot.firstname .. " " .. playerpilot.lastname .. "                  "
     txt = txt .. playerpilot.health .. "                 " .. playerpilot.missions .. "                  " .. playerpilot.kills .. "                        " .. playerpilot.ejections
 

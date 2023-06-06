@@ -66,7 +66,7 @@ local function getEmptyVessel(forf)
 
 	for i = 1, #HANGER do
 		-- if HANGER[i].pilotguid == nil and HANGER[i].forf == forf then
-		if not HANGER[i].isLaunched then
+		if not HANGER[i].isLaunched and HANGER[i].forf == forf then
 			return HANGER[i]
 		end
 	end

@@ -416,20 +416,51 @@ local function updatePod(Pod)
     end
 end
 
+local function getFighterIndexInHanger(guid)
+    -- search HANGER for the guid and return the hanger INDEX that is not a physics object
+    -- works for friends and foes
+    -- returns nil if guid not found (escape pods return nil)
+    for i = 1, #HANGER do
+        if HANGER[i].guid == guid then
+           return HANGER[i]
+        end
+    end
+    return nil
+end
+
 local function checkForRTB(Obj)
 	-- check for successful RTB and then set lifetime to zero
+
     local topaction = fun.getTopAction(Obj)
     if topaction ~= nil and topaction.action == enum.unitActionReturningToBase then
         if Obj.forf == enum.forfFriend then
             if Obj.body:getX() <= FRIEND_START_X then
-                -- rtb success
+                -- rtb success. Return fighter to hanger
                 print("RTB succeed. Destroying object")
                 Obj.lifetime = 0                        -- destroy the object
+                local hangerfighter = getFighterIndexInHanger(Obj.guid)       --! this code block is repeated and can be refactored
+                if hangerfighter == nil then
+                    -- probably an escape pod
+                else
+                    hangerfighter.isLaunched = false
+                    hangerfighter.fixture:destroy()         -- not sure if this is necessary
+                    hangerfighter.body:destroy()           --! this doesn't remove the pilot guid. I think that is done later
+                    print("Friendly fighter returned to hanger")
+                end
             end
         elseif Obj.forf == enum.forfEnemy then
             if Obj.body:getX() >= FOE_START_X then
                 print("RTB succeed. Destroying object")
                 Obj.lifetime = 0                        -- destroy the object
+                local hangerfighter = getFighterIndexInHanger(Obj.guid)
+                if hangerfighter == nil then
+                    -- probably an escape pod
+                else
+                    hangerfighter.isLaunched = false
+                    hangerfighter.fixture:destroy()         -- not sure if this is necessary
+                    hangerfighter.body:destroy()
+                    print("Foe fighter returned to hanger")
+                end
             end
         else
             error()

@@ -53,6 +53,7 @@ function commanderai.update(dt)
                 thisorder.active = true         -- set to false if you want to queue it but not activate it
                 thisorder.order = enum.commanderOrdersReturnToBase
                 table.insert(commanderAI[i].orders, thisorder)
+                print("Ratio is " .. ratio)
                 print("Commander orders: RTB")
 				if ratio <= 0.66 then		-- can retreat due to ratio or to timer.
 					-- this commander has lost the battle. Adjust fleet moves accordingly
