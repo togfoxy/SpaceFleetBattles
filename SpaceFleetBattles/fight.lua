@@ -113,6 +113,27 @@ local function destroyObjects(dt)
     end
 end
 
+local function isPlayerFighterOnBattlefield()
+    -- scans OBJECT table for player guid
+    for i = 1, #OBJECTS do
+        if OBJECTS[i].guid == PLAYER_FIGHTER_GUID then
+            return true
+        end
+    end
+    return false
+end
+
+local function isPlayerFighterAlive()
+    -- this returns true if the players fighter is in the hanger
+
+    for i = 1, #HANGER do
+        if HANGER[i].guid == PLAYER_FIGHTER_GUID then
+            return true
+        end
+    end
+    return false
+end
+
 local function battleOver()
     local isFriends = false
     local isFoes = false
@@ -273,7 +294,6 @@ local function addEvadeAction(victim)
 	-- print("Evasive force applied")
 end
 
-
 local function createDamageText(componenthit, victim)
 	local txt = ""
 	if componenthit == enum.componentAccelerator then
@@ -313,7 +333,7 @@ function fight.applyDamage(victim, bullet)
         fun.createAnimation(victim, enum.animSmoke)
 
         -- play audio
-        if fun.isPlayerFighterAlive() and bullet.ownerObjectguid == PLAYER_FIGHTER_GUID then
+        if isPlayerFighterAlive() and bullet.ownerObjectguid == PLAYER_FIGHTER_GUID then
             -- this bullet is the players bullet. Make an audible
             cf.playAudio(enum.audioBulletHit, false, true)
         else
@@ -421,7 +441,8 @@ function fight.mousemoved(x, y, dx, dy)
         TRANSLATEY = TRANSLATEY - dy
 	else
 		-- check for mouse over the player then display menu
-		if fun.isPlayerFighterAlive() then
+		-- if isPlayerFighterAlive() then
+        if isPlayerFighterOnBattlefield() then
             -- see if player unit is clicked
 			local Obj = fun.getObject(PLAYER_FIGHTER_GUID)
 			local objcategory = Obj.fixture:getCategory()				-- need to check if this is a fighter or pod
@@ -443,7 +464,8 @@ end
 function fight.mousereleased(rx, ry, x, y, button)
     if button == 1 then
 		-- menu appears during mouse over. This is to check if menu is clicked
-		if fun.isPlayerFighterAlive() then
+		-- if isPlayerFighterAlive() then
+        if isPlayerFighterOnBattlefield() then
             -- see if player unit is clicked
 
             -- I reckon all of this can be simplified
@@ -493,7 +515,8 @@ local function drawHUD()
     love.graphics.setColor(1,1,1,1)
     love.graphics.draw(IMAGE[enum.imageFightHUD], 0, 0)
 
-    if fun.isPlayerFighterAlive() then
+    -- if isPlayerFighterAlive() then
+    if isPlayerFighterOnBattlefield() then
         local Obj = fun.getObject(PLAYER_FIGHTER_GUID)
         if Obj ~= nil then      -- this is a safety check
             local barlength = 100       -- unnecessary but a reminder that the barlength is a convenient 100 pixels
@@ -806,7 +829,8 @@ function fight.draw()
     end
 
     -- draw target recticle for player 1
-    if fun.isPlayerFighterAlive() then
+    -- if isPlayerFighterAlive() then
+    if isPlayerFighterOnBattlefield() then
         -- player still alive
         if playerfighter.actions ~= nil and playerfighter.actions[1] ~= nil then
             if playerfighter.actions[1].targetguid ~= nil then
@@ -837,7 +861,7 @@ function fight.draw()
     end
 
     -- draw the menu if menu is open
-    if showmenu and fun.isPlayerFighterAlive() then
+    if showmenu and isPlayerFighterOnBattlefield() then
 		drawMenu()
     end
 
@@ -849,6 +873,8 @@ function fight.draw()
     -- animations are drawn in love.draw()
     cam:detach()
 end
+
+
 
 function fight.update(dt)
     if not fightsceneHasLoaded then
@@ -924,7 +950,7 @@ function fight.update(dt)
         -- fleet movement points is added/subtracted in the commanderai file
 
         -- load up the SCORE table for later user
-        if fun.isPlayerFighterAlive() then
+        if isPlayerFighterAlive() then
             SCORE.playerfighteralive = true
         else
             SCORE.playerfighteralive = false
