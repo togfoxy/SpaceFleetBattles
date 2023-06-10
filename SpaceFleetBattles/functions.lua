@@ -283,4 +283,28 @@ function functions.ImportNameFile(filename)
     return thistable
 end
 
+function functions.checkFightersHaveOrders()
+    -- quality check - all fighters have an order
+    if BATTLE_TIMER > 5 then
+        for i = 1, #OBJECTS do
+            if not OBJECTS[i].fixture:isDestroyed() then
+                local objcategory = OBJECTS[i].fixture:getCategory()
+                if objcategory == enum.categoryEnemyFighter or objcategory == enum.categoryFriendlyFighter then
+                    if OBJECTS[i].lifetime ~= 0 then
+                        local currentaction = fun.getTopAction(OBJECTS[i])     -- receives an object
+                        if currentaction == nil then
+                            print("Uniform")
+                            print(inspect(OBJECTS[i]))
+                            print("###")
+                            print(inspect(OBJECTS[i].body))
+                            error()
+                        end
+                    end
+                end
+            end
+        end
+    end
+end
+
+
 return functions
