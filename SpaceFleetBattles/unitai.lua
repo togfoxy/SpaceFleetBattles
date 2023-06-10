@@ -26,14 +26,18 @@ local function getClosestFighter(thisObj, desiredforf)
 
     for k, Obj in pairs(OBJECTS) do
         -- get distance to this obj
-        if Obj.forf == desiredforf and not Obj.body:isBullet() then
-            if Obj.fixture:getCategory() == enum.categoryEnemyFighter or Obj.fixture:getCategory() == enum.categoryFriendlyFighter then
-                local objx, objy = Obj.body:getPosition()
-                local dist = cf.getDistance(thisobjx, thisobjy, objx, objy)
-                if closestid == 0 or dist < closestdist then
-                    -- got a new candidate
-                    closestid = k
-                    closestdist = dist
+        if Obj:isDestroyed() then
+            -- skip
+        else
+            if Obj.forf == desiredforf and not Obj.body:isBullet() then
+                if Obj.fixture:getCategory() == enum.categoryEnemyFighter or Obj.fixture:getCategory() == enum.categoryFriendlyFighter then
+                    local objx, objy = Obj.body:getPosition()
+                    local dist = cf.getDistance(thisobjx, thisobjy, objx, objy)
+                    if closestid == 0 or dist < closestdist then
+                        -- got a new candidate
+                        closestid = k
+                        closestdist = dist
+                    end
                 end
             end
         end
@@ -145,6 +149,8 @@ function unitai.setTaskEngage(Obj, cooldown)
 end
 
 local function isFighter(Obj)
+    if Obj.fixture:isDestroyed() then return false end
+
     local category = Obj.fixture:getCategory()
     if category == enum.categoryEnemyFighter or category == enum.categoryFriendlyFighter then
         return true
@@ -219,25 +225,25 @@ local function adjustAngle(Obj, dt)
 
 	local objx, objy = Obj.body:getPosition()
 
+    local currentaction = fun.getTopAction(Obj)     -- receives an object and returns an action table
+
     -- turn to destination if one exists
-    if Obj.actions[1] ~= nil and Obj.actions[1].destx ~= nil then
+    if currentaction ~= nil and currentaction.destx ~= nil then
         -- move to destination
-        local destx = Obj.actions[1].destx
-        local desty = Obj.actions[1].desty
+        local destx = currentaction.destx
+        local desty = currentaction.desty
         local disttodest = cf.getDistance(objx, objy, destx, desty)
         if disttodest < 20 then
             -- arrived at destination. Remove the top action
-			Obj.actions[1] = nil
+            currentaction.cooldown = 0
         else
             turnToObjective(Obj, destx, desty, dt)
         end
-
-    -- turn to target if one exists
-    elseif Obj.actions[1] ~= nil and Obj.actions[1].targetguid ~= nil then		--! need to not adjust angle if RTB
-        local enemyobject = fun.getObject(Obj.actions[1].targetguid)
+    elseif currentaction ~= nil and currentaction.targetguid ~= nil then    -- turn to target if one exists
+        local enemyobject = fun.getObject(currentaction.targetguid)
         if enemyobject == nil or enemyobject.body:isDestroyed() then
             -- somehow, the target is no longer legitimate
-            Obj.actions[1].cooldown = 0
+            currentaction.cooldown = 0
         else
             local x2, y2 = enemyobject.body:getPosition()
             turnToObjective(Obj, x2, y2, dt)
@@ -287,12 +293,14 @@ local function adjustThrust(Obj, dt)
     assert(Obj.squadCallsign ~= nil)        -- bullets should not be sent to this function
     assert(Obj.body:isBullet() == false)
 
-    local currentangle = Obj.body:getAngle()
-    if Obj.actions[1] ~= nil then
-        local destx = Obj.actions[1].destx
-        local desty = Obj.actions[1].desty
+    local currentaction = fun.getTopAction(Obj)     -- receives an object and returns an action table
 
-        if Obj.actions[1].action == enum.unitActionEngaging then
+    local currentangle = Obj.body:getAngle()
+    if currentaction ~= nil then
+        local destx = currentaction.destx
+        local desty = currentaction.desty
+
+        if currentaction.action == enum.unitActionEngaging then
             adjustThrustEngaging2(Obj, dt)
         elseif destx ~= nil then
     		local objx, objy = Obj.body:getPosition()
@@ -300,7 +308,7 @@ local function adjustThrust(Obj, dt)
     		if disttodest > 10 then
     			Obj.currentForwardThrust = Obj.currentForwardThrust + (Obj.currentMaxAcceleration * dt)
     		else
-                Obj.actions[1].cooldown = 0
+                currentaction.cooldown = 0
     		end
         else
             print(inspect(Obj))
@@ -461,6 +469,10 @@ local function checkForRTB(Obj)
                     hangerfighter.body:destroy()
                     print("Foe fighter returned to hanger")
                 end
+            else
+                if DEV_MODE then
+                    print("Object " .. Obj.guid .. " not yet reached start line")
+                end
             end
         else
             error()
@@ -473,7 +485,7 @@ local function updateUnitTask(Obj, squadorder, dt)
 
     assert(Obj ~= nil)
     if DEV_MODE then
-        print("Unit reacting to squad order: " .. squadorder)
+        -- print("Unit reacting to squad order: " .. squadorder)
     end
 
     if Obj.actions[1] ~= nil then
@@ -483,11 +495,9 @@ local function updateUnitTask(Obj, squadorder, dt)
         end
     end
 
-    -- if #Obj.actions <= 0 then
-	if Obj.actions[1] == nil then
+    local currentaction = fun.getTopAction(Obj)     -- receives an object
+    if currentaction == nil then
         -- try to find a new action
-
-        -- print("Seeking new action")
 
         -- do self-preservation checks firstly. Remember the ordering matters
         if Obj.componentHealth[enum.componentWeapon] <= 0 then
@@ -502,27 +512,18 @@ local function updateUnitTask(Obj, squadorder, dt)
             unitai.setTaskRTB(Obj)
         elseif Obj.componentHealth[enum.componentStructure] <= 50 then
             unitai.setTaskRTB(Obj)
+        elseif squadorder == enum.squadOrdersReturnToBase then
+            unitai.setTaskRTB(Obj)
         end
 
         local currentaction = fun.getTopAction(Obj)     -- receives an object
         if currentaction == nil then
-
-            -- print("No self-preservation required. Continuing to seek new action.")
-
     		-- after the self-preservation bits, take direction from current squad orders
             if squadorder == enum.squadOrdersEngage then
                 -- print("alpha. setting task = engage")
 				unitai.setTaskEngage(Obj)
                 assert(#Obj.actions > 0 )       -- the first order can be nil so don't test for nil
-                                                --! need to find a way to delete actions[1] when it is nil
-
-            elseif squadorder == enum.squadOrdersReturnToBase then
-                -- print("beta")
-				unitai.setTaskRTB(Obj)
-                -- print("Unit task: RTB")
-            else
-                -- print("charlie")
-                -- no squad order or unexpected squad order
+            else    -- no squad order or unexpected squad order
                 Obj.actions[1] = nil
                 -- print("No squad order available for this unit")
                 -- set destination to the centre of the battle map

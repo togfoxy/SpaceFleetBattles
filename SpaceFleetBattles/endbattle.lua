@@ -14,6 +14,13 @@ end
 local function drawPilotStats(drawx, drawy)
     local playerpilot = fun.getPlayerPilot()        -- scans ROSTER
 
+    if playerpilot == nil then
+        -- need to work out if this is legit.
+        -- suspect pilot dieing is killing stats
+        print(inspect(playerpilot))
+        error()
+    end
+
     love.graphics.print("Your pilot stats:", drawx, drawy)
     drawy = drawy + 50
     love.graphics.print("                              Health  # Missions    # Kills     # Fighters lost", drawx, drawy)		--! make this correct x/y values
