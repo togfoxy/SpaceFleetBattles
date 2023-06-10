@@ -26,14 +26,18 @@ local function getClosestFighter(thisObj, desiredforf)
 
     for k, Obj in pairs(OBJECTS) do
         -- get distance to this obj
-        if Obj.forf == desiredforf and not Obj.body:isBullet() then
-            if Obj.fixture:getCategory() == enum.categoryEnemyFighter or Obj.fixture:getCategory() == enum.categoryFriendlyFighter then
-                local objx, objy = Obj.body:getPosition()
-                local dist = cf.getDistance(thisobjx, thisobjy, objx, objy)
-                if closestid == 0 or dist < closestdist then
-                    -- got a new candidate
-                    closestid = k
-                    closestdist = dist
+        if Obj:isDestroyed() then
+            -- skip
+        else
+            if Obj.forf == desiredforf and not Obj.body:isBullet() then
+                if Obj.fixture:getCategory() == enum.categoryEnemyFighter or Obj.fixture:getCategory() == enum.categoryFriendlyFighter then
+                    local objx, objy = Obj.body:getPosition()
+                    local dist = cf.getDistance(thisobjx, thisobjy, objx, objy)
+                    if closestid == 0 or dist < closestdist then
+                        -- got a new candidate
+                        closestid = k
+                        closestdist = dist
+                    end
                 end
             end
         end
@@ -145,6 +149,8 @@ function unitai.setTaskEngage(Obj, cooldown)
 end
 
 local function isFighter(Obj)
+    if Obj.fixture:isDestroyed() then return false end
+
     local category = Obj.fixture:getCategory()
     if category == enum.categoryEnemyFighter or category == enum.categoryFriendlyFighter then
         return true
@@ -462,6 +468,10 @@ local function checkForRTB(Obj)
                     hangerfighter.fixture:destroy()         -- not sure if this is necessary
                     hangerfighter.body:destroy()
                     print("Foe fighter returned to hanger")
+                end
+            else
+                if DEV_MODE then
+                    print("Object " .. Obj.guid .. " not yet reached start line")
                 end
             end
         else

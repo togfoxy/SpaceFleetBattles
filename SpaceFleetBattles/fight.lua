@@ -688,38 +688,54 @@ local function drawPhysicsObject(Obj)
 end
 
 local function drawCallsign(Obj)
-	if showcallsigns then
-		local drawx = Obj.body:getX()
-        local drawy = Obj.body:getY()
-		if Obj.squadCallsign ~= nil then
-            local str = ""
-			-- local str = "CS: " .. Obj.squadCallsign .. "-" .. string.sub(Obj.guid, - 4)		-- this is squad callsign + guid
-            -- str = str .. "\n"
-			if Obj.forf == enum.forfFriend then
-				-- get the pilots last name and add that to the callsign
-				local pilotguid = Obj.pilotguid
-				local pilot = fun.getPilot(pilotguid)
-                str = str .. pilot.lastname
-            else
-                -- str = "CS: " .. Obj.squadCallsign .. "-" .. string.sub(Obj.guid, - 4)		-- this is squad callsign + guid
-                str = str .. string.sub(Obj.guid, - 4)		-- this is squad callsign + guid
-			end
 
-			love.graphics.setColor(1,1,1,1)
-			love.graphics.print(str, drawx, drawy, 0, 1, 1, -15, 30)
+    if DEV_MODE then
 
-			-- draw a cool line next
-			local x2, y2 = drawx + 30, drawy - 14
-			love.graphics.setColor(1,1,1,1)
-			love.graphics.line(drawx, drawy, x2, y2)
-		else
+        if showcallsigns then
+
             local category = Obj.fixture:getCategory()
             if category == enum.categoryEnemyFighter or category == enum.categoryFriendlyFighter then
-                print("Category:" .. category)
-                error()
+                local drawx = Obj.body:getX()
+                local drawy = Obj.body:getY()
+                str = Obj.guid
+                love.graphics.setColor(1,1,1,1)
+                love.graphics.print(str, drawx, drawy, 0, 1, 1, -15, 30)
             end
-		end
-	end
+        end
+    else
+       	if showcallsigns then
+    		local drawx = Obj.body:getX()
+            local drawy = Obj.body:getY()
+    		if Obj.squadCallsign ~= nil then
+                local str = ""
+    			-- local str = "CS: " .. Obj.squadCallsign .. "-" .. string.sub(Obj.guid, - 4)		-- this is squad callsign + guid
+                -- str = str .. "\n"
+    			if Obj.forf == enum.forfFriend then
+    				-- get the pilots last name and add that to the callsign
+    				local pilotguid = Obj.pilotguid
+    				local pilot = fun.getPilot(pilotguid)
+                    str = str .. pilot.lastname
+                else
+                    -- str = "CS: " .. Obj.squadCallsign .. "-" .. string.sub(Obj.guid, - 4)		-- this is squad callsign + guid
+                    str = str .. string.sub(Obj.guid, - 4)		-- this is squad callsign + guid
+    			end
+
+    			love.graphics.setColor(1,1,1,1)
+    			love.graphics.print(str, drawx, drawy, 0, 1, 1, -15, 30)
+
+    			-- draw a cool line next
+    			local x2, y2 = drawx + 30, drawy - 14
+    			love.graphics.setColor(1,1,1,1)
+    			love.graphics.line(drawx, drawy, x2, y2)
+    		else
+                local category = Obj.fixture:getCategory()
+                if category == enum.categoryEnemyFighter or category == enum.categoryFriendlyFighter then
+                    print("Category:" .. category)
+                    error()
+                end
+    		end
+    	end
+    end
 end
 
 local function drawDamageText()
