@@ -418,7 +418,6 @@ function fight.keyreleased(key, scancode)
 
 	if timefactor < 1 then timefactor = 1 end
 	if timefactor > 2 then timefactor = 2 end
-
 end
 
 function fight.wheelmoved(x, y)
