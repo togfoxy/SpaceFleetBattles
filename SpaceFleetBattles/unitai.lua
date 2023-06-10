@@ -26,7 +26,7 @@ local function getClosestFighter(thisObj, desiredforf)
 
     for k, Obj in pairs(OBJECTS) do
         -- get distance to this obj
-        if Obj:isDestroyed() then
+        if Obj.body:isDestroyed() then
             -- skip
         else
             if Obj.forf == desiredforf and not Obj.body:isBullet() then

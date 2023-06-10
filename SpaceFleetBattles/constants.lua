@@ -2,7 +2,7 @@ constants = {}
 
 function constants.load()
 
-    GAME_VERSION = "0.01"
+    GAME_VERSION = "0.03"
 
     SCREEN_STACK = {}
 
@@ -32,8 +32,8 @@ function constants.load()
     enums.load()
     -- add extra items below this line ======================================================
 
-    DEV_MODE = true
-    -- DEV_MODE = false
+    -- DEV_MODE = true
+    DEV_MODE = false
 
     FRIEND_START_X = 0      			-- left side of screen
     FOE_START_X = SCREEN_WIDTH * 2		-- right side of screen
