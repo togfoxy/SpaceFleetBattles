@@ -455,7 +455,6 @@ function fight.mousemoved(x, y, dx, dy)
             end
 		else		-- player is dead. Hide menu
 			showmenu = false
-			pause = false
         end
     end
 end
@@ -872,8 +871,6 @@ function fight.draw()
     -- animations are drawn in love.draw()
     cam:detach()
 end
-
-
 
 function fight.update(dt)
     if not fightsceneHasLoaded then

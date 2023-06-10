@@ -475,7 +475,7 @@ local function updateUnitTask(Obj, squadorder, dt)
 
     assert(Obj ~= nil)
     if DEV_MODE then
-        print("Unit reacting to squad order: " .. squadorder)
+        -- print("Unit reacting to squad order: " .. squadorder)
     end
 
     if Obj.actions[1] ~= nil then
