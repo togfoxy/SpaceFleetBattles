@@ -52,6 +52,8 @@ function functions.loadAudio()
     AUDIO[enum.audioBulletHit] = love.audio.newSource("assets/audio/cannon_fire.ogg", "static")
     AUDIO[enum.audioBulletPing] = love.audio.newSource("assets/audio/ricochet_1.mp3", "static")
     AUDIO[enum.audioMouseClick] = love.audio.newSource("assets/audio/click.wav", "static")
+    AUDIO[enum.audioLaser] = love.audio.newSource("assets/audio/660404__mattbrs__laser-gunshot.wav", "static")
+
 end
 
 function functions.createAnimation(Obj, animtype)

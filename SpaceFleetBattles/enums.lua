@@ -28,6 +28,7 @@ function enums.load()
     enum.audioBulletPing = 2
     enum.audioBulletHit = 3
     enum.audioMouseClick = 4
+    enum.audioLaser = 5
 
     -- add extra items below this line =================================
 

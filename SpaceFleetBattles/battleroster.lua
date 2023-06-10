@@ -193,7 +193,7 @@ function battleroster.mousereleased(rx, ry, x, y, button)
 		cf.saveTableToFile("fleet.dat", FLEET)							-- do this here only when starting the next battle
         cf.swapScreen(enum.sceneFight, SCREEN_STACK)
 
-		print("FLEET table: ")
+		-- print("FLEET table: ")
 		-- print(inspect(FLEET))
     end
 end

@@ -26,7 +26,7 @@ local function getClosestFighter(thisObj, desiredforf)
 
     for k, Obj in pairs(OBJECTS) do
         -- get distance to this obj
-        if Obj:isDestroyed() then
+        if Obj.body:isDestroyed() then
             -- skip
         else
             if Obj.forf == desiredforf and not Obj.body:isBullet() then
@@ -397,6 +397,10 @@ local function fireWeapons(Obj, dt)
                     if angletotarget > -0.07 and angletotarget < 0.07 then
                         Obj.weaponcooldown = 4
                         createNewBullet(Obj, true)       -- includes missiles and bombs. Use TRUE for fast moving bullets
+                        -- play laser if the object is the player object
+                        if Obj.guid == PLAYER_FIGHTER_GUID then
+                            cf.playAudio(enum.audioLaser, false, true)
+                        end
                     else
                         -- print(currentangle, bearingtotarget, angletotarget)
                     end
